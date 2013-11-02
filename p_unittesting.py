@@ -15,56 +15,14 @@ from spyderlib.qt.QtCore import SIGNAL, Qt
 from spyderlib.baseconfig import get_translation
 _ = get_translation("p_unittesting", dirname="spyderplugins")
 from spyderlib.utils.qthelpers import get_icon, create_action
-from spyderlib.plugins import SpyderPluginMixin, PluginConfigPage, runconfig
-from spyderlib.py3compat import configparser
+from spyderlib.plugins import SpyderPluginMixin, runconfig
 from spyderplugins.widgets.unittestinggui import (UnitTestingWidget,
                                                   is_unittesting_installed)
-
-
-class UnitTestingConfigPage(PluginConfigPage):
-    """Widget with configuration options for unit testing
-    """
-    def setup_page(self):
-
-        settings_group = QGroupBox(_("Settings"))
-        use_color_box = self.create_checkbox(
-            _("Use deterministic colors to differentiate functions"),
-            'use_colors', default=True)
-
-        results_group = QGroupBox(_("Results"))
-        results_label1 = QLabel(_("Unit testing plugin results "
-                                  "(the output of kernprof.py)\n"
-                                  "are stored here:"))
-        results_label1.setWordWrap(True)
-
-        # Warning: do not try to regroup the following QLabel contents with
-        # widgets above -- this string was isolated here in a single QLabel
-        # on purpose: to fix Issue 863 of Profiler plugon
-        results_label2 = QLabel(UnitTestingWidget.DATAPATH)
-
-        results_label2.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        results_label2.setWordWrap(True)
-
-        settings_layout = QVBoxLayout()
-        settings_layout.addWidget(use_color_box)
-        settings_group.setLayout(settings_layout)
-
-        results_layout = QVBoxLayout()
-        results_layout.addWidget(results_label1)
-        results_layout.addWidget(results_label2)
-        results_group.setLayout(results_layout)
-
-        vlayout = QVBoxLayout()
-        vlayout.addWidget(settings_group)
-        vlayout.addWidget(results_group)
-        vlayout.addStretch(1)
-        self.setLayout(vlayout)
 
 
 class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
     """Unit testing"""
     CONF_SECTION = 'unittesting'
-    CONFIGWIDGET_CLASS = UnitTestingConfigPage
 
     def __init__(self, parent=None):
         UnitTestingWidget.__init__(self, parent=parent)
@@ -148,15 +106,8 @@ class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
             if runconf.args_enabled:
                 args = runconf.args
 
-        try:
-            use_colors = self.get_option('use_colors')
-        except configparser.NoOptionError:
-            use_colors = self.set_option('use_colors', True)
-            use_colors = True
-
         UnitTestingWidget.analyze(self, filename, wdir=wdir, args=args,
-                                  pythonpath=pythonpath,
-                                  use_colors=use_colors)
+                                  pythonpath=pythonpath)
 
 
 #==============================================================================

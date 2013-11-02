@@ -75,8 +75,6 @@ class UnitTestingWidget(QWidget):
         self.output = None
         self.error_output = None
 
-        self.use_colors = True
-
         self._last_wdir = None
         self._last_args = None
         self._last_pythonpath = None
@@ -164,9 +162,7 @@ class UnitTestingWidget(QWidget):
         else:
             pass  # self.show_data()
 
-    def analyze(self, filename, wdir=None, args=None, pythonpath=None,
-                use_colors=True):
-        self.use_colors = use_colors
+    def analyze(self, filename, wdir=None, args=None, pythonpath=None):
         if not is_unittesting_installed():
             return
         self.kill_if_running()
@@ -415,8 +411,7 @@ def test():
     widget = UnitTestingWidget(None)
     widget.resize(800, 600)
     widget.show()
-    widget.analyze(osp.normpath(osp.join(osp.dirname(__file__), osp.pardir)),
-                   use_colors=True)
+    widget.analyze(osp.normpath(osp.join(osp.dirname(__file__), osp.pardir)))
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
