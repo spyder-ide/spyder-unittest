@@ -29,4 +29,8 @@ class TestImage(object):
 
     @pytest.mark.xfail
     def test_xfail(self):
+        assert False
+
+    @pytest.mark.xfail
+    def test_xfail_pass(self):
         pass
