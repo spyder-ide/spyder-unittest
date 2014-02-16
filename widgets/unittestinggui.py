@@ -50,6 +50,17 @@ COL_POS = 0  # Position is not displayed but set as Qt.UserRole
 
 CODE_NOT_RUN_COLOR = QBrush(QColor.fromRgb(128, 128, 128, 200))
 
+
+COLOR_OK = QBrush(QColor("#C1FFBA"))
+COLOR_SKIP = QBrush(QColor("#C5C5C5"))
+COLOR_FAIL = QBrush(QColor("#FF0000"))
+COLORS = {
+    "ok": COLOR_OK,
+    "failure": COLOR_FAIL,  # py.test
+    "error": COLOR_FAIL,  # nose
+    "skipped": COLOR_SKIP,  # py.test, nose
+    }
+
 WEBSITE_URL = 'http://pythonhosted.org/line_profiler/'
 
 
@@ -322,7 +333,7 @@ class UnitTestingDataTree(QTreeWidget):
     def __init__(self, parent=None):
         QTreeWidget.__init__(self, parent)
         self.header_list = [
-            _('Name'), _('Class'), _('Message'), _('Time (s)')]
+            _('Status'), _('Name'), _('Message'), _('Time (ms)')]
         self.data = None      # To be filled by self.load_data()
         self.max_time = 0      # To be filled by self.load_data()
         self.header().setDefaultAlignment(Qt.AlignCenter)
@@ -370,29 +381,40 @@ class UnitTestingDataTree(QTreeWidget):
         for testcase in self.data:
             testcase_item = QTreeWidgetItem(self)
             testcase_item.setData(
-                0, Qt.DisplayRole, testcase.get("name"))
+                1, Qt.DisplayRole, "{0}.{1}".format(
+                    testcase.get("classname"), testcase.get("name")))
             testcase_item.setData(
-                1, Qt.DisplayRole, testcase.get("classname"))
-            testcase_item.setData(
-                3, Qt.DisplayRole, testcase.get("time"))
+                3, Qt.DisplayRole, float(testcase.get("time")) * 1e3)
 
             if len(testcase):
                 test_error = testcase[0]
 
-                message = test_error.get("message").rstrip()
-                if message:
-                    testcase_item.setData(
-                        2, Qt.DisplayRole, test_error.get("message"))
+                status = test_error.tag
+                testcase_item.setData(0, Qt.DisplayRole, status)
+                color = COLORS[status]
+                for col in range(self.columnCount()):
+                    testcase_item.setBackground(col, color)
+
+                type_ = test_error.get("type")
+                message = test_error.get("message")
+                if type_ and message:
+                    text = "{0}: {1}".format(type_, message)
+                elif type_:
+                    text = type_
+                else:
+                    text = message
+                testcase_item.setData(2, Qt.DisplayRole, text)
 
                 text = test_error.text
-                if text is not None:
-                    text = text.rstrip()
                 if text:
-                    error_content_item = QTreeWidgetItem(testcase_item)
-                    error_content_item.setData(
-                        0, Qt.DisplayRole, test_error.text)
-                    error_content_item.setFirstColumnSpanned(True)
-                    error_content_item.setFont(0, monospace_font)
+                    for line in text.rstrip().split("\n"):
+                        error_content_item = QTreeWidgetItem(testcase_item)
+                        error_content_item.setData(
+                            0, Qt.DisplayRole, line)
+                        error_content_item.setFirstColumnSpanned(True)
+                        error_content_item.setFont(0, monospace_font)
+            else:
+                testcase_item.setData(0, Qt.DisplayRole, "ok")
 
     def item_activated(self, item):
         filename, line_no = item.data(COL_POS, Qt.UserRole)
