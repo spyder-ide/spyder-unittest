@@ -281,7 +281,7 @@ class UnitTestingWidget(QWidget):
 
     def finished(self):
         self.set_running_state(False)
-        self.show_errorlog()  # If errors occurred, show them.
+        #self.show_errorlog()  # If errors occurred, show them.
         self.output = self.error_output + self.output
         # FIXME: figure out if show_data should be called here or
         #        as a signal from the combobox
