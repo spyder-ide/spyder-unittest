@@ -340,6 +340,7 @@ class UnitTestingDataTree(QTreeWidget):
         self.setColumnCount(len(self.header_list))
         self.setHeaderLabels(self.header_list)
         self.clear()
+        self.setSortingEnabled(False)
 #        self.connect(self, SIGNAL('itemActivated(QTreeWidgetItem*,int)'),
 #                     self.item_activated)
 
@@ -347,14 +348,11 @@ class UnitTestingDataTree(QTreeWidget):
         """Populate the tree with unit testing data and display it."""
         self.clear()  # Clear before re-populating
         self.setItemsExpandable(True)
-        self.setSortingEnabled(False)
         self.populate_tree()
         self.expandAll()
         for col in range(self.columnCount()-1):
             self.resizeColumnToContents(col)
         self.collapseAll()
-        self.setSortingEnabled(True)
-        self.sortItems(1, Qt.AscendingOrder)
 
     def load_data(self, profdatafile):
         """Load unit testing data"""
