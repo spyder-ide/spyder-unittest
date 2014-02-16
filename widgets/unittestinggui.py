@@ -353,11 +353,7 @@ class UnitTestingDataTree(QTreeWidget):
         """Create each item (and associated data) in the tree"""
         if not len(self.data):
             warn_item = QTreeWidgetItem(self)
-            warn_item.setData(
-                0, Qt.DisplayRole,
-                _('No timings to display. '
-                  'Did you forget to add @profile decorators ?')
-                .format(url=WEBSITE_URL))
+            warn_item.setData(0, Qt.DisplayRole, "No results to show.")
             warn_item.setFirstColumnSpanned(True)
             warn_item.setTextAlignment(0, Qt.AlignCenter)
             font = warn_item.font(0)
