@@ -242,11 +242,11 @@ class UnitTestingWidget(QWidget):
         self.output = ''
         self.error_output = ''
 
-        executable = "py.test"
-        p_args = ['--junit-xml', self.DATAPATH]
+#        executable = "py.test"
+#        p_args = ['--junit-xml', self.DATAPATH]
 
-#        executable = "nosetests"
-#        p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
+        executable = "nosetests"
+        p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
 
         if args:
             p_args.extend(programs.shell_split(args))
