@@ -8,21 +8,21 @@
 
 """Unit testing Plugin"""
 
-from spyderlib.qt.QtGui import QVBoxLayout, QGroupBox, QLabel
-from spyderlib.qt.QtCore import SIGNAL, Qt
+from qtpy.QtWidgets import QVBoxLayout, QGroupBox, QLabel
+from qtpy.QtCore import Signal, Qt
 
 # Local imports
-from spyderlib.baseconfig import get_translation
-_ = get_translation("p_unittesting", dirname="spyderplugins")
+from spyderlib.config.base import get_translation
+_ = get_translation("unittesting", dirname="spyder_unittesting")
 from spyderlib.utils.qthelpers import get_icon, create_action
 from spyderlib.plugins import SpyderPluginMixin, runconfig
-from spyderplugins.widgets.unittestinggui import (UnitTestingWidget,
-                                                  is_unittesting_installed)
+from .widgets.unittestinggui import (UnitTestingWidget, is_unittesting_installed)
 
 
 class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
     """Unit testing"""
     CONF_SECTION = 'unittesting'
+    edit_goto = Signal(str, int, str)
 
     def __init__(self, parent=None):
         UnitTestingWidget.__init__(self, parent=parent)
@@ -53,15 +53,13 @@ class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
 
     def on_first_registration(self):
         """Action to be performed on first plugin registration"""
-        self.main.tabify_plugins(self.main.inspector, self)
+        self.main.tabify_plugins(self.main.help, self)
         self.dockwidget.hide()
 
     def register_plugin(self):
         """Register plugin in Spyder's main window"""
-        self.connect(self, SIGNAL("edit_goto(QString,int,QString)"),
-                     self.main.editor.load)
-        self.connect(self, SIGNAL('redirect_stdio(bool)'),
-                     self.main.redirect_internalshell_stdio)
+        self.edit_goto.connect(self.main.editor.load)
+        self.redirect_stdio.connect(self.main.redirect_internalshell_stdio)
         self.main.add_dockwidget(self)
 
         unittesting_act = create_action(self, _("Run unit tests"),
@@ -108,9 +106,3 @@ class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
 
         UnitTestingWidget.analyze(self, filename, wdir=wdir, args=args,
                                   pythonpath=pythonpath)
-
-
-#==============================================================================
-# The following statements are required to register this 3rd party plugin:
-#==============================================================================
-PLUGIN_CLASS = UnitTesting

@@ -12,32 +12,33 @@ Unit Testing widget
 
 from __future__ import with_statement
 
-from spyderlib.qt.QtGui import (QHBoxLayout, QWidget, QMessageBox, QVBoxLayout,
-                                QLabel, QTreeWidget, QTreeWidgetItem,
-                                QApplication, QBrush, QColor, QFont)
-from spyderlib.qt.QtCore import SIGNAL, QProcess, QByteArray, Qt, QTextCodec
+from qtpy.QtCore import (QByteArray, QProcess, Qt, QTextCodec,
+                         QProcessEnvironment, Signal)
+from qtpy.QtGui import QApplication, QBrush, QColor, QFont
+from qtpy.QtWidgets import (QHBoxLayout, QWidget, QMessageBox, QVBoxLayout,
+                            QLabel, QTreeWidget, QTreeWidgetItem)
 locale_codec = QTextCodec.codecForLocale()
-from spyderlib.qt.compat import getexistingdirectory
+from qtpy.compat import getexistingdirectory
 
 import sys
 import os
 import os.path as osp
 import time
-import cPickle
-import linecache
-import inspect
-import hashlib
+#import cPickle
+#import linecache
+#import inspect
+#import hashlib
 from lxml import etree
 
 # Local imports
 from spyderlib.utils.qthelpers import create_toolbutton, get_icon
 from spyderlib.utils import programs
-from spyderlib.baseconfig import get_conf_path, get_translation
-from spyderlib.widgets.texteditor import TextEditor
+from spyderlib.config.base import get_conf_path, get_translation
+from spyderlib.widgets.variableexplorer.texteditor import TextEditor
 from spyderlib.widgets.comboboxes import PythonModulesComboBox
 from spyderlib.widgets.externalshell import baseshell
 from spyderlib.py3compat import to_text_string, getcwd
-_ = get_translation("p_unittesting", dirname="spyderplugins")
+_ = get_translation("unittesting", dirname="spyder_unittesting")
 
 
 COL_NO = 0
@@ -67,8 +68,8 @@ WEBSITE_URL = 'http://pythonhosted.org/line_profiler/'
 def is_unittesting_installed():
     """Checks if the program and the library for line_profiler is installed
     """
-    return (programs.is_module_installed('line_profiler')
-            and programs.find_program('kernprof.py') is not None)
+    return True#(programs.is_module_installed('line_profiler')
+            #and programs.find_program('kernprof.py') is not None)
 
 
 class UnitTestingWidget(QWidget):
@@ -77,6 +78,7 @@ class UnitTestingWidget(QWidget):
     """
     DATAPATH = get_conf_path('unittesting.results')
     VERSION = '0.0.1'
+    redirect_stdio = Signal(bool)
 
     def __init__(self, parent):
         QWidget.__init__(self, parent)
@@ -103,8 +105,7 @@ class UnitTestingWidget(QWidget):
             text=_("Stop"),
             tip=_("Stop current profiling"),
             text_beside_icon=True)
-        self.connect(self.filecombo, SIGNAL('valid(bool)'),
-                     self.start_button.setEnabled)
+        self.filecombo.valid.connect(self.start_button.setEnabled)
         #self.connect(self.filecombo, SIGNAL('valid(bool)'), self.show_data)
         # FIXME: The combobox emits this signal on almost any event
         #        triggering show_data() too early, too often.
