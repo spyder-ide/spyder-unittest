@@ -12,8 +12,7 @@ Unit Testing widget
 
 from __future__ import with_statement
 
-from qtpy.QtCore import (QByteArray, QProcess, Qt, QTextCodec,
-                         QProcessEnvironment, Signal)
+from qtpy.QtCore import QByteArray, QProcess, Qt, QTextCodec, Signal
 from qtpy.QtGui import QBrush, QColor, QFont
 from qtpy.QtWidgets import (QApplication, QHBoxLayout, QWidget, QMessageBox, 
                             QVBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem)
@@ -24,10 +23,6 @@ import sys
 import os
 import os.path as osp
 import time
-#import cPickle
-#import linecache
-#import inspect
-#import hashlib
 from lxml import etree
 
 # Local imports
@@ -41,16 +36,7 @@ from spyder.py3compat import to_text_string, getcwd
 _ = get_translation("unittesting", dirname="spyder_unittesting")
 
 
-COL_NO = 0
-COL_HITS = 1
-COL_TIME = 2
-COL_PERHIT = 3
-COL_PERCENT = 4
-COL_LINE = 5
 COL_POS = 0  # Position is not displayed but set as Qt.UserRole
-
-CODE_NOT_RUN_COLOR = QBrush(QColor.fromRgb(128, 128, 128, 200))
-
 
 COLOR_OK = QBrush(QColor("#C1FFBA"))
 COLOR_SKIP = QBrush(QColor("#C5C5C5"))
@@ -61,8 +47,6 @@ COLORS = {
     "error": COLOR_FAIL,  # nose
     "skipped": COLOR_SKIP,  # py.test, nose
     }
-
-WEBSITE_URL = 'http://pythonhosted.org/line_profiler/'
 
 
 def is_unittesting_installed():
@@ -166,9 +150,7 @@ class UnitTestingWidget(QWidget):
                            self.start_button, self.stop_button, browse_button,
                            self.collapse_button, self.expand_button):
                 widget.setDisabled(True)
-            text = _(
-                '<b>Please install the <a href="%s">line_profiler module</a></b>'
-                ) % WEBSITE_URL
+            text = _('<b>Please install the unittesting module</b>')
             self.datelabel.setText(text)
             self.datelabel.setOpenExternalLinks(True)
         else:
