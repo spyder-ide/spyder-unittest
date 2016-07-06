@@ -192,10 +192,10 @@ class UnitTestingWidget(QWidget):
             self.start(wdir, args, pythonpath)
 
     def select_file(self):
-        self.emit(SIGNAL('redirect_stdio(bool)'), False)
+        self.redirect_stdio.emit(False)
         filename = getexistingdirectory(
             self, _("Select directory"), getcwd())
-        self.emit(SIGNAL('redirect_stdio(bool)'), False)
+        self.redirect_stdio.emit(False)
         if filename:
             self.analyze(filename)
 
@@ -236,14 +236,11 @@ class UnitTestingWidget(QWidget):
         self.process = QProcess(self)
         self.process.setProcessChannelMode(QProcess.SeparateChannels)
         self.process.setWorkingDirectory(filename)
-        self.connect(self.process, SIGNAL("readyReadStandardOutput()"),
-                     self.read_output)
-        self.connect(self.process, SIGNAL("readyReadStandardError()"),
-                     lambda: self.read_output(error=True))
-        self.connect(self.process,
-                     SIGNAL("finished(int,QProcess::ExitStatus)"),
-                     self.finished)
-        self.connect(self.stop_button, SIGNAL("clicked()"), self.process.kill)
+        self.process.readyReadStandardOutput.connect(self.read_output)
+        self.process.readyReadStandardError.connect(
+            lambda: self.read_output(error=True))
+        self.process.finished.connect(self.finished)
+        self.stop_button.clicked.connect(self.process.kill)
 
         if pythonpath is not None:
             env = [to_text_string(_pth)
@@ -415,8 +412,7 @@ class UnitTestingDataTree(QTreeWidget):
 
     def item_activated(self, item):
         filename, line_no = item.data(COL_POS, Qt.UserRole)
-        self.parent().emit(SIGNAL("edit_goto(QString,int,QString)"),
-                           filename, line_no, '')
+        self.parent().edit_goto.emit(filename, line_no, '')
 
 
 def test():
