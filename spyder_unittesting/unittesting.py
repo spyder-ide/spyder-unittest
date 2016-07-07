@@ -13,7 +13,8 @@ from qtpy.QtCore import Signal
 # Local imports
 from spyder.config.base import get_translation
 from spyder.config.gui import fixed_shortcut
-from spyder.utils.qthelpers import get_icon, create_action
+from spyder.utils.qthelpers import create_action
+from spyder.utils import icon_manager as ima
 from spyder.plugins import SpyderPluginMixin, runconfig
 from .widgets.unittestinggui import (UnitTestingWidget, is_unittesting_installed)
 
@@ -39,7 +40,7 @@ class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
 
     def get_plugin_icon(self):
         """Return widget icon"""
-        return get_icon('profiler.png')
+        return ima.icon('profiler')
 
     def get_focus_widget(self):
         """
@@ -64,7 +65,7 @@ class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
         self.main.add_dockwidget(self)
 
         unittesting_act = create_action(self, _("Run unit tests"),
-                                        icon=get_icon('profiler.png'),
+                                        icon=ima.icon('profiler'),
                                         triggered=self.run_unittesting)
         unittesting_act.setEnabled(is_unittesting_installed())
         fixed_shortcut("Ctrl+Shift+F11", self.main,

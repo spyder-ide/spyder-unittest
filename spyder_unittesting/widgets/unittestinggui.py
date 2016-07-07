@@ -26,7 +26,8 @@ import time
 from lxml import etree
 
 # Local imports
-from spyder.utils.qthelpers import create_toolbutton, get_icon
+from spyder.utils.qthelpers import create_toolbutton
+from spyder.utils import icon_manager as ima
 from spyder.utils import programs
 from spyder.config.base import get_conf_path, get_translation
 from spyder.widgets.variableexplorer.texteditor import TextEditor
@@ -79,13 +80,12 @@ class UnitTestingWidget(QWidget):
         self.filecombo = PythonModulesComboBox(self)
 
         self.start_button = create_toolbutton(
-            self, icon=get_icon('run.png'),
+            self, icon=ima.icon('run'),
             text=_("Run tests"),
             tip=_("Run unit testing"),
             triggered=self.start, text_beside_icon=True)
         self.stop_button = create_toolbutton(
-            self,
-            icon=get_icon('terminate.png'),
+            self, icon=ima.icon('stop'),
             text=_("Stop"),
             tip=_("Stop current profiling"),
             text_beside_icon=True)
@@ -95,14 +95,14 @@ class UnitTestingWidget(QWidget):
         #        triggering show_data() too early, too often.
 
         browse_button = create_toolbutton(
-            self, icon=get_icon('fileopen.png'),
+            self, icon=ima.icon('fileopen'),
             tip=_('Select Python script'),
             triggered=self.select_file)
 
         self.datelabel = QLabel()
 
         self.log_button = create_toolbutton(
-            self, icon=get_icon('log.png'),
+            self, icon=ima.icon('log'),
             text=_("Output"),
             text_beside_icon=True,
             tip=_("Show program's output"),
@@ -112,12 +112,12 @@ class UnitTestingWidget(QWidget):
 
         self.collapse_button = create_toolbutton(
             self,
-            icon=get_icon('collapse.png'),
+            icon=ima.icon('collapse'),
             triggered=lambda dD=-1: self.datatree.collapseAll(),
             tip=_('Collapse all'))
         self.expand_button = create_toolbutton(
             self,
-            icon=get_icon('expand.png'),
+            icon=ima.icon('expand'),
             triggered=lambda dD=1: self.datatree.expandAll(),
             tip=_('Expand all'))
 
