@@ -35,7 +35,13 @@ from spyder.config.base import get_conf_path, get_translation
 from spyder.widgets.variableexplorer.texteditor import TextEditor
 from spyder.widgets.comboboxes import PythonModulesComboBox
 from spyder.py3compat import to_text_string, getcwd
-_ = get_translation("unittesting", dirname="spyder_unittesting")
+
+# This is needed for testing this module as a stand alone script
+try:
+    _ = get_translation("unittesting", dirname="spyder_unittesting")
+except KeyError as error:
+    import gettext
+    _ = gettext.gettext
 
 
 COL_POS = 0  # Position is not displayed but set as Qt.UserRole
