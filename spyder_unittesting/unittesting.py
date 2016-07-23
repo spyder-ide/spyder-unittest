@@ -8,15 +8,16 @@
 
 """Unit testing Plugin"""
 
-from qtpy.QtWidgets import QVBoxLayout, QGroupBox, QLabel
-from qtpy.QtCore import Signal, Qt
+from qtpy.QtCore import Signal
 
 # Local imports
 from spyderlib.config.base import get_translation
-_ = get_translation("unittesting", dirname="spyder_unittesting")
+from spyderlib.config.gui import fixed_shortcut
 from spyderlib.utils.qthelpers import get_icon, create_action
 from spyderlib.plugins import SpyderPluginMixin, runconfig
 from .widgets.unittestinggui import (UnitTestingWidget, is_unittesting_installed)
+
+_ = get_translation("unittesting", dirname="spyder_unittesting")
 
 
 class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
@@ -66,8 +67,8 @@ class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
                                         icon=get_icon('profiler.png'),
                                         triggered=self.run_unittesting)
         unittesting_act.setEnabled(is_unittesting_installed())
-        self.register_shortcut(unittesting_act, context="Unit testing",
-                               name="Run unit tests", default="Ctrl+Shift+F10")
+        fixed_shortcut("Ctrl+Shift+F11", self.main,
+                       self.run_unittesting)
 
         self.main.run_menu_actions += [unittesting_act]
         self.main.editor.pythonfile_dependent_actions += [unittesting_act]
