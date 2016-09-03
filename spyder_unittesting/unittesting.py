@@ -4,17 +4,17 @@
 # based on p_profiler.py by Santiago Jaramillo
 #
 # Licensed under the terms of the MIT License
-# (see spyderlib/__init__.py for details)
+# (see spyder/__init__.py for details)
 
 """Unit testing Plugin"""
 
 from qtpy.QtCore import Signal
 
 # Local imports
-from spyderlib.config.base import get_translation
-from spyderlib.config.gui import fixed_shortcut
-from spyderlib.utils.qthelpers import get_icon, create_action
-from spyderlib.plugins import SpyderPluginMixin, runconfig
+from spyder.config.base import get_translation
+from spyder.config.gui import fixed_shortcut
+from spyder.utils.qthelpers import get_icon, create_action
+from spyder.plugins import SpyderPluginMixin, runconfig
 from .widgets.unittestinggui import (UnitTestingWidget, is_unittesting_installed)
 
 _ = get_translation("unittesting", dirname="spyder_unittesting")

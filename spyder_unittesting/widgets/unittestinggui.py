@@ -4,7 +4,7 @@
 # based on pylintgui.py by Pierre Raybaut
 #
 # Licensed under the terms of the MIT License
-# (see spyderlib/__init__.py for details)
+# (see spyder/__init__.py for details)
 
 """
 Unit Testing widget
@@ -31,13 +31,13 @@ import time
 from lxml import etree
 
 # Local imports
-from spyderlib.utils.qthelpers import create_toolbutton, get_icon
-from spyderlib.utils import programs
-from spyderlib.config.base import get_conf_path, get_translation
-from spyderlib.widgets.variableexplorer.texteditor import TextEditor
-from spyderlib.widgets.comboboxes import PythonModulesComboBox
-from spyderlib.widgets.externalshell import baseshell
-from spyderlib.py3compat import to_text_string, getcwd
+from spyder.utils.qthelpers import create_toolbutton, get_icon
+from spyder.utils import programs
+from spyder.config.base import get_conf_path, get_translation
+from spyder.widgets.variableexplorer.texteditor import TextEditor
+from spyder.widgets.comboboxes import PythonModulesComboBox
+from spyder.widgets.externalshell import baseshell
+from spyder.py3compat import to_text_string, getcwd
 _ = get_translation("unittesting", dirname="spyder_unittesting")
 
 
@@ -417,7 +417,7 @@ class UnitTestingDataTree(QTreeWidget):
 
 def test():
     """Run widget test"""
-    from spyderlib.utils.qthelpers import qapplication
+    from spyder.utils.qthelpers import qapplication
     app = qapplication()
     widget = UnitTestingWidget(None)
     widget.resize(800, 600)
