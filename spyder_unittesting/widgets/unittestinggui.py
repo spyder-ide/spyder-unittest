@@ -14,9 +14,9 @@ from __future__ import with_statement
 
 from qtpy.QtCore import (QByteArray, QProcess, Qt, QTextCodec,
                          QProcessEnvironment, Signal)
-from qtpy.QtGui import QApplication, QBrush, QColor, QFont
-from qtpy.QtWidgets import (QHBoxLayout, QWidget, QMessageBox, QVBoxLayout,
-                            QLabel, QTreeWidget, QTreeWidgetItem)
+from qtpy.QtGui import QBrush, QColor, QFont
+from qtpy.QtWidgets import (QApplication, QHBoxLayout, QWidget, QMessageBox, 
+                            QVBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem)
 locale_codec = QTextCodec.codecForLocale()
 from qtpy.compat import getexistingdirectory
 
