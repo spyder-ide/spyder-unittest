@@ -4,7 +4,7 @@
 # based on pylintgui.py by Pierre Raybaut
 #
 # Licensed under the terms of the MIT License
-# (see spyderlib/__init__.py for details)
+# (see spyder/__init__.py for details)
 
 """
 Unit Testing widget
@@ -12,11 +12,10 @@ Unit Testing widget
 
 from __future__ import with_statement
 
-from qtpy.QtCore import (QByteArray, QProcess, Qt, QTextCodec,
-                         QProcessEnvironment, Signal)
-from qtpy.QtGui import QApplication, QBrush, QColor, QFont
-from qtpy.QtWidgets import (QHBoxLayout, QWidget, QMessageBox, QVBoxLayout,
-                            QLabel, QTreeWidget, QTreeWidgetItem)
+from qtpy.QtCore import QByteArray, QProcess, Qt, QTextCodec, Signal
+from qtpy.QtGui import QBrush, QColor, QFont
+from qtpy.QtWidgets import (QApplication, QHBoxLayout, QWidget, QMessageBox, 
+                            QVBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem)
 locale_codec = QTextCodec.codecForLocale()
 from qtpy.compat import getexistingdirectory
 
@@ -24,33 +23,21 @@ import sys
 import os
 import os.path as osp
 import time
-#import cPickle
-#import linecache
-#import inspect
-#import hashlib
 from lxml import etree
 
 # Local imports
-from spyderlib.utils.qthelpers import create_toolbutton, get_icon
-from spyderlib.utils import programs
-from spyderlib.config.base import get_conf_path, get_translation
-from spyderlib.widgets.variableexplorer.texteditor import TextEditor
-from spyderlib.widgets.comboboxes import PythonModulesComboBox
-from spyderlib.widgets.externalshell import baseshell
-from spyderlib.py3compat import to_text_string, getcwd
+from spyder.utils.qthelpers import create_toolbutton
+from spyder.utils import icon_manager as ima
+from spyder.utils import programs
+from spyder.config.base import get_conf_path, get_translation
+from spyder.widgets.variableexplorer.texteditor import TextEditor
+from spyder.widgets.comboboxes import PythonModulesComboBox
+from spyder.widgets.externalshell import baseshell
+from spyder.py3compat import to_text_string, getcwd
 _ = get_translation("unittesting", dirname="spyder_unittesting")
 
 
-COL_NO = 0
-COL_HITS = 1
-COL_TIME = 2
-COL_PERHIT = 3
-COL_PERCENT = 4
-COL_LINE = 5
 COL_POS = 0  # Position is not displayed but set as Qt.UserRole
-
-CODE_NOT_RUN_COLOR = QBrush(QColor.fromRgb(128, 128, 128, 200))
-
 
 COLOR_OK = QBrush(QColor("#C1FFBA"))
 COLOR_SKIP = QBrush(QColor("#C5C5C5"))
@@ -61,8 +48,6 @@ COLORS = {
     "error": COLOR_FAIL,  # nose
     "skipped": COLOR_SKIP,  # py.test, nose
     }
-
-WEBSITE_URL = 'http://pythonhosted.org/line_profiler/'
 
 
 def is_unittesting_installed():
@@ -95,13 +80,12 @@ class UnitTestingWidget(QWidget):
         self.filecombo = PythonModulesComboBox(self)
 
         self.start_button = create_toolbutton(
-            self, icon=get_icon('run.png'),
+            self, icon=ima.icon('run'),
             text=_("Run tests"),
             tip=_("Run unit testing"),
             triggered=self.start, text_beside_icon=True)
         self.stop_button = create_toolbutton(
-            self,
-            icon=get_icon('terminate.png'),
+            self, icon=ima.icon('stop'),
             text=_("Stop"),
             tip=_("Stop current profiling"),
             text_beside_icon=True)
@@ -111,14 +95,14 @@ class UnitTestingWidget(QWidget):
         #        triggering show_data() too early, too often.
 
         browse_button = create_toolbutton(
-            self, icon=get_icon('fileopen.png'),
+            self, icon=ima.icon('fileopen'),
             tip=_('Select Python script'),
             triggered=self.select_file)
 
         self.datelabel = QLabel()
 
         self.log_button = create_toolbutton(
-            self, icon=get_icon('log.png'),
+            self, icon=ima.icon('log'),
             text=_("Output"),
             text_beside_icon=True,
             tip=_("Show program's output"),
@@ -128,12 +112,12 @@ class UnitTestingWidget(QWidget):
 
         self.collapse_button = create_toolbutton(
             self,
-            icon=get_icon('collapse.png'),
+            icon=ima.icon('collapse'),
             triggered=lambda dD=-1: self.datatree.collapseAll(),
             tip=_('Collapse all'))
         self.expand_button = create_toolbutton(
             self,
-            icon=get_icon('expand.png'),
+            icon=ima.icon('expand'),
             triggered=lambda dD=1: self.datatree.expandAll(),
             tip=_('Expand all'))
 
@@ -166,9 +150,7 @@ class UnitTestingWidget(QWidget):
                            self.start_button, self.stop_button, browse_button,
                            self.collapse_button, self.expand_button):
                 widget.setDisabled(True)
-            text = _(
-                '<b>Please install the <a href="%s">line_profiler module</a></b>'
-                ) % WEBSITE_URL
+            text = _('<b>Please install the unittesting module</b>')
             self.datelabel.setText(text)
             self.datelabel.setOpenExternalLinks(True)
         else:
@@ -192,10 +174,10 @@ class UnitTestingWidget(QWidget):
             self.start(wdir, args, pythonpath)
 
     def select_file(self):
-        self.emit(SIGNAL('redirect_stdio(bool)'), False)
+        self.redirect_stdio.emit(False)
         filename = getexistingdirectory(
             self, _("Select directory"), getcwd())
-        self.emit(SIGNAL('redirect_stdio(bool)'), False)
+        self.redirect_stdio.emit(False)
         if filename:
             self.analyze(filename)
 
@@ -236,14 +218,11 @@ class UnitTestingWidget(QWidget):
         self.process = QProcess(self)
         self.process.setProcessChannelMode(QProcess.SeparateChannels)
         self.process.setWorkingDirectory(filename)
-        self.connect(self.process, SIGNAL("readyReadStandardOutput()"),
-                     self.read_output)
-        self.connect(self.process, SIGNAL("readyReadStandardError()"),
-                     lambda: self.read_output(error=True))
-        self.connect(self.process,
-                     SIGNAL("finished(int,QProcess::ExitStatus)"),
-                     self.finished)
-        self.connect(self.stop_button, SIGNAL("clicked()"), self.process.kill)
+        self.process.readyReadStandardOutput.connect(self.read_output)
+        self.process.readyReadStandardError.connect(
+            lambda: self.read_output(error=True))
+        self.process.finished.connect(self.finished)
+        self.stop_button.clicked.connect(self.process.kill)
 
         if pythonpath is not None:
             env = [to_text_string(_pth)
@@ -254,11 +233,11 @@ class UnitTestingWidget(QWidget):
         self.output = ''
         self.error_output = ''
 
-#        executable = "py.test"
-#        p_args = ['--junit-xml', self.DATAPATH]
+        executable = "py.test"
+        p_args = ['--junit-xml', self.DATAPATH]
 
-        executable = "nosetests"
-        p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
+#        executable = "nosetests"
+#        p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
 
         if args:
             p_args.extend(programs.shell_split(args))
@@ -415,13 +394,12 @@ class UnitTestingDataTree(QTreeWidget):
 
     def item_activated(self, item):
         filename, line_no = item.data(COL_POS, Qt.UserRole)
-        self.parent().emit(SIGNAL("edit_goto(QString,int,QString)"),
-                           filename, line_no, '')
+        self.parent().edit_goto.emit(filename, line_no, '')
 
 
 def test():
     """Run widget test"""
-    from spyderlib.utils.qthelpers import qapplication
+    from spyder.utils.qthelpers import qapplication
     app = qapplication()
     widget = UnitTestingWidget(None)
     widget.resize(800, 600)
