@@ -12,7 +12,8 @@ Unit Testing widget
 
 from __future__ import with_statement
 
-from qtpy.QtCore import QByteArray, QProcess, Qt, QTextCodec, Signal
+from qtpy.QtCore import (QByteArray, QProcess, QProcessEnvironment, Qt,
+                         QTextCodec, Signal)
 from qtpy.QtGui import QBrush, QColor, QFont
 from qtpy.QtWidgets import (QApplication, QHBoxLayout, QWidget, QMessageBox, 
                             QVBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem)
@@ -29,10 +30,10 @@ from lxml import etree
 from spyder.utils.qthelpers import create_toolbutton
 from spyder.utils import icon_manager as ima
 from spyder.utils import programs
+from spyder.utils.misc import add_pathlist_to_PYTHONPATH
 from spyder.config.base import get_conf_path, get_translation
 from spyder.widgets.variableexplorer.texteditor import TextEditor
 from spyder.widgets.comboboxes import PythonModulesComboBox
-from spyder.widgets.externalshell import baseshell
 from spyder.py3compat import to_text_string, getcwd
 _ = get_translation("unittesting", dirname="spyder_unittesting")
 
@@ -197,7 +198,6 @@ class UnitTestingWidget(QWidget):
             wdir = self._last_wdir
             if wdir is None:
                 wdir = osp.basename(filename)
-        print(filename)
         if os.name == 'nt':
             # On Windows, one has to replace backslashes by slashes to avoid
             # confusion with escape characters (otherwise, for example, '\t'
@@ -217,7 +217,7 @@ class UnitTestingWidget(QWidget):
 
         self.process = QProcess(self)
         self.process.setProcessChannelMode(QProcess.SeparateChannels)
-        self.process.setWorkingDirectory(filename)
+        self.process.setWorkingDirectory(wdir)
         self.process.readyReadStandardOutput.connect(self.read_output)
         self.process.readyReadStandardError.connect(
             lambda: self.read_output(error=True))
@@ -227,8 +227,12 @@ class UnitTestingWidget(QWidget):
         if pythonpath is not None:
             env = [to_text_string(_pth)
                    for _pth in self.process.systemEnvironment()]
-            baseshell.add_pathlist_to_PYTHONPATH(env, pythonpath)
-            self.process.setEnvironment(env)
+            add_pathlist_to_PYTHONPATH(env, pythonpath)
+            processEnvironment = QProcessEnvironment()
+            for envItem in env:
+                envName, separator, envValue = envItem.partition('=')
+                processEnvironment.insert(envName, envValue)
+            self.process.setProcessEnvironment(processEnvironment)
 
         self.output = ''
         self.error_output = ''
