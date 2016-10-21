@@ -12,7 +12,8 @@ Unit Testing widget
 
 from __future__ import with_statement
 
-from qtpy.QtCore import QByteArray, QProcess, Qt, QTextCodec, Signal
+from qtpy.QtCore import (QByteArray, QProcess, QProcessEnvironment, Qt,
+                         QTextCodec, Signal)
 from qtpy.QtGui import QBrush, QColor, QFont
 from qtpy.QtWidgets import (QApplication, QHBoxLayout, QWidget, QMessageBox, 
                             QVBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem)
@@ -228,7 +229,11 @@ class UnitTestingWidget(QWidget):
             env = [to_text_string(_pth)
                    for _pth in self.process.systemEnvironment()]
             add_pathlist_to_PYTHONPATH(env, pythonpath)
-            self.process.setEnvironment(env)
+            processEnvironment = QProcessEnvironment()
+            for envItem in env:
+                envName, separator, envValue = envItem.partition('=')
+                processEnvironment.insert(envName, envValue)
+            self.process.setProcessEnvironment(processEnvironment)
 
         self.output = ''
         self.error_output = ''
