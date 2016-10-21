@@ -198,7 +198,6 @@ class UnitTestingWidget(QWidget):
             wdir = self._last_wdir
             if wdir is None:
                 wdir = osp.basename(filename)
-        print(filename)
         if os.name == 'nt':
             # On Windows, one has to replace backslashes by slashes to avoid
             # confusion with escape characters (otherwise, for example, '\t'
@@ -218,7 +217,7 @@ class UnitTestingWidget(QWidget):
 
         self.process = QProcess(self)
         self.process.setProcessChannelMode(QProcess.SeparateChannels)
-        self.process.setWorkingDirectory(filename)
+        self.process.setWorkingDirectory(wdir)
         self.process.readyReadStandardOutput.connect(self.read_output)
         self.process.readyReadStandardError.connect(
             lambda: self.read_output(error=True))
