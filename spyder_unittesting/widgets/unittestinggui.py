@@ -29,10 +29,10 @@ from lxml import etree
 from spyder.utils.qthelpers import create_toolbutton
 from spyder.utils import icon_manager as ima
 from spyder.utils import programs
+from spyder.utils.misc import add_pathlist_to_PYTHONPATH
 from spyder.config.base import get_conf_path, get_translation
 from spyder.widgets.variableexplorer.texteditor import TextEditor
 from spyder.widgets.comboboxes import PythonModulesComboBox
-from spyder.widgets.externalshell import baseshell
 from spyder.py3compat import to_text_string, getcwd
 _ = get_translation("unittesting", dirname="spyder_unittesting")
 
@@ -227,7 +227,7 @@ class UnitTestingWidget(QWidget):
         if pythonpath is not None:
             env = [to_text_string(_pth)
                    for _pth in self.process.systemEnvironment()]
-            baseshell.add_pathlist_to_PYTHONPATH(env, pythonpath)
+            add_pathlist_to_PYTHONPATH(env, pythonpath)
             self.process.setEnvironment(env)
 
         self.output = ''
