@@ -163,7 +163,7 @@ class UnitTestingWidget(QWidget):
         else:
             pass  # self.show_data()
 
-    def analyze(self, filename, wdir=None, args=None, pythonpath=None):
+    def analyze(self, filename, wdir=None, pythonpath=None):
         if not is_unittesting_installed():
             return
         self.kill_if_running()
@@ -178,7 +178,7 @@ class UnitTestingWidget(QWidget):
         if self.filecombo.is_valid():
             if wdir is None:
                 wdir = osp.dirname(filename)
-            self.start(wdir, args, pythonpath)
+            self.start(wdir, pythonpath)
 
     def select_file(self):
         self.redirect_stdio.emit(False)
@@ -198,7 +198,7 @@ class UnitTestingWidget(QWidget):
             TextEditor(self.error_output, title=_("Unit testing output"),
                        readonly=True, size=(700, 500)).exec_()
 
-    def start(self, wdir=None, args=None, pythonpath=None):
+    def start(self, wdir=None, pythonpath=None):
         filename = to_text_string(self.filecombo.currentText())
         if wdir is None:
             wdir = self._last_wdir
@@ -209,14 +209,9 @@ class UnitTestingWidget(QWidget):
             # confusion with escape characters (otherwise, for example, '\t'
             # will be interpreted as a tabulation):
             filename = osp.normpath(filename).replace(os.sep, '/')
-        if args is None:
-            args = self._last_args
-            if args is None:
-                args = []
         if pythonpath is None:
             pythonpath = self._last_pythonpath
         self._last_wdir = wdir
-        self._last_args = args
         self._last_pythonpath = pythonpath
 
         self.datelabel.setText(_('Running tests, please wait...'))
@@ -249,8 +244,6 @@ class UnitTestingWidget(QWidget):
 #        executable = "nosetests"
 #        p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
 
-        if args:
-            p_args.extend(programs.shell_split(args))
         self.process.start(executable, p_args)
 
         running = self.process.waitForStarted()

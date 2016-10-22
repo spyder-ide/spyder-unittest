@@ -96,12 +96,10 @@ class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
             self.dockwidget.raise_()
         pythonpath = self.main.get_spyder_pythonpath()
         runconf = runconfig.get_run_configuration(filename)
-        wdir, args = None, None
+        wdir = None
         if runconf is not None:
             if runconf.wdir_enabled:
                 wdir = runconf.wdir
-            if runconf.args_enabled:
-                args = runconf.args
 
-        UnitTestingWidget.analyze(self, filename, wdir=wdir, args=args,
+        UnitTestingWidget.analyze(self, filename, wdir=wdir,
                                   pythonpath=pythonpath)
