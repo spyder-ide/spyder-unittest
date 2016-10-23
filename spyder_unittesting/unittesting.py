@@ -68,7 +68,7 @@ class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
                                         icon=ima.icon('profiler'),
                                         triggered=self.run_unittesting)
         unittesting_act.setEnabled(is_unittesting_installed())
-        fixed_shortcut("Ctrl+Shift+F11", self.main,
+        fixed_shortcut("Shift+Alt+F11", self.main,
                        self.run_unittesting)
 
         self.main.run_menu_actions += [unittesting_act]
