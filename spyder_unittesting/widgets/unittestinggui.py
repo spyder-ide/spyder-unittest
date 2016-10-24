@@ -90,7 +90,7 @@ class UnitTestingWidget(QWidget):
             self, icon=ima.icon('run'),
             text=_("Run tests"),
             tip=_("Run unit testing"),
-            triggered=self.start, text_beside_icon=True)
+            triggered=self.start_test_process, text_beside_icon=True)
         self.stop_button = create_toolbutton(
             self, icon=ima.icon('stop'),
             text=_("Stop"),
@@ -178,7 +178,7 @@ class UnitTestingWidget(QWidget):
         if self.filecombo.is_valid():
             if wdir is None:
                 wdir = osp.dirname(filename)
-            self.start(wdir, pythonpath)
+            self.start_test_process(wdir, pythonpath)
 
     def select_file(self):
         self.redirect_stdio.emit(False)
@@ -198,7 +198,22 @@ class UnitTestingWidget(QWidget):
             TextEditor(self.error_output, title=_("Unit testing output"),
                        readonly=True, size=(700, 500)).exec_()
 
-    def start(self, wdir=None, pythonpath=None):
+    def start_test_process(self, wdir=None, pythonpath=None):
+        """
+        Start the process for running tests.
+
+        The process's output is consumed by `read_output()`.
+        When the process finishes, the `finish` signal is emitted.
+
+        Parameters
+        ----------
+        wdir : str
+            working directory to switch to when running tests.
+            If None, use `self._last_wdir` or path of file in combo box.
+        pythonpath : list of str
+            directories to be added to system python path.
+            If None, use `self._last_pythonpath`.
+        """
         filename = to_text_string(self.filecombo.currentText())
         if wdir is None:
             wdir = self._last_wdir
