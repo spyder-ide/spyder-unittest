@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright © 2016- The Spyder Development Team
+# Copyright © Spyder Project Contributors
 # Licensed under the terms of the MIT License
-# (see ../../LICENSE for details)
+# (see spyder/__init__.py for details)
 
 """Tests for unittestinggui.py"""
 

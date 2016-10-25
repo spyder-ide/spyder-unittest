@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright © 2011 Santiago Jaramillo
-# based on pylintgui.py by Pierre Raybaut
-#
+# Copyright © Spyder Project Contributors
 # Licensed under the terms of the MIT License
 # (see spyder/__init__.py for details)
 
