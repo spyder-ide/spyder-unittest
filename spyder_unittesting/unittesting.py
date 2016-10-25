@@ -8,13 +8,15 @@
 
 """Unit testing Plugin"""
 
+import os.path as osp
+
 from qtpy.QtCore import Signal
 
 # Local imports
 from spyder.config.base import get_translation
 from spyder.utils.qthelpers import create_action
 from spyder.utils import icon_manager as ima
-from spyder.plugins import SpyderPluginMixin, runconfig
+from spyder.plugins import SpyderPluginMixin
 from .widgets.unittestinggui import (UnitTestingWidget, is_unittesting_installed)
 
 _ = get_translation("unittesting", dirname="spyder_unittesting")
@@ -86,20 +88,15 @@ class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
     #------ Public API --------------------------------------------------------
     def run_unittesting(self):
         """Run unit testing"""
-        self.analyze(self.main.editor.get_current_filename())
+        filename = self.main.editor.get_current_filename()
+        dirname = osp.dirname(filename)
+        self.analyze(dirname)
 
-    def analyze(self, filename):
+    def analyze(self, wdir):
         """Reimplement analyze method"""
         if self.dockwidget and not self.ismaximized:
             self.dockwidget.setVisible(True)
             self.dockwidget.setFocus()
             self.dockwidget.raise_()
         pythonpath = self.main.get_spyder_pythonpath()
-        runconf = runconfig.get_run_configuration(filename)
-        wdir = None
-        if runconf is not None:
-            if runconf.wdir_enabled:
-                wdir = runconf.wdir
-
-        UnitTestingWidget.analyze(self, filename, wdir=wdir,
-                                  pythonpath=pythonpath)
+        UnitTestingWidget.analyze(self, wdir, pythonpath=pythonpath)

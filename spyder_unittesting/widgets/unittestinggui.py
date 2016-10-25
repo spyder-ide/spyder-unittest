@@ -21,7 +21,6 @@ locale_codec = QTextCodec.codecForLocale()
 from qtpy.compat import getexistingdirectory
 
 import sys
-import os
 import os.path as osp
 import time
 from lxml import etree
@@ -29,11 +28,10 @@ from lxml import etree
 # Local imports
 from spyder.utils.qthelpers import create_toolbutton
 from spyder.utils import icon_manager as ima
-from spyder.utils import programs
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH
 from spyder.config.base import get_conf_path, get_translation
 from spyder.widgets.variableexplorer.texteditor import TextEditor
-from spyder.widgets.comboboxes import PythonModulesComboBox
+from spyder.widgets.comboboxes import PathComboBox
 from spyder.py3compat import to_text_string, getcwd
 
 # This is needed for testing this module as a stand alone script
@@ -84,7 +82,7 @@ class UnitTestingWidget(QWidget):
         self._last_args = None
         self._last_pythonpath = None
 
-        self.filecombo = PythonModulesComboBox(self)
+        self.pathcombo = PathComboBox(self)
 
         self.start_button = create_toolbutton(
             self, icon=ima.icon('run'),
@@ -96,15 +94,15 @@ class UnitTestingWidget(QWidget):
             text=_("Stop"),
             tip=_("Stop current profiling"),
             text_beside_icon=True)
-        self.filecombo.valid.connect(self.start_button.setEnabled)
-        #self.connect(self.filecombo, SIGNAL('valid(bool)'), self.show_data)
+        self.pathcombo.valid.connect(self.start_button.setEnabled)
+        #self.connect(self.pathcombo, SIGNAL('valid(bool)'), self.show_data)
         # FIXME: The combobox emits this signal on almost any event
         #        triggering show_data() too early, too often.
 
         browse_button = create_toolbutton(
             self, icon=ima.icon('fileopen'),
-            tip=_('Select Python script'),
-            triggered=self.select_file)
+            tip=_('Select directory from which to run unit tests'),
+            triggered=self.select_dir)
 
         self.datelabel = QLabel()
 
@@ -129,7 +127,7 @@ class UnitTestingWidget(QWidget):
             tip=_('Expand all'))
 
         hlayout1 = QHBoxLayout()
-        hlayout1.addWidget(self.filecombo)
+        hlayout1.addWidget(self.pathcombo)
         hlayout1.addWidget(browse_button)
         hlayout1.addWidget(self.start_button)
         hlayout1.addWidget(self.stop_button)
@@ -153,7 +151,7 @@ class UnitTestingWidget(QWidget):
         self.start_button.setEnabled(False)
 
         if not is_unittesting_installed():
-            for widget in (self.datatree, self.filecombo, self.log_button,
+            for widget in (self.datatree, self.pathcombo, self.log_button,
                            self.start_button, self.stop_button, browse_button,
                            self.collapse_button, self.expand_button):
                 widget.setDisabled(True)
@@ -163,30 +161,27 @@ class UnitTestingWidget(QWidget):
         else:
             pass  # self.show_data()
 
-    def analyze(self, filename, wdir=None, pythonpath=None):
+    def analyze(self, wdir, pythonpath=None):
         if not is_unittesting_installed():
             return
         self.kill_if_running()
         #index, _data = self.get_data(filename)
         index = None  # FIXME: storing data is not implemented yet
         if index is None:
-            self.filecombo.addItem(filename)
-            self.filecombo.setCurrentIndex(self.filecombo.count()-1)
+            self.pathcombo.addItem(wdir)
+            self.pathcombo.setCurrentIndex(self.pathcombo.count()-1)
         else:
-            self.filecombo.setCurrentIndex(self.filecombo.findText(filename))
-        self.filecombo.selected()
-        if self.filecombo.is_valid():
-            if wdir is None:
-                wdir = osp.dirname(filename)
+            self.pathcombo.setCurrentIndex(self.pathcombo.findText(wdir))
+        self.pathcombo.selected()
+        if self.pathcombo.is_valid():
             self.start_test_process(wdir, pythonpath)
 
-    def select_file(self):
+    def select_dir(self):
         self.redirect_stdio.emit(False)
-        filename = getexistingdirectory(
-            self, _("Select directory"), getcwd())
+        dirname = getexistingdirectory(self, _("Select directory"), getcwd())
         self.redirect_stdio.emit(False)
-        if filename:
-            self.analyze(filename)
+        if dirname:
+            self.analyze(dirname)
 
     def show_log(self):
         if self.output:
@@ -214,16 +209,10 @@ class UnitTestingWidget(QWidget):
             directories to be added to system python path.
             If None, use `self._last_pythonpath`.
         """
-        filename = to_text_string(self.filecombo.currentText())
         if wdir is None:
             wdir = self._last_wdir
             if wdir is None:
-                wdir = osp.basename(filename)
-        if os.name == 'nt':
-            # On Windows, one has to replace backslashes by slashes to avoid
-            # confusion with escape characters (otherwise, for example, '\t'
-            # will be interpreted as a tabulation):
-            filename = osp.normpath(filename).replace(os.sep, '/')
+                wdir = to_text_string(self.pathcombo.currentText())
         if pythonpath is None:
             pythonpath = self._last_pythonpath
         self._last_wdir = wdir
@@ -308,7 +297,7 @@ class UnitTestingWidget(QWidget):
         self.log_button.setEnabled(
             self.output is not None and len(self.output) > 0)
         self.kill_if_running()
-        filename = to_text_string(self.filecombo.currentText())
+        filename = to_text_string(self.pathcombo.currentText())
         if not filename:
             return
 

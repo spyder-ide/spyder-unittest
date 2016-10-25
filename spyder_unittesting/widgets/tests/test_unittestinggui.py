@@ -24,7 +24,7 @@ def test_run_tests_and_display_results(qtbot, tmpdir):
 
     widget = UnitTestingWidget(None)
     qtbot.addWidget(widget)
-    widget.analyze(testfilename)
+    widget.analyze(tmpdir.strpath)
     qtbot.wait(1000) # wait for tests to run
 
     datatree = widget.datatree
