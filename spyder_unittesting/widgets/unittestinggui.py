@@ -13,7 +13,7 @@ Unit Testing widget
 from __future__ import with_statement
 
 from qtpy.QtCore import (QByteArray, QProcess, QProcessEnvironment, Qt,
-                         QTextCodec, Signal)
+                         QTextCodec)
 from qtpy.QtGui import QBrush, QColor, QFont
 from qtpy.QtWidgets import (QApplication, QHBoxLayout, QWidget, QMessageBox, 
                             QVBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem)
@@ -68,7 +68,6 @@ class UnitTestingWidget(QWidget):
     """
     DATAPATH = get_conf_path('unittesting.results')
     VERSION = '0.0.1'
-    redirect_stdio = Signal(bool)
 
     def __init__(self, parent):
         QWidget.__init__(self, parent)
@@ -177,9 +176,7 @@ class UnitTestingWidget(QWidget):
             self.start_test_process(wdir, pythonpath)
 
     def select_dir(self):
-        self.redirect_stdio.emit(False)
         dirname = getexistingdirectory(self, _("Select directory"), getcwd())
-        self.redirect_stdio.emit(False)
         if dirname:
             self.analyze(dirname)
 

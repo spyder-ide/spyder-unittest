@@ -62,7 +62,6 @@ class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
     def register_plugin(self):
         """Register plugin in Spyder's main window"""
         self.edit_goto.connect(self.main.editor.load)
-        self.redirect_stdio.connect(self.main.redirect_internalshell_stdio)
         self.main.add_dockwidget(self)
 
         unittesting_act = create_action(
