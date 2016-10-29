@@ -171,7 +171,7 @@ class UnitTestWidget(QWidget):
         else:
             pass  # self.show_data()
 
-    def analyze(self, wdir, pythonpath=None):
+    def analyze(self, wdir, framework='py.test', pythonpath=None):
         """Run tests."""
         if not is_unittesting_installed():
             return
@@ -185,7 +185,7 @@ class UnitTestWidget(QWidget):
             self.pathcombo.setCurrentIndex(self.pathcombo.findText(wdir))
         self.pathcombo.selected()
         if self.pathcombo.is_valid():
-            self.start_test_process(wdir, pythonpath)
+            self.start_test_process(wdir, pythonpath, framework)
 
     def select_dir(self):
         """Select directory and run tests."""
@@ -211,7 +211,10 @@ class UnitTestWidget(QWidget):
                 readonly=True,
                 size=(700, 500)).exec_()
 
-    def start_test_process(self, wdir=None, pythonpath=None):
+    def start_test_process(self,
+                           wdir=None,
+                           pythonpath=None,
+                           framework='py.test'):
         """
         Start the process for running tests.
 
@@ -226,6 +229,8 @@ class UnitTestWidget(QWidget):
         pythonpath : list of str
             directories to be added to system python path.
             If None, use `self._last_pythonpath`.
+        framework : str
+            test framework; can be 'nose' or 'py.test'
         """
         if wdir is None:
             wdir = self._last_wdir
@@ -262,12 +267,18 @@ class UnitTestWidget(QWidget):
         self.output = ''
         self.error_output = ''
 
-        executable = "py.test"
+        if framework == 'nose':
+            executable = "nosetests"
+            p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
+        elif framework == 'py.test':
+            executable = "py.test"
+            p_args = ['--junit-xml', self.DATAPATH]
+        else:
+            raise ValueError('Unknown framework')
+
         if os.name == 'nt':
             executable += '.exe'
-        p_args = ['--junit-xml', self.DATAPATH]
-        # executable = "nosetests"
-        # p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
+
         self.process.start(executable, p_args)
 
         running = self.process.waitForStarted()

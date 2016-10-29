@@ -13,6 +13,7 @@ import os
 # Third party imports
 from pytestqt import qtbot
 from qtpy.QtCore import Qt
+import pytest
 
 # Local imports
 from spyder_unittest.widgets.unittestgui import UnitTestWidget
@@ -23,7 +24,8 @@ except ImportError:
     from mock import Mock  # Python 2
 
 
-def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch):
+@pytest.mark.parametrize('framework', ['py.test', 'nose'])
+def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
     """Basic check."""
     os.chdir(tmpdir.strpath)
     testfilename = tmpdir.join('test_foo.py').strpath
@@ -39,7 +41,7 @@ def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch):
     widget = UnitTestWidget(None)
     qtbot.addWidget(widget)
     with qtbot.waitSignal(widget.sig_finished, timeout=10000, raising=True):
-        widget.analyze(tmpdir.strpath)
+        widget.analyze(tmpdir.strpath, framework=framework)
 
     MockQMessageBox.assert_not_called()
     dt = widget.datatree
@@ -50,4 +52,8 @@ def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch):
     assert dt.topLevelItem(0).data(2, Qt.DisplayRole) is None
     assert dt.topLevelItem(1).data(0, Qt.DisplayRole) == 'failure'
     assert dt.topLevelItem(1).data(1, Qt.DisplayRole) == 'test_foo.test_fail'
-    assert dt.topLevelItem(1).data(2, Qt.DisplayRole) == 'assert (1 + 1) == 3'
+    if framework == 'py.test':
+        expected = 'assert (1 + 1) == 3'
+    else:
+        expected = 'builtins.AssertionError'
+    assert dt.topLevelItem(1).data(2, Qt.DisplayRole) == expected
