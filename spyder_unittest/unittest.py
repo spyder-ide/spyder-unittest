@@ -22,7 +22,7 @@ _ = get_translation("unittest", dirname="spyder_unittest")
 
 class UnitTestPlugin(UnitTestWidget, SpyderPluginMixin):
     """Unit testing"""
-    CONF_SECTION = 'unittesting'
+    CONF_SECTION = 'unittest'
     edit_goto = Signal(str, int, str)
 
     def __init__(self, parent=None):

@@ -16,7 +16,7 @@ Installation
 
 See https://github.com/spyder-ide/spyder/wiki/User-plugins but in
 short, the following command installs the development version of the
-unittesting plugin:
+unittest plugin:
 
     pip install git+git://github.com/spyder-ide/spyder-unittest.git
 

@@ -64,7 +64,7 @@ class UnitTestWidget(QWidget):
     """
     Unit testing widget
     """
-    DATAPATH = get_conf_path('unittesting.results')
+    DATAPATH = get_conf_path('unittest.results')
     VERSION = '0.0.1'
 
     def __init__(self, parent):
