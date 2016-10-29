@@ -110,7 +110,7 @@ class UnitTestWidget(QWidget):
             tip=_("Show program's output"),
             triggered=self.show_log)
 
-        self.datatree = UnitTestingDataTree(self)
+        self.datatree = UnitTestDataTree(self)
 
         self.collapse_button = create_toolbutton(
             self,
@@ -307,7 +307,7 @@ class UnitTestWidget(QWidget):
         self.datelabel.setText(date_text)
 
 
-class UnitTestingDataTree(QTreeWidget):
+class UnitTestDataTree(QTreeWidget):
     """
     Convenience tree widget (with built-in model)
     to store and view unit testing data.
