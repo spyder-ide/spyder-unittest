@@ -1,12 +1,12 @@
 # -*- coding:utf-8 -*-
 #
-# Copyright © 2013 Joseph Martinot-Lagarde
-# based on p_profiler.py by Santiago Jaramillo
-#
+# Copyright © Spyder Project Contributors
 # Licensed under the terms of the MIT License
 # (see spyder/__init__.py for details)
 
 """Unit testing Plugin"""
+
+import os.path as osp
 
 from qtpy.QtCore import Signal
 
@@ -14,7 +14,7 @@ from qtpy.QtCore import Signal
 from spyder.config.base import get_translation
 from spyder.utils.qthelpers import create_action
 from spyder.utils import icon_manager as ima
-from spyder.plugins import SpyderPluginMixin, runconfig
+from spyder.plugins import SpyderPluginMixin
 from .widgets.unittestinggui import (UnitTestingWidget, is_unittesting_installed)
 
 _ = get_translation("unittesting", dirname="spyder_unittesting")
@@ -60,7 +60,6 @@ class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
     def register_plugin(self):
         """Register plugin in Spyder's main window"""
         self.edit_goto.connect(self.main.editor.load)
-        self.redirect_stdio.connect(self.main.redirect_internalshell_stdio)
         self.main.add_dockwidget(self)
 
         unittesting_act = create_action(
@@ -86,22 +85,15 @@ class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
     #------ Public API --------------------------------------------------------
     def run_unittesting(self):
         """Run unit testing"""
-        self.analyze(self.main.editor.get_current_filename())
+        filename = self.main.editor.get_current_filename()
+        dirname = osp.dirname(filename)
+        self.analyze(dirname)
 
-    def analyze(self, filename):
+    def analyze(self, wdir):
         """Reimplement analyze method"""
         if self.dockwidget and not self.ismaximized:
             self.dockwidget.setVisible(True)
             self.dockwidget.setFocus()
             self.dockwidget.raise_()
         pythonpath = self.main.get_spyder_pythonpath()
-        runconf = runconfig.get_run_configuration(filename)
-        wdir, args = None, None
-        if runconf is not None:
-            if runconf.wdir_enabled:
-                wdir = runconf.wdir
-            if runconf.args_enabled:
-                args = runconf.args
-
-        UnitTestingWidget.analyze(self, filename, wdir=wdir, args=args,
-                                  pythonpath=pythonpath)
+        UnitTestingWidget.analyze(self, wdir, pythonpath=pythonpath)

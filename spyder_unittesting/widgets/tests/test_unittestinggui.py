@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright © 2016- The Spyder Development Team
+# Copyright © Spyder Project Contributors
 # Licensed under the terms of the MIT License
-# (see ../../LICENSE for details)
+# (see spyder/__init__.py for details)
 
 """Tests for unittestinggui.py"""
 
@@ -24,7 +24,7 @@ def test_run_tests_and_display_results(qtbot, tmpdir):
 
     widget = UnitTestingWidget(None)
     qtbot.addWidget(widget)
-    widget.analyze(testfilename)
+    widget.analyze(tmpdir.strpath)
     qtbot.wait(1000) # wait for tests to run
 
     datatree = widget.datatree

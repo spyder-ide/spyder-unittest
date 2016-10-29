@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright © 2011 Santiago Jaramillo
-# based on pylintgui.py by Pierre Raybaut
-#
+# Copyright © Spyder Project Contributors
 # Licensed under the terms of the MIT License
 # (see spyder/__init__.py for details)
 
@@ -13,7 +11,7 @@ Unit Testing widget
 from __future__ import with_statement
 
 from qtpy.QtCore import (QByteArray, QProcess, QProcessEnvironment, Qt,
-                         QTextCodec, Signal)
+                         QTextCodec)
 from qtpy.QtGui import QBrush, QColor, QFont
 from qtpy.QtWidgets import (QApplication, QHBoxLayout, QWidget, QMessageBox, 
                             QVBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem)
@@ -21,7 +19,6 @@ locale_codec = QTextCodec.codecForLocale()
 from qtpy.compat import getexistingdirectory
 
 import sys
-import os
 import os.path as osp
 import time
 from lxml import etree
@@ -29,11 +26,10 @@ from lxml import etree
 # Local imports
 from spyder.utils.qthelpers import create_toolbutton
 from spyder.utils import icon_manager as ima
-from spyder.utils import programs
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH
 from spyder.config.base import get_conf_path, get_translation
 from spyder.widgets.variableexplorer.texteditor import TextEditor
-from spyder.widgets.comboboxes import PythonModulesComboBox
+from spyder.widgets.comboboxes import PathComboBox
 from spyder.py3compat import to_text_string, getcwd
 
 # This is needed for testing this module as a stand alone script
@@ -70,7 +66,6 @@ class UnitTestingWidget(QWidget):
     """
     DATAPATH = get_conf_path('unittesting.results')
     VERSION = '0.0.1'
-    redirect_stdio = Signal(bool)
 
     def __init__(self, parent):
         QWidget.__init__(self, parent)
@@ -84,27 +79,27 @@ class UnitTestingWidget(QWidget):
         self._last_args = None
         self._last_pythonpath = None
 
-        self.filecombo = PythonModulesComboBox(self)
+        self.pathcombo = PathComboBox(self)
 
         self.start_button = create_toolbutton(
             self, icon=ima.icon('run'),
             text=_("Run tests"),
             tip=_("Run unit testing"),
-            triggered=self.start, text_beside_icon=True)
+            triggered=self.start_test_process, text_beside_icon=True)
         self.stop_button = create_toolbutton(
             self, icon=ima.icon('stop'),
             text=_("Stop"),
             tip=_("Stop current profiling"),
             text_beside_icon=True)
-        self.filecombo.valid.connect(self.start_button.setEnabled)
-        #self.connect(self.filecombo, SIGNAL('valid(bool)'), self.show_data)
+        self.pathcombo.valid.connect(self.start_button.setEnabled)
+        #self.connect(self.pathcombo, SIGNAL('valid(bool)'), self.show_data)
         # FIXME: The combobox emits this signal on almost any event
         #        triggering show_data() too early, too often.
 
         browse_button = create_toolbutton(
             self, icon=ima.icon('fileopen'),
-            tip=_('Select Python script'),
-            triggered=self.select_file)
+            tip=_('Select directory from which to run unit tests'),
+            triggered=self.select_dir)
 
         self.datelabel = QLabel()
 
@@ -129,7 +124,7 @@ class UnitTestingWidget(QWidget):
             tip=_('Expand all'))
 
         hlayout1 = QHBoxLayout()
-        hlayout1.addWidget(self.filecombo)
+        hlayout1.addWidget(self.pathcombo)
         hlayout1.addWidget(browse_button)
         hlayout1.addWidget(self.start_button)
         hlayout1.addWidget(self.stop_button)
@@ -153,7 +148,7 @@ class UnitTestingWidget(QWidget):
         self.start_button.setEnabled(False)
 
         if not is_unittesting_installed():
-            for widget in (self.datatree, self.filecombo, self.log_button,
+            for widget in (self.datatree, self.pathcombo, self.log_button,
                            self.start_button, self.stop_button, browse_button,
                            self.collapse_button, self.expand_button):
                 widget.setDisabled(True)
@@ -163,30 +158,25 @@ class UnitTestingWidget(QWidget):
         else:
             pass  # self.show_data()
 
-    def analyze(self, filename, wdir=None, args=None, pythonpath=None):
+    def analyze(self, wdir, pythonpath=None):
         if not is_unittesting_installed():
             return
         self.kill_if_running()
         #index, _data = self.get_data(filename)
         index = None  # FIXME: storing data is not implemented yet
         if index is None:
-            self.filecombo.addItem(filename)
-            self.filecombo.setCurrentIndex(self.filecombo.count()-1)
+            self.pathcombo.addItem(wdir)
+            self.pathcombo.setCurrentIndex(self.pathcombo.count()-1)
         else:
-            self.filecombo.setCurrentIndex(self.filecombo.findText(filename))
-        self.filecombo.selected()
-        if self.filecombo.is_valid():
-            if wdir is None:
-                wdir = osp.dirname(filename)
-            self.start(wdir, args, pythonpath)
+            self.pathcombo.setCurrentIndex(self.pathcombo.findText(wdir))
+        self.pathcombo.selected()
+        if self.pathcombo.is_valid():
+            self.start_test_process(wdir, pythonpath)
 
-    def select_file(self):
-        self.redirect_stdio.emit(False)
-        filename = getexistingdirectory(
-            self, _("Select directory"), getcwd())
-        self.redirect_stdio.emit(False)
-        if filename:
-            self.analyze(filename)
+    def select_dir(self):
+        dirname = getexistingdirectory(self, _("Select directory"), getcwd())
+        if dirname:
+            self.analyze(dirname)
 
     def show_log(self):
         if self.output:
@@ -198,25 +188,29 @@ class UnitTestingWidget(QWidget):
             TextEditor(self.error_output, title=_("Unit testing output"),
                        readonly=True, size=(700, 500)).exec_()
 
-    def start(self, wdir=None, args=None, pythonpath=None):
-        filename = to_text_string(self.filecombo.currentText())
+    def start_test_process(self, wdir=None, pythonpath=None):
+        """
+        Start the process for running tests.
+
+        The process's output is consumed by `read_output()`.
+        When the process finishes, the `finish` signal is emitted.
+
+        Parameters
+        ----------
+        wdir : str
+            working directory to switch to when running tests.
+            If None, use `self._last_wdir` or path of file in combo box.
+        pythonpath : list of str
+            directories to be added to system python path.
+            If None, use `self._last_pythonpath`.
+        """
         if wdir is None:
             wdir = self._last_wdir
             if wdir is None:
-                wdir = osp.basename(filename)
-        if os.name == 'nt':
-            # On Windows, one has to replace backslashes by slashes to avoid
-            # confusion with escape characters (otherwise, for example, '\t'
-            # will be interpreted as a tabulation):
-            filename = osp.normpath(filename).replace(os.sep, '/')
-        if args is None:
-            args = self._last_args
-            if args is None:
-                args = []
+                wdir = to_text_string(self.pathcombo.currentText())
         if pythonpath is None:
             pythonpath = self._last_pythonpath
         self._last_wdir = wdir
-        self._last_args = args
         self._last_pythonpath = pythonpath
 
         self.datelabel.setText(_('Running tests, please wait...'))
@@ -249,8 +243,6 @@ class UnitTestingWidget(QWidget):
 #        executable = "nosetests"
 #        p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
 
-        if args:
-            p_args.extend(programs.shell_split(args))
         self.process.start(executable, p_args)
 
         running = self.process.waitForStarted()
@@ -300,7 +292,7 @@ class UnitTestingWidget(QWidget):
         self.log_button.setEnabled(
             self.output is not None and len(self.output) > 0)
         self.kill_if_running()
-        filename = to_text_string(self.filecombo.currentText())
+        filename = to_text_string(self.pathcombo.currentText())
         if not filename:
             return
 
