@@ -34,7 +34,7 @@ from spyder.py3compat import to_text_string, getcwd
 
 # This is needed for testing this module as a stand alone script
 try:
-    _ = get_translation("unittesting", dirname="spyder_unittesting")
+    _ = get_translation("unittest", dirname="spyder_unittest")
 except KeyError as error:
     import gettext
     _ = gettext.gettext
@@ -60,11 +60,11 @@ def is_unittesting_installed():
             #and programs.find_program('kernprof.py') is not None)
 
 
-class UnitTestingWidget(QWidget):
+class UnitTestWidget(QWidget):
     """
     Unit testing widget
     """
-    DATAPATH = get_conf_path('unittesting.results')
+    DATAPATH = get_conf_path('unittest.results')
     VERSION = '0.0.1'
 
     def __init__(self, parent):
@@ -110,7 +110,7 @@ class UnitTestingWidget(QWidget):
             tip=_("Show program's output"),
             triggered=self.show_log)
 
-        self.datatree = UnitTestingDataTree(self)
+        self.datatree = UnitTestDataTree(self)
 
         self.collapse_button = create_toolbutton(
             self,
@@ -307,7 +307,7 @@ class UnitTestingWidget(QWidget):
         self.datelabel.setText(date_text)
 
 
-class UnitTestingDataTree(QTreeWidget):
+class UnitTestDataTree(QTreeWidget):
     """
     Convenience tree widget (with built-in model)
     to store and view unit testing data.
@@ -403,7 +403,7 @@ def test():
     """Run widget test"""
     from spyder.utils.qthelpers import qapplication
     app = qapplication()
-    widget = UnitTestingWidget(None)
+    widget = UnitTestWidget(None)
     widget.resize(800, 600)
     widget.show()
     widget.analyze(osp.normpath(osp.join(osp.dirname(__file__), osp.pardir)))

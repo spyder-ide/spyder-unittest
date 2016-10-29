@@ -1,5 +1,5 @@
-spyder_unittesting
-==================
+spyder_unittest
+===============
 
 This is a plugin for Spyder that integrates popular unit test
 frameworks. It allows you to run tests and view the results.
@@ -16,9 +16,9 @@ Installation
 
 See https://github.com/spyder-ide/spyder/wiki/User-plugins but in
 short, the following command installs the development version of the
-unittesting plugin:
+unittest plugin:
 
-    pip install git+git://github.com/spyder-ide/spyder.unittest.git
+    pip install git+git://github.com/spyder-ide/spyder-unittest.git
 
 The plugin is not yet included in PyPI.
 
