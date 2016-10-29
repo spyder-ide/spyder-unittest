@@ -1,1 +1,1 @@
-from .unittesting import UnitTesting as PLUGIN_CLASS
+from .unittesting import UnitTestPlugin as PLUGIN_CLASS

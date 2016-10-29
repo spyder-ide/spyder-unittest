@@ -20,7 +20,7 @@ from .widgets.unittestinggui import (UnitTestingWidget, is_unittesting_installed
 _ = get_translation("unittest", dirname="spyder_unittest")
 
 
-class UnitTesting(UnitTestingWidget, SpyderPluginMixin):
+class UnitTestPlugin(UnitTestingWidget, SpyderPluginMixin):
     """Unit testing"""
     CONF_SECTION = 'unittesting'
     edit_goto = Signal(str, int, str)
