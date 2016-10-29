@@ -52,7 +52,7 @@ setup(
     package_data={LIBNAME: get_package_data(LIBNAME, EXTLIST)},
     keywords=["Qt PyQt4 PyQt5 PySide spyder plugins spyplugins unittesting"],
     install_requires=REQUIREMENTS,
-    url='https://github.com/spyder-ide/spyder.unittesting',
+    url='https://github.com/spyder-ide/spyder-unittesting',
     license='MIT',
     author='Joseph Martinot-Lagarde',
     author_email='',
