@@ -4,7 +4,7 @@
 # Licensed under the terms of the MIT License
 # (see spyder/__init__.py for details)
 
-"""Tests for unittestinggui.py"""
+"""Tests for unittestgui.py"""
 
 import os
 
@@ -13,7 +13,7 @@ from qtpy.QtCore import Qt
 from spyder.utils.qthelpers import qapplication
 MAIN_APP = qapplication() # without this line, the import below segfaults
 
-from spyder_unittest.widgets.unittestinggui import UnitTestingWidget
+from spyder_unittest.widgets.unittestgui import UnitTestWidget
 
 def test_run_tests_and_display_results(qtbot, tmpdir):
     os.chdir(tmpdir.strpath)
@@ -22,7 +22,7 @@ def test_run_tests_and_display_results(qtbot, tmpdir):
         f.write("def test_ok(): assert 1+1 == 2\n"
                 "def test_fail(): assert 1+1 == 3\n")
 
-    widget = UnitTestingWidget(None)
+    widget = UnitTestWidget(None)
     qtbot.addWidget(widget)
     widget.analyze(tmpdir.strpath)
     qtbot.wait(1000) # wait for tests to run

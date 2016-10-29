@@ -60,7 +60,7 @@ def is_unittesting_installed():
             #and programs.find_program('kernprof.py') is not None)
 
 
-class UnitTestingWidget(QWidget):
+class UnitTestWidget(QWidget):
     """
     Unit testing widget
     """
@@ -403,7 +403,7 @@ def test():
     """Run widget test"""
     from spyder.utils.qthelpers import qapplication
     app = qapplication()
-    widget = UnitTestingWidget(None)
+    widget = UnitTestWidget(None)
     widget.resize(800, 600)
     widget.show()
     widget.analyze(osp.normpath(osp.join(osp.dirname(__file__), osp.pardir)))

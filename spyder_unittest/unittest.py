@@ -15,18 +15,18 @@ from spyder.config.base import get_translation
 from spyder.utils.qthelpers import create_action
 from spyder.utils import icon_manager as ima
 from spyder.plugins import SpyderPluginMixin
-from .widgets.unittestinggui import (UnitTestingWidget, is_unittesting_installed)
+from .widgets.unittestgui import (UnitTestWidget, is_unittesting_installed)
 
 _ = get_translation("unittest", dirname="spyder_unittest")
 
 
-class UnitTestPlugin(UnitTestingWidget, SpyderPluginMixin):
+class UnitTestPlugin(UnitTestWidget, SpyderPluginMixin):
     """Unit testing"""
     CONF_SECTION = 'unittesting'
     edit_goto = Signal(str, int, str)
 
     def __init__(self, parent=None):
-        UnitTestingWidget.__init__(self, parent=parent)
+        UnitTestWidget.__init__(self, parent=parent)
         SpyderPluginMixin.__init__(self, parent)
 
         # Initialize plugin
@@ -96,4 +96,4 @@ class UnitTestPlugin(UnitTestingWidget, SpyderPluginMixin):
             self.dockwidget.setFocus()
             self.dockwidget.raise_()
         pythonpath = self.main.get_spyder_pythonpath()
-        UnitTestingWidget.analyze(self, wdir, pythonpath=pythonpath)
+        UnitTestWidget.analyze(self, wdir, pythonpath=pythonpath)
