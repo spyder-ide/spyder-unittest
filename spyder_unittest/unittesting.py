@@ -17,7 +17,7 @@ from spyder.utils import icon_manager as ima
 from spyder.plugins import SpyderPluginMixin
 from .widgets.unittestinggui import (UnitTestingWidget, is_unittesting_installed)
 
-_ = get_translation("unittesting", dirname="spyder_unittesting")
+_ = get_translation("unittest", dirname="spyder_unittest")
 
 
 class UnitTesting(UnitTestingWidget, SpyderPluginMixin):

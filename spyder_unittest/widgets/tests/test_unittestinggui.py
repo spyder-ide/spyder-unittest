@@ -13,7 +13,7 @@ from qtpy.QtCore import Qt
 from spyder.utils.qthelpers import qapplication
 MAIN_APP = qapplication() # without this line, the import below segfaults
 
-from spyder_unittesting.widgets.unittestinggui import UnitTestingWidget
+from spyder_unittest.widgets.unittestinggui import UnitTestingWidget
 
 def test_run_tests_and_display_results(qtbot, tmpdir):
     os.chdir(tmpdir.strpath)

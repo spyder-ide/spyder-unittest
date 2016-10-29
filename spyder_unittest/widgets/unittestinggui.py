@@ -34,7 +34,7 @@ from spyder.py3compat import to_text_string, getcwd
 
 # This is needed for testing this module as a stand alone script
 try:
-    _ = get_translation("unittesting", dirname="spyder_unittesting")
+    _ = get_translation("unittest", dirname="spyder_unittest")
 except KeyError as error:
     import gettext
     _ = gettext.gettext

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Setup script for spyder.unittesting
+Setup script for spyder_unittest
 """
 
 from setuptools import setup, find_packages
@@ -11,7 +11,7 @@ import os.path as osp
 
 def get_version():
     """ """
-    with open("spyder_unittesting/__init__.py") as f:
+    with open("spyder_unittest/__init__.py") as f:
         lines = f.read().splitlines()
         for l in lines:
             if "__version__" in l:
@@ -42,7 +42,7 @@ def get_package_data(name, extlist):
 # Requirements
 REQUIREMENTS = []
 EXTLIST = ['.jpg', '.png', '.json', '.mo', '.ini']
-LIBNAME = 'spyder.unittesting'
+LIBNAME = 'spyder_unittest'
 
 
 setup(
@@ -50,9 +50,9 @@ setup(
     version=get_version(),
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     package_data={LIBNAME: get_package_data(LIBNAME, EXTLIST)},
-    keywords=["Qt PyQt4 PyQt5 PySide spyder plugins spyplugins unittesting"],
+    keywords=["Qt PyQt4 PyQt5 PySide spyder plugins spyplugins unittest"],
     install_requires=REQUIREMENTS,
-    url='https://github.com/spyder-ide/spyder-unittesting',
+    url='https://github.com/spyder-ide/spyder-unittest',
     license='MIT',
     author='Joseph Martinot-Lagarde',
     author_email='',

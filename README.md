@@ -1,5 +1,5 @@
-spyder_unittesting
-==================
+spyder_unittest
+===============
 
 This is a plugin for Spyder that integrates popular unit test
 frameworks. It allows you to run tests and view the results.
