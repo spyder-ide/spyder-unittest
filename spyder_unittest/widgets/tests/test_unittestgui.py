@@ -11,13 +11,11 @@
 import os
 
 # Third party imports
+from pytestqt import qtbot
 from qtpy.QtCore import Qt
-from spyder.utils.qthelpers import qapplication
 
 # Local imports
 from spyder_unittest.widgets.unittestgui import UnitTestWidget
-
-MAIN_APP = qapplication() # without this line, the import below segfaults
 
 
 def test_run_tests_and_display_results(qtbot, tmpdir):
@@ -33,7 +31,8 @@ def test_run_tests_and_display_results(qtbot, tmpdir):
     qtbot.wait(1000) # wait for tests to run
 
     datatree = widget.datatree
-    assert datatree.topLevelItemCount() == 2
+    itemcount = datatree.topLevelItemCount()
+    assert itemcount == 2
     assert datatree.topLevelItem(0).data(0, Qt.DisplayRole) == 'ok'
     assert datatree.topLevelItem(0).data(1, Qt.DisplayRole) == 'test_foo.test_ok'
     assert datatree.topLevelItem(0).data(2, Qt.DisplayRole) is None
