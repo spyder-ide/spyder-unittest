@@ -1,21 +1,24 @@
-# -*- coding:utf-8 -*-
+# -*- coding: utf-8 -*-
+# -----------------------------------------------------------------------------
+# Copyright (c) Spyder Project Developers
 #
-# Copyright © Spyder Project Contributors
 # Licensed under the terms of the MIT License
-# (see spyder/__init__.py for details)
+# (see LICENSE.txt for details)
+# -----------------------------------------------------------------------------
+"""Unit testing Plugin."""
 
-"""Unit testing Plugin"""
-
+# Standard library imports
 import os.path as osp
 
+# Third party imports
 from qtpy.QtCore import Signal
+from spyder.config.base import get_translation
+from spyder.plugins import SpyderPluginMixin
+from spyder.utils import icon_manager as ima
+from spyder.utils.qthelpers import create_action
 
 # Local imports
-from spyder.config.base import get_translation
-from spyder.utils.qthelpers import create_action
-from spyder.utils import icon_manager as ima
-from spyder.plugins import SpyderPluginMixin
-from .widgets.unittestgui import (UnitTestWidget, is_unittesting_installed)
+from .widgets.unittestgui import UnitTestWidget, is_unittesting_installed
 
 _ = get_translation("unittest", dirname="spyder_unittest")
 

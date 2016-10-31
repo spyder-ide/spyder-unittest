@@ -5,9 +5,9 @@
 [ciocheck]
 branch = origin/master
 diff_mode = commited
-file_mode = lines
+file_mode = all
 check = pep8,pydocstyle,flake8,pylint,isort,coverage,pytest
-enforce = pep8,pydocstyle,flake8
+enforce = isort
 
 # Python (pyformat)
 header = # -*- coding: utf-8 -*-
@@ -56,8 +56,9 @@ max-complexity = 64
 [isort]
 from_first = true
 import_heading_stdlib = Standard library imports
-import_heading_firstparty = Local imports
 import_heading_thirdparty = Third party imports
+import_heading_firstparty = Local imports
+import_heading_localfolder = Local imports
 indent = '    '
 known_first_party = spyder_unittest
 known_third_party = spyder,pytest,nose

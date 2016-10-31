@@ -1,36 +1,38 @@
 # -*- coding: utf-8 -*-
+# -----------------------------------------------------------------------------
+# Copyright (c) Spyder Project Developers
 #
-# Copyright © Spyder Project Contributors
 # Licensed under the terms of the MIT License
-# (see spyder/__init__.py for details)
-
-"""
-Unit Testing widget
-"""
+# (see LICENSE.txt for details)
+# -----------------------------------------------------------------------------
+"""Unit Testing widget."""
 
 from __future__ import with_statement
 
+# Standard library imports
+import os.path as osp
+import sys
+import time
+
+# Third party imports
+from lxml import etree
+from qtpy.compat import getexistingdirectory
 from qtpy.QtCore import (QByteArray, QProcess, QProcessEnvironment, Qt,
                          QTextCodec)
 from qtpy.QtGui import QBrush, QColor, QFont
-from qtpy.QtWidgets import (QApplication, QHBoxLayout, QWidget, QMessageBox, 
-                            QVBoxLayout, QLabel, QTreeWidget, QTreeWidgetItem)
-locale_codec = QTextCodec.codecForLocale()
-from qtpy.compat import getexistingdirectory
-
-import sys
-import os.path as osp
-import time
-from lxml import etree
-
-# Local imports
-from spyder.utils.qthelpers import create_toolbutton
+from qtpy.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMessageBox,
+                            QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
+from spyder.config.base import get_conf_path, get_translation
+from spyder.py3compat import getcwd, to_text_string
 from spyder.utils import icon_manager as ima
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH
-from spyder.config.base import get_conf_path, get_translation
-from spyder.widgets.variableexplorer.texteditor import TextEditor
+from spyder.utils.qthelpers import create_toolbutton
 from spyder.widgets.comboboxes import PathComboBox
-from spyder.py3compat import to_text_string, getcwd
+from spyder.widgets.variableexplorer.texteditor import TextEditor
+
+locale_codec = QTextCodec.codecForLocale()
+
+
 
 # This is needed for testing this module as a stand alone script
 try:
