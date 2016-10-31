@@ -32,14 +32,12 @@ from spyder.widgets.variableexplorer.texteditor import TextEditor
 
 locale_codec = QTextCodec.codecForLocale()
 
-
 # This is needed for testing this module as a stand alone script
 try:
     _ = get_translation("unittest", dirname="spyder_unittest")
 except KeyError as error:
     import gettext
     _ = gettext.gettext
-
 
 COL_POS = 0  # Position is not displayed but set as Qt.UserRole
 
@@ -83,12 +81,15 @@ class UnitTestWidget(QWidget):
         self.pathcombo = PathComboBox(self)
 
         self.start_button = create_toolbutton(
-            self, icon=ima.icon('run'),
+            self,
+            icon=ima.icon('run'),
             text=_("Run tests"),
             tip=_("Run unit testing"),
-            triggered=self.start_test_process, text_beside_icon=True)
+            triggered=self.start_test_process,
+            text_beside_icon=True)
         self.stop_button = create_toolbutton(
-            self, icon=ima.icon('stop'),
+            self,
+            icon=ima.icon('stop'),
             text=_("Stop"),
             tip=_("Stop current profiling"),
             text_beside_icon=True)
@@ -98,14 +99,16 @@ class UnitTestWidget(QWidget):
         #        triggering show_data() too early, too often.
 
         browse_button = create_toolbutton(
-            self, icon=ima.icon('fileopen'),
+            self,
+            icon=ima.icon('fileopen'),
             tip=_('Select directory from which to run unit tests'),
             triggered=self.select_dir)
 
         self.datelabel = QLabel()
 
         self.log_button = create_toolbutton(
-            self, icon=ima.icon('log'),
+            self,
+            icon=ima.icon('log'),
             text=_("Output"),
             text_beside_icon=True,
             tip=_("Show program's output"),
@@ -181,13 +184,19 @@ class UnitTestWidget(QWidget):
 
     def show_log(self):
         if self.output:
-            TextEditor(self.output, title=_("Unit testing output"),
-                       readonly=True, size=(700, 500)).exec_()
+            TextEditor(
+                self.output,
+                title=_("Unit testing output"),
+                readonly=True,
+                size=(700, 500)).exec_()
 
     def show_errorlog(self):
         if self.error_output:
-            TextEditor(self.error_output, title=_("Unit testing output"),
-                       readonly=True, size=(700, 500)).exec_()
+            TextEditor(
+                self.error_output,
+                title=_("Unit testing output"),
+                readonly=True,
+                size=(700, 500)).exec_()
 
     def start_test_process(self, wdir=None, pythonpath=None):
         """
@@ -226,8 +235,10 @@ class UnitTestWidget(QWidget):
         self.stop_button.clicked.connect(self.process.kill)
 
         if pythonpath is not None:
-            env = [to_text_string(_pth)
-                   for _pth in self.process.systemEnvironment()]
+            env = [
+                to_text_string(_pth)
+                for _pth in self.process.systemEnvironment()
+            ]
             add_pathlist_to_PYTHONPATH(env, pythonpath)
             processEnvironment = QProcessEnvironment()
             for envItem in env:
@@ -240,17 +251,16 @@ class UnitTestWidget(QWidget):
 
         executable = "py.test"
         p_args = ['--junit-xml', self.DATAPATH]
-
-#        executable = "nosetests"
-#        p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
-
+        # executable = "nosetests"
+        # p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
         self.process.start(executable, p_args)
 
         running = self.process.waitForStarted()
         self.set_running_state(running)
+
         if not running:
-            QMessageBox.critical(self, _("Error"),
-                                 _("Process failed to start"))
+            QMessageBox.critical(self,
+                                 _("Error"), _("Process failed to start"))
 
     def set_running_state(self, state=True):
         self.start_button.setEnabled(not state)
@@ -315,17 +325,18 @@ class UnitTestDataTree(QTreeWidget):
         """Convenience tree widget to store and view unit testing data."""
         QTreeWidget.__init__(self, parent)
         self.header_list = [
-            _('Status'), _('Name'), _('Message'), _('Time (ms)')]
-        self.data = None      # To be filled by self.load_data()
-        self.max_time = 0      # To be filled by self.load_data()
+            _('Status'), _('Name'), _('Message'), _('Time (ms)')
+        ]
+        self.data = None  # To be filled by self.load_data()
+        self.max_time = 0  # To be filled by self.load_data()
         self.header().setDefaultAlignment(Qt.AlignCenter)
         self.setColumnCount(len(self.header_list))
         self.setHeaderLabels(self.header_list)
         self.clear()
         self.setItemsExpandable(True)
         self.setSortingEnabled(False)
-#        self.connect(self, SIGNAL('itemActivated(QTreeWidgetItem*,int)'),
-#                     self.item_activated)
+        # self.connect(self, SIGNAL('itemActivated(QTreeWidgetItem*,int)'),
+        #              self.item_activated)
 
     def show_tree(self):
         """Populate the tree with unit testing data and display it."""
@@ -358,11 +369,10 @@ class UnitTestDataTree(QTreeWidget):
 
         for testcase in self.data:
             testcase_item = QTreeWidgetItem(self)
-            testcase_item.setData(
-                1, Qt.DisplayRole, "{0}.{1}".format(
-                    testcase.get("classname"), testcase.get("name")))
-            testcase_item.setData(
-                3, Qt.DisplayRole, float(testcase.get("time")) * 1e3)
+            testcase_item.setData(1, Qt.DisplayRole, "{0}.{1}".format(
+                testcase.get("classname"), testcase.get("name")))
+            testcase_item.setData(3, Qt.DisplayRole,
+                                  float(testcase.get("time")) * 1e3)
 
             if len(testcase):
                 test_error = testcase[0]
@@ -387,8 +397,7 @@ class UnitTestDataTree(QTreeWidget):
                 if text:
                     for line in text.rstrip().split("\n"):
                         error_content_item = QTreeWidgetItem(testcase_item)
-                        error_content_item.setData(
-                            0, Qt.DisplayRole, line)
+                        error_content_item.setData(0, Qt.DisplayRole, line)
                         error_content_item.setFirstColumnSpanned(True)
                         error_content_item.setFont(0, monospace_font)
             else:
@@ -408,6 +417,7 @@ def test():
     widget.show()
     widget.analyze(osp.normpath(osp.join(osp.dirname(__file__), osp.pardir)))
     sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     test()

@@ -65,8 +65,11 @@ class UnitTestPlugin(UnitTestWidget, SpyderPluginMixin):
         self.main.add_dockwidget(self)
 
         unittesting_act = create_action(
-            self, _("Run unit tests"), icon=ima.icon('profiler'),
-            shortcut="Shift+Alt+F11", triggered=self.run_unittesting)
+            self,
+            _("Run unit tests"),
+            icon=ima.icon('profiler'),
+            shortcut="Shift+Alt+F11",
+            triggered=self.run_unittesting)
         unittesting_act.setEnabled(is_unittesting_installed())
 
         self.main.run_menu_actions += [unittesting_act]
