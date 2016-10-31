@@ -36,11 +36,9 @@ about:
   license: MIT
   license_family: MIT
   license_file: LICENSE.txt
-  summary: The lektor static file content management system.
+  summary: Spyder plugin that integrates popular unit test frameworks.
   description: |
-    A flexible and powerful static content management system for building
-    complex and beautiful websites out of flat files for people who do not
-    want to make a compromise between a CMS and a static blog engine.
+    It allows you to run tests and view the results.
   dev_url: https://github.com/spyder-ide/spyder-unittest
 
 extra:
