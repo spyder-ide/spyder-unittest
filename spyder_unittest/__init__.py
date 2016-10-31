@@ -3,7 +3,7 @@
 # Copyright (c) Spyder Project Developers
 #
 # Licensed under the terms of the MIT License
-# (see spyder/__init__.py for details)
+# (see LICENSE.txt for details)
 # -----------------------------------------------------------------------------
 """Spyder unitest plugin."""
 
