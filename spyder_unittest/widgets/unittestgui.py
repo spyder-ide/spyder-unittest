@@ -33,7 +33,6 @@ from spyder.widgets.variableexplorer.texteditor import TextEditor
 locale_codec = QTextCodec.codecForLocale()
 
 
-
 # This is needed for testing this module as a stand alone script
 try:
     _ = get_translation("unittest", dirname="spyder_unittest")
@@ -52,24 +51,24 @@ COLORS = {
     "failure": COLOR_FAIL,  # py.test
     "error": COLOR_FAIL,  # nose
     "skipped": COLOR_SKIP,  # py.test, nose
-    }
+}
 
 
 def is_unittesting_installed():
-    """Checks if the program and the library for line_profiler is installed
-    """
-    return True#(programs.is_module_installed('line_profiler')
-            #and programs.find_program('kernprof.py') is not None)
+    """Check if the program and the library for line_profiler is installed."""
+    # return (programs.is_module_installed('line_profiler')
+    # and programs.find_program('kernprof.py') is not None)
+    return True
 
 
 class UnitTestWidget(QWidget):
-    """
-    Unit testing widget
-    """
+    """Unit testing widget."""
+
     DATAPATH = get_conf_path('unittest.results')
     VERSION = '0.0.1'
 
     def __init__(self, parent):
+        """Unit testing widget."""
         QWidget.__init__(self, parent)
 
         self.setWindowTitle("Unit testing")
@@ -94,7 +93,7 @@ class UnitTestWidget(QWidget):
             tip=_("Stop current profiling"),
             text_beside_icon=True)
         self.pathcombo.valid.connect(self.start_button.setEnabled)
-        #self.connect(self.pathcombo, SIGNAL('valid(bool)'), self.show_data)
+        # self.connect(self.pathcombo, SIGNAL('valid(bool)'), self.show_data)
         # FIXME: The combobox emits this signal on almost any event
         #        triggering show_data() too early, too often.
 
@@ -164,11 +163,11 @@ class UnitTestWidget(QWidget):
         if not is_unittesting_installed():
             return
         self.kill_if_running()
-        #index, _data = self.get_data(filename)
+        # index, _data = self.get_data(filename)
         index = None  # FIXME: storing data is not implemented yet
         if index is None:
             self.pathcombo.addItem(wdir)
-            self.pathcombo.setCurrentIndex(self.pathcombo.count()-1)
+            self.pathcombo.setCurrentIndex(self.pathcombo.count() - 1)
         else:
             self.pathcombo.setCurrentIndex(self.pathcombo.findText(wdir))
         self.pathcombo.selected()
@@ -276,7 +275,7 @@ class UnitTestWidget(QWidget):
 
     def finished(self):
         self.set_running_state(False)
-        #self.show_errorlog()  # If errors occurred, show them.
+        # self.show_errorlog()  # If errors occurred, show them.
         self.output = self.error_output + self.output
         # FIXME: figure out if show_data should be called here or
         #        as a signal from the combobox
@@ -310,11 +309,10 @@ class UnitTestWidget(QWidget):
 
 
 class UnitTestDataTree(QTreeWidget):
-    """
-    Convenience tree widget (with built-in model)
-    to store and view unit testing data.
-    """
+    """Convenience tree widget to store and view unit testing data."""
+
     def __init__(self, parent=None):
+        """Convenience tree widget to store and view unit testing data."""
         QTreeWidget.__init__(self, parent)
         self.header_list = [
             _('Status'), _('Name'), _('Message'), _('Time (ms)')]
@@ -333,15 +331,15 @@ class UnitTestDataTree(QTreeWidget):
         """Populate the tree with unit testing data and display it."""
         self.clear()  # Clear before re-populating
         self.populate_tree()
-        for col in range(self.columnCount()-1):
+        for col in range(self.columnCount() - 1):
             self.resizeColumnToContents(col)
 
     def load_data(self, profdatafile):
-        """Load unit testing data"""
+        """Load unit testing data."""
         self.data = etree.parse(profdatafile).getroot()
 
     def populate_tree(self):
-        """Create each item (and associated data) in the tree"""
+        """Create each item (and associated data) in the tree."""
         if not len(self.data):
             warn_item = QTreeWidgetItem(self)
             warn_item.setData(0, Qt.DisplayRole, "No results to show.")
@@ -402,7 +400,7 @@ class UnitTestDataTree(QTreeWidget):
 
 
 def test():
-    """Run widget test"""
+    """Run widget test."""
     from spyder.utils.qthelpers import qapplication
     app = qapplication()
     widget = UnitTestWidget(None)
