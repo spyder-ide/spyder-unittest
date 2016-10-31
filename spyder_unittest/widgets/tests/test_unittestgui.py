@@ -6,14 +6,18 @@
 
 """Tests for unittestgui.py"""
 
+# Standard library imports
 import os
 
+# Third party imports
 from qtpy.QtCore import Qt
-
 from spyder.utils.qthelpers import qapplication
+
+# Local imports
+from spyder_unittest.widgets.unittestgui import UnitTestWidget
+
 MAIN_APP = qapplication() # without this line, the import below segfaults
 
-from spyder_unittest.widgets.unittestgui import UnitTestWidget
 
 def test_run_tests_and_display_results(qtbot, tmpdir):
     os.chdir(tmpdir.strpath)
