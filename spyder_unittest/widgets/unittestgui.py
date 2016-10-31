@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
+# -----------------------------------------------------------------------------
+# Copyright (c) Spyder Project Developers
 #
-# Copyright © Spyder Project Contributors
 # Licensed under the terms of the MIT License
-# (see spyder/__init__.py for details)
-
-"""
-Unit Testing widget
-"""
+# (see LICENSE.txt for details)
+# -----------------------------------------------------------------------------
+"""Unit Testing widget."""
 
 from __future__ import with_statement
 

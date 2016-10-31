@@ -1,10 +1,11 @@
-# -*- coding:utf-8 -*-
+# -*- coding: utf-8 -*-
+# -----------------------------------------------------------------------------
+# Copyright (c) Spyder Project Developers
 #
-# Copyright © Spyder Project Contributors
 # Licensed under the terms of the MIT License
-# (see spyder/__init__.py for details)
-
-"""Unit testing Plugin"""
+# (see LICENSE.txt for details)
+# -----------------------------------------------------------------------------
+"""Unit testing Plugin."""
 
 # Standard library imports
 import os.path as osp
