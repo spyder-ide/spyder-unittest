@@ -7,7 +7,7 @@ branch = origin/master
 diff_mode = commited
 file_mode = all
 check = pep8,pydocstyle,flake8,pylint,isort,coverage,pytest
-enforce = isort
+enforce = isort,pytest
 
 # Python (pyformat)
 header = # -*- coding: utf-8 -*-
@@ -61,7 +61,7 @@ import_heading_firstparty = Local imports
 import_heading_localfolder = Local imports
 indent = '    '
 known_first_party = spyder_unittest
-known_third_party = spyder,pytest,nose
+known_third_party = spyder,pytest,pytestqt,nose
 line_length = 79
 sections = FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER
 
@@ -108,3 +108,4 @@ exclude_lines =
 [pytest]
 addopts = -rfew --durations=10
 python_functions = test_*
+python_files = test_*.py
