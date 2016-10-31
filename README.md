@@ -8,6 +8,9 @@
 [![Code Issues](https://www.quantifiedcode.com/api/v1/project/cce1ea0d121246ff876d2822e9e3d2a1/badge.svg)](https://www.quantifiedcode.com/app/project/cce1ea0d121246ff876d2822e9e3d2a1)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spyder-ide/spyder-unittest/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/spyder-ide/spyder-unittest/?branch=master)
 
+## Project information
+[![Join the chat at https://gitter.im/spyder-ide/spyder](https://badges.gitter.im/spyder-ide/spyder.svg)](https://gitter.im/spyder-ide/spyder)
+
 ## Description
 This is a plugin for Spyder that integrates popular unit test
 frameworks. It allows you to run tests and view the results.
