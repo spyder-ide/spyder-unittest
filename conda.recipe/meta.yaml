@@ -1,0 +1,49 @@
+{% set name = "spyder-unitest" %}
+{% set version = "0.1" %}
+{% set hash_type = "sha256" %}
+{% set hash = "" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  fn: {{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  {{ hash_type }}: {{ hash }}
+
+build:
+  number: 0
+  script: python setup.py install --single-version-externally-managed --record=record.txt
+
+requirements:
+  build:
+    - python
+    - setuptools
+
+  run:
+    - nose
+    - python
+    - pytest-qt
+    - spyder
+
+test:
+  imports:
+    - spyder_unittest
+
+about:
+  home: https://github.com/spyder-ide/spyder-unittest
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.txt
+  summary: The lektor static file content management system.
+  description: |
+    A flexible and powerful static content management system for building
+    complex and beautiful websites out of flat files for people who do not
+    want to make a compromise between a CMS and a static blog engine.
+  dev_url: https://github.com/spyder-ide/spyder-unittest
+
+extra:
+  recipe-maintainers:
+    - ccordoba12
+    - goanpeca
