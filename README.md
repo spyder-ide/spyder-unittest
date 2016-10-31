@@ -9,7 +9,7 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spyder-ide/spyder-unittest/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/spyder-ide/spyder-unittest/?branch=master)
 
 ## Project information
-[![Join the chat at https://gitter.im/spyder-ide/spyder](https://badges.gitter.im/spyder-ide/spyder.svg)](https://gitter.im/spyder-ide/spyder)
+[![Join the chat at https://gitter.im/spyder-ide/public](https://badges.gitter.im/spyder-ide/public.svg)](https://gitter.im/spyder-ide/public)
 
 ## Description
 This is a plugin for Spyder that integrates popular unit test
