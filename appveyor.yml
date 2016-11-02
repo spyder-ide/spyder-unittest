@@ -46,9 +46,9 @@ environment:
     - PYTHON_VERSION: "3.5"
       USE_QT_API: "PyQt4"
       PYTEST_QT_API: "pyqt4v2"
-    - PYTHON_VERSION: "3.4"
-      USE_QT_API: "PyQt4"
-      PYTEST_QT_API: "pyqt4v2"
+#    - PYTHON_VERSION: "3.4"  # spyder does not work in this configuration ?!?
+#      USE_QT_API: "PyQt4"
+#      PYTEST_QT_API: "pyqt4v2"
     - PYTHON_VERSION: "2.7"
       USE_QT_API: "PyQt4"
       PYTEST_QT_API: "pyqt4v2"
