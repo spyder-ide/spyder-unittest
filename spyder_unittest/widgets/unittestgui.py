@@ -10,6 +10,7 @@
 from __future__ import with_statement
 
 # Standard library imports
+import os
 import os.path as osp
 import sys
 import time
@@ -262,6 +263,8 @@ class UnitTestWidget(QWidget):
         self.error_output = ''
 
         executable = "py.test"
+        if os.name == 'nt':
+            executable += '.exe'
         p_args = ['--junit-xml', self.DATAPATH]
         # executable = "nosetests"
         # p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
