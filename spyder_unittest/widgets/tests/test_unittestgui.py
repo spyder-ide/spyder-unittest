@@ -38,8 +38,8 @@ def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch):
 
     widget = UnitTestWidget(None)
     qtbot.addWidget(widget)
-    widget.analyze(tmpdir.strpath)
-    qtbot.wait(10000)  # wait for tests to run
+    with qtbot.waitSignal(widget.sig_finished, timeout=10000, raising=True):
+        widget.analyze(tmpdir.strpath)
 
     MockQMessageBox.assert_not_called()
     dt = widget.datatree

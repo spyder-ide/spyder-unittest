@@ -18,7 +18,7 @@ import time
 from lxml import etree
 from qtpy.compat import getexistingdirectory
 from qtpy.QtCore import (QByteArray, QProcess, QProcessEnvironment, Qt,
-                         QTextCodec)
+                         QTextCodec, Signal)
 from qtpy.QtGui import QBrush, QColor, QFont
 from qtpy.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMessageBox,
                             QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
@@ -60,10 +60,18 @@ def is_unittesting_installed():
 
 
 class UnitTestWidget(QWidget):
-    """Unit testing widget."""
+    """
+    Unit testing widget.
+
+    Signals
+    -------
+    sig_finished: Emitted when plugin finishes processing tests.
+    """
 
     DATAPATH = get_conf_path('unittest.results')
     VERSION = '0.0.1'
+
+    sig_finished = Signal()
 
     def __init__(self, parent):
         """Unit testing widget."""
@@ -297,6 +305,7 @@ class UnitTestWidget(QWidget):
         # FIXME: figure out if show_data should be called here or
         #        as a signal from the combobox
         self.show_data(justanalyzed=True)
+        self.sig_finished.emit()
 
     def kill_if_running(self):
         """Kill testing process if it is running."""
