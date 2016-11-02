@@ -9,7 +9,7 @@ machine:
     PY_VERSIONS: "3.5 3.4 2.7"
     # Environment variables used by astropy helpers
     TRAVIS_OS_NAME: "linux"
-    CONDA_DEPENDENCIES: "lxml nose pytest spyder"
+    CONDA_DEPENDENCIES: "lxml mock nose pytest spyder"
     PIP_DEPENDENCIES: "coveralls pytest-qt"
 
 dependencies:
