@@ -163,6 +163,7 @@ class UnitTestWidget(QWidget):
             pass  # self.show_data()
 
     def analyze(self, wdir, pythonpath=None):
+        """Run tests."""
         if not is_unittesting_installed():
             return
         self.kill_if_running()
@@ -178,11 +179,13 @@ class UnitTestWidget(QWidget):
             self.start_test_process(wdir, pythonpath)
 
     def select_dir(self):
+        """Select directory and run tests."""
         dirname = getexistingdirectory(self, _("Select directory"), getcwd())
         if dirname:
             self.analyze(dirname)
 
     def show_log(self):
+        """Show output of testing process."""
         if self.output:
             TextEditor(
                 self.output,
@@ -191,6 +194,7 @@ class UnitTestWidget(QWidget):
                 size=(700, 500)).exec_()
 
     def show_errorlog(self):
+        """Show errors of testing process."""
         if self.error_output:
             TextEditor(
                 self.error_output,
@@ -263,10 +267,12 @@ class UnitTestWidget(QWidget):
                                  _("Error"), _("Process failed to start"))
 
     def set_running_state(self, state=True):
+        """Set running state."""
         self.start_button.setEnabled(not state)
         self.stop_button.setEnabled(state)
 
     def read_output(self, error=False):
+        """Read output of testing process."""
         if error:
             self.process.setReadChannel(QProcess.StandardError)
         else:
@@ -284,6 +290,7 @@ class UnitTestWidget(QWidget):
             self.output += text
 
     def finished(self):
+        """Testing has finished."""
         self.set_running_state(False)
         # self.show_errorlog()  # If errors occurred, show them.
         self.output = self.error_output + self.output
@@ -292,12 +299,14 @@ class UnitTestWidget(QWidget):
         self.show_data(justanalyzed=True)
 
     def kill_if_running(self):
+        """Kill testing process if it is running."""
         if self.process is not None:
             if self.process.state() == QProcess.Running:
                 self.process.kill()
                 self.process.waitForFinished()
 
     def show_data(self, justanalyzed=False):
+        """Show test results."""
         if not justanalyzed:
             self.output = None
         self.log_button.setEnabled(
@@ -404,6 +413,7 @@ class UnitTestDataTree(QTreeWidget):
                 testcase_item.setData(0, Qt.DisplayRole, "ok")
 
     def item_activated(self, item):
+        """Called if user clicks on item."""
         filename, line_no = item.data(COL_POS, Qt.UserRole)
         self.parent().edit_goto.emit(filename, line_no, '')
 
