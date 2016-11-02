@@ -17,8 +17,13 @@ from qtpy.QtCore import Qt
 # Local imports
 from spyder_unittest.widgets.unittestgui import UnitTestWidget
 
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock  # Python 2
 
-def test_run_tests_and_display_results(qtbot, tmpdir):
+
+def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch):
     """Basic check."""
     os.chdir(tmpdir.strpath)
     testfilename = tmpdir.join('test_foo.py').strpath
@@ -27,11 +32,16 @@ def test_run_tests_and_display_results(qtbot, tmpdir):
         f.write("def test_ok(): assert 1+1 == 2\n"
                 "def test_fail(): assert 1+1 == 3\n")
 
+    MockQMessageBox = Mock()
+    monkeypatch.setattr('spyder_unittest.widgets.unittestgui.QMessageBox',
+                        MockQMessageBox)
+
     widget = UnitTestWidget(None)
     qtbot.addWidget(widget)
-    widget.analyze(tmpdir.strpath)
-    qtbot.wait(10000)  # wait for tests to run
+    with qtbot.waitSignal(widget.sig_finished, timeout=10000, raising=True):
+        widget.analyze(tmpdir.strpath)
 
+    MockQMessageBox.assert_not_called()
     dt = widget.datatree
     itemcount = dt.topLevelItemCount()
     assert itemcount == 2

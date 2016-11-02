@@ -18,7 +18,7 @@ environment:
     PYTHON_ARCH: "64" # needs to be set for CMD_IN_ENV to succeed. If a mix
                       # of 32 bit and 64 bit builds are needed, move this
                       # to the matrix section.
-    CONDA_DEPENDENCIES: "lxml nose pytest spyder"
+    CONDA_DEPENDENCIES: "lxml mock nose pytest spyder"
     PIP_DEPENDENCIES_2: "coveralls pytest-qt"  # Fix when fixed upstream
 
   matrix:
@@ -26,9 +26,9 @@ environment:
     - PYTHON_VERSION: "3.5"
       USE_QT_API: "PyQt5"
       PYTEST_QT_API: "pyqt5"
-    - PYTHON_VERSION: "3.4"
-      USE_QT_API: "PyQt5"
-      PYTEST_QT_API: "pyqt5"
+#    - PYTHON_VERSION: "3.4"
+#      USE_QT_API: "PyQt5"
+#      PYTEST_QT_API: "pyqt5"
     - PYTHON_VERSION: "2.7"
       USE_QT_API: "PyQt5"
       PYTEST_QT_API: "pyqt5"
@@ -43,15 +43,15 @@ environment:
 #      USE_QT_API: "PySide2"
 #      PYTEST_QT_API: "pyside2"
     # PyQt4
-    - PYTHON_VERSION: "3.5"
-      USE_QT_API: "PyQt4"
-      PYTEST_QT_API: "pyqt4v2"
-    - PYTHON_VERSION: "3.4"
-      USE_QT_API: "PyQt4"
-      PYTEST_QT_API: "pyqt4v2"
-    - PYTHON_VERSION: "2.7"
-      USE_QT_API: "PyQt4"
-      PYTEST_QT_API: "pyqt4v2"
+#    - PYTHON_VERSION: "3.5"
+#      USE_QT_API: "PyQt4"
+#      PYTEST_QT_API: "pyqt4v2"
+#    - PYTHON_VERSION: "3.4"  # spyder does not work in this configuration ?!?
+#      USE_QT_API: "PyQt4"
+#      PYTEST_QT_API: "pyqt4v2"
+#    - PYTHON_VERSION: "2.7"
+#      USE_QT_API: "PyQt4"
+#      PYTEST_QT_API: "pyqt4v2"
     # PySide
 #    - PYTHON_VERSION: "2.7"
 #      USE_QT_API: "PySide"
@@ -93,4 +93,4 @@ build: false
 test_script:
   - ciocheck spyder_unittest --disable-tests
   - conda remove pytest-xdist
-#  - py.test spyder_unittest --cov=spyder_unittest
+  - py.test spyder_unittest --cov=spyder_unittest

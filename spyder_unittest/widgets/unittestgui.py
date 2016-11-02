@@ -10,6 +10,7 @@
 from __future__ import with_statement
 
 # Standard library imports
+import os
 import os.path as osp
 import sys
 import time
@@ -18,7 +19,7 @@ import time
 from lxml import etree
 from qtpy.compat import getexistingdirectory
 from qtpy.QtCore import (QByteArray, QProcess, QProcessEnvironment, Qt,
-                         QTextCodec)
+                         QTextCodec, Signal)
 from qtpy.QtGui import QBrush, QColor, QFont
 from qtpy.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMessageBox,
                             QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
@@ -60,10 +61,18 @@ def is_unittesting_installed():
 
 
 class UnitTestWidget(QWidget):
-    """Unit testing widget."""
+    """
+    Unit testing widget.
+
+    Signals
+    -------
+    sig_finished: Emitted when plugin finishes processing tests.
+    """
 
     DATAPATH = get_conf_path('unittest.results')
     VERSION = '0.0.1'
+
+    sig_finished = Signal()
 
     def __init__(self, parent):
         """Unit testing widget."""
@@ -163,6 +172,7 @@ class UnitTestWidget(QWidget):
             pass  # self.show_data()
 
     def analyze(self, wdir, pythonpath=None):
+        """Run tests."""
         if not is_unittesting_installed():
             return
         self.kill_if_running()
@@ -178,11 +188,13 @@ class UnitTestWidget(QWidget):
             self.start_test_process(wdir, pythonpath)
 
     def select_dir(self):
+        """Select directory and run tests."""
         dirname = getexistingdirectory(self, _("Select directory"), getcwd())
         if dirname:
             self.analyze(dirname)
 
     def show_log(self):
+        """Show output of testing process."""
         if self.output:
             TextEditor(
                 self.output,
@@ -191,6 +203,7 @@ class UnitTestWidget(QWidget):
                 size=(700, 500)).exec_()
 
     def show_errorlog(self):
+        """Show errors of testing process."""
         if self.error_output:
             TextEditor(
                 self.error_output,
@@ -250,6 +263,8 @@ class UnitTestWidget(QWidget):
         self.error_output = ''
 
         executable = "py.test"
+        if os.name == 'nt':
+            executable += '.exe'
         p_args = ['--junit-xml', self.DATAPATH]
         # executable = "nosetests"
         # p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
@@ -263,10 +278,12 @@ class UnitTestWidget(QWidget):
                                  _("Error"), _("Process failed to start"))
 
     def set_running_state(self, state=True):
+        """Set running state."""
         self.start_button.setEnabled(not state)
         self.stop_button.setEnabled(state)
 
     def read_output(self, error=False):
+        """Read output of testing process."""
         if error:
             self.process.setReadChannel(QProcess.StandardError)
         else:
@@ -284,20 +301,24 @@ class UnitTestWidget(QWidget):
             self.output += text
 
     def finished(self):
+        """Testing has finished."""
         self.set_running_state(False)
         # self.show_errorlog()  # If errors occurred, show them.
         self.output = self.error_output + self.output
         # FIXME: figure out if show_data should be called here or
         #        as a signal from the combobox
         self.show_data(justanalyzed=True)
+        self.sig_finished.emit()
 
     def kill_if_running(self):
+        """Kill testing process if it is running."""
         if self.process is not None:
             if self.process.state() == QProcess.Running:
                 self.process.kill()
                 self.process.waitForFinished()
 
     def show_data(self, justanalyzed=False):
+        """Show test results."""
         if not justanalyzed:
             self.output = None
         self.log_button.setEnabled(
@@ -404,6 +425,7 @@ class UnitTestDataTree(QTreeWidget):
                 testcase_item.setData(0, Qt.DisplayRole, "ok")
 
     def item_activated(self, item):
+        """Called if user clicks on item."""
         filename, line_no = item.data(COL_POS, Qt.UserRole)
         self.parent().edit_goto.emit(filename, line_no, '')
 
