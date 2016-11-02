@@ -93,4 +93,4 @@ build: false
 test_script:
   - ciocheck spyder_unittest --disable-tests
   - conda remove pytest-xdist
-#  - py.test spyder_unittest --cov=spyder_unittest
+  - py.test spyder_unittest --cov=spyder_unittest
