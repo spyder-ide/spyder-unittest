@@ -31,6 +31,9 @@ from spyder.utils.qthelpers import create_toolbutton
 from spyder.widgets.comboboxes import PathComboBox
 from spyder.widgets.variableexplorer.texteditor import TextEditor
 
+# Local imports
+from spyder_unittest.widgets.configdialog import ask_for_config
+
 locale_codec = QTextCodec.codecForLocale()
 
 # This is needed for testing this module as a stand alone script
@@ -171,7 +174,7 @@ class UnitTestWidget(QWidget):
         else:
             pass  # self.show_data()
 
-    def analyze(self, wdir, framework='py.test', pythonpath=None):
+    def analyze(self, wdir, pythonpath=None, framework=None):
         """Run tests."""
         if not is_unittesting_installed():
             return
@@ -211,10 +214,7 @@ class UnitTestWidget(QWidget):
                 readonly=True,
                 size=(700, 500)).exec_()
 
-    def start_test_process(self,
-                           wdir=None,
-                           pythonpath=None,
-                           framework='py.test'):
+    def start_test_process(self, wdir=None, pythonpath=None, framework=None):
         """
         Start the process for running tests.
 
@@ -229,9 +229,15 @@ class UnitTestWidget(QWidget):
         pythonpath : list of str
             directories to be added to system python path.
             If None, use `self._last_pythonpath`.
-        framework : str
-            test framework; can be 'nose' or 'py.test'
+        framework : str or None
+            test framework; can be 'nose' or 'py.test'.
+            If None, user will be asked.
         """
+        if framework is None:
+            framework = ask_for_config()
+            if framework is None:  # if user pressed Cancel
+                return
+
         if wdir is None:
             wdir = self._last_wdir
             if wdir is None:
