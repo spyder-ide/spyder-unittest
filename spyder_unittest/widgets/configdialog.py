@@ -11,18 +11,38 @@ Functionality for asking the user to specify the test configuration.
 The main entry point is `ask_for_config()`.
 """
 
+# Standard library imports
+from collections import namedtuple
+import os.path as osp
+
 # Third party imports
-from qtpy.QtWidgets import (QApplication, QDialog, QDialogButtonBox,
+from qtpy.compat import getexistingdirectory
+from qtpy.QtWidgets import (QApplication, QDialog, QDialogButtonBox, QGroupBox,
+                            QHBoxLayout, QLabel, QLineEdit, QPushButton,
                             QRadioButton, QVBoxLayout)
+from spyder.config.base import get_translation
+from spyder.py3compat import getcwd, to_text_string
+from spyder.utils import icon_manager as ima
+
+try:
+    _ = get_translation("unittest", dirname="spyder_unittest")
+except KeyError as error:
+    import gettext
+    _ = gettext.gettext
+
+Config = namedtuple('Config', ['framework', 'wdir'])
 
 
 class ConfigDialog(QDialog):
     """
     Dialog window for specifying test configuration.
 
-    The window contains two radio buttons (for 'py,test' and 'nose') and OK
-    and Cancel buttons. Initially, neither radio button is selected and the OK
-    button is disabled. Selecting a radio button enabled the OK button.
+    The window contains two radio buttons (for 'py,test' and 'nose'),
+    a line edit box for specifying the working directory, a button to
+    use a file browser for selecting the directory, and OK and Cancel
+    buttons. Initially, neither radio button is selected and the OK
+    button is disabled. Selecting a radio button enabled the OK
+    button.
     """
 
     def __init__(self, parent=None):
@@ -34,13 +54,31 @@ class ConfigDialog(QDialog):
         parent : QWidget
         """
         super(ConfigDialog, self).__init__(parent)
-        self.setWindowTitle('Configure tests')
+        self.setWindowTitle(_('Configure tests'))
         layout = QVBoxLayout(self)
 
-        self.pytest_button = QRadioButton('py.test', self)
-        layout.addWidget(self.pytest_button)
-        self.nose_button = QRadioButton('nose', self)
-        layout.addWidget(self.nose_button)
+        framework_groupbox = QGroupBox(_('Test framework'), self)
+        framework_layout = QVBoxLayout(framework_groupbox)
+        self.pytest_button = QRadioButton('py.test', framework_groupbox)
+        framework_layout.addWidget(self.pytest_button)
+        self.nose_button = QRadioButton('nose', framework_groupbox)
+        framework_layout.addWidget(self.nose_button)
+        layout.addWidget(framework_groupbox)
+
+        layout.addSpacing(10)
+
+        wdir_label = QLabel(_('Directory from which to run tests'))
+        layout.addWidget(wdir_label)
+        wdir_layout = QHBoxLayout()
+        self.wdir_lineedit = QLineEdit(self)
+        wdir_layout.addWidget(self.wdir_lineedit)
+        self.wdir_button = QPushButton(ima.icon('DirOpenIcon'), '', self)
+        self.wdir_button.setToolTip(_("Select directory"))
+        self.wdir_button.clicked.connect(lambda: self.select_directory())
+        wdir_layout.addWidget(self.wdir_button)
+        layout.addLayout(wdir_layout)
+
+        layout.addSpacing(20)
 
         self.buttons = QDialogButtonBox(QDialogButtonBox.Ok |
                                         QDialogButtonBox.Cancel, self)
@@ -53,19 +91,32 @@ class ConfigDialog(QDialog):
         self.pytest_button.clicked.connect(lambda: ok_button.setEnabled(True))
         self.nose_button.clicked.connect(lambda: ok_button.setEnabled(True))
 
-    def config(self):
+    def select_directory(self):
+        """Display dialog for user to select working directory."""
+        basedir = to_text_string(self.wdir_lineedit.text())
+        if not osp.isdir(basedir):
+            basedir = getcwd()
+        title = _("Select directory")
+        directory = getexistingdirectory(self, title, basedir)
+        if directory:
+            self.wdir_lineedit.setText(directory)
+
+    def get_config(self):
         """
         Return the test configuration specified by the user.
 
         Returns
         -------
-        str or None
-            Test framework, or None if dialog window was cancelled
+        Config
+            Test configuration
         """
         if self.pytest_button.isChecked():
-            return 'py.test'
+            framework = 'py.test'
         elif self.nose_button.isChecked():
-            return 'nose'
+            framework = 'nose'
+        else:
+            framework = None
+        return Config(framework=framework, wdir=self.wdir_lineedit.text())
 
 
 def ask_for_config(parent=None):
@@ -78,7 +129,7 @@ def ask_for_config(parent=None):
     dialog = ConfigDialog(parent)
     result = dialog.exec_()
     if result == QDialog.Accepted:
-        return dialog.config()
+        return dialog.get_config()
 
 
 if __name__ == '__main__':

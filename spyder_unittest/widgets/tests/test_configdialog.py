@@ -7,6 +7,9 @@
 # -----------------------------------------------------------------------------
 """Tests for configdialog.py."""
 
+# Standard library imports
+import os
+
 # Third party imports
 from qtpy.QtWidgets import QDialogButtonBox
 
@@ -18,7 +21,7 @@ def test_configdialog_click_pytest(qtbot):
     configdialog = ConfigDialog()
     qtbot.addWidget(configdialog)
     configdialog.pytest_button.click()
-    assert configdialog.config() == 'py.test'
+    assert configdialog.get_config().framework == 'py.test'
 
 
 def test_configdialog_ok_initially_disabled(qtbot):
@@ -32,3 +35,22 @@ def test_configdialog_clicking_pytest_enables_ok(qtbot):
     qtbot.addWidget(configdialog)
     configdialog.pytest_button.click()
     assert configdialog.buttons.button(QDialogButtonBox.Ok).isEnabled()
+
+
+def test_configdialog_wdir_lineedit(qtbot):
+    configdialog = ConfigDialog()
+    qtbot.addWidget(configdialog)
+    wdir = os.path.normpath(os.path.join(os.getcwd(), os.path.pardir))
+    configdialog.wdir_lineedit.setText(wdir)
+    assert configdialog.get_config().wdir == wdir
+
+
+def test_configdialog_wdir_button(qtbot, monkeypatch):
+    configdialog = ConfigDialog()
+    qtbot.addWidget(configdialog)
+    wdir = os.path.normpath(os.path.join(os.getcwd(), os.path.pardir))
+    monkeypatch.setattr(
+        'spyder_unittest.widgets.configdialog.getexistingdirectory',
+        lambda parent, caption, basedir: wdir)
+    configdialog.wdir_button.click()
+    assert configdialog.get_config().wdir == wdir

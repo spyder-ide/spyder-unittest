@@ -234,9 +234,12 @@ class UnitTestWidget(QWidget):
             If None, user will be asked.
         """
         if framework is None:
-            framework = ask_for_config()
-            if framework is None:  # if user pressed Cancel
+            config = ask_for_config()
+            if config is None:  # if user pressed Cancel
                 return
+            framework = config.framework
+            if config.wdir:
+                wdir = config.wdir
 
         if wdir is None:
             wdir = self._last_wdir
