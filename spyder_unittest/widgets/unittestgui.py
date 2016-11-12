@@ -32,7 +32,7 @@ from spyder.widgets.comboboxes import PathComboBox
 from spyder.widgets.variableexplorer.texteditor import TextEditor
 
 # Local imports
-from spyder_unittest.widgets.configdialog import ask_for_config
+from spyder_unittest.widgets.configdialog import Config, ask_for_config
 
 locale_codec = QTextCodec.codecForLocale()
 
@@ -218,6 +218,7 @@ class UnitTestWidget(QWidget):
         """
         Start the process for running tests.
 
+        First ask user to configure test process.
         The process's output is consumed by `read_output()`.
         When the process finishes, the `finish` signal is emitted.
 
@@ -230,22 +231,19 @@ class UnitTestWidget(QWidget):
             directories to be added to system python path.
             If None, use `self._last_pythonpath`.
         framework : str or None
-            test framework; can be 'nose' or 'py.test'.
-            If None, user will be asked.
+            test framework; can be 'nose' or 'py.test' or None
         """
         if wdir is None:
             wdir = self._last_wdir
             if wdir is None:
                 wdir = to_text_string(self.pathcombo.currentText())
 
-        if framework is None:
-            oldconfig = Config(framework=framework, wdir=wdir)
-            config = ask_for_config(oldconfig)
-            if config is None:  # if user pressed Cancel
-                return
-            framework = config.framework
-            if config.wdir:
-                wdir = config.wdir
+        oldconfig = Config(framework=framework, wdir=wdir)
+        config = ask_for_config(oldconfig)
+        if config is None:  # if user pressed Cancel
+            return
+        framework = config.framework
+        wdir = config.wdir
 
         if pythonpath is None:
             pythonpath = self._last_pythonpath

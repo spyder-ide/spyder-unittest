@@ -37,6 +37,8 @@ def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
     MockQMessageBox = Mock()
     monkeypatch.setattr('spyder_unittest.widgets.unittestgui.QMessageBox',
                         MockQMessageBox)
+    monkeypatch.setattr('spyder_unittest.widgets.unittestgui.ask_for_config',
+                        lambda config: config)
 
     widget = UnitTestWidget(None)
     qtbot.addWidget(widget)
