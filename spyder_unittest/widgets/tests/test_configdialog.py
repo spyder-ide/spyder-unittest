@@ -14,31 +14,48 @@ import os
 from qtpy.QtWidgets import QDialogButtonBox
 
 # Local imports
-from spyder_unittest.widgets.configdialog import ConfigDialog
+from spyder_unittest.widgets.configdialog import Config, ConfigDialog
+
+
+def default_config():
+    return Config(framework=None, wdir=os.getcwd())
+
+
+def test_configdialog_sets_initial_config(qtbot):
+    config = default_config()
+    configdialog = ConfigDialog(config)
+    assert configdialog.get_config() == config
 
 
 def test_configdialog_click_pytest(qtbot):
-    configdialog = ConfigDialog()
+    configdialog = ConfigDialog(default_config())
     qtbot.addWidget(configdialog)
     configdialog.pytest_button.click()
     assert configdialog.get_config().framework == 'py.test'
 
 
 def test_configdialog_ok_initially_disabled(qtbot):
-    configdialog = ConfigDialog()
+    configdialog = ConfigDialog(default_config())
     qtbot.addWidget(configdialog)
     assert not configdialog.buttons.button(QDialogButtonBox.Ok).isEnabled()
 
 
+def test_configdialog_ok_setting_framework_initially_enables_ok(qtbot):
+    config = Config(framework='py.test', wdir=os.getcwd())
+    configdialog = ConfigDialog(config)
+    qtbot.addWidget(configdialog)
+    assert configdialog.buttons.button(QDialogButtonBox.Ok).isEnabled()
+
+
 def test_configdialog_clicking_pytest_enables_ok(qtbot):
-    configdialog = ConfigDialog()
+    configdialog = ConfigDialog(default_config())
     qtbot.addWidget(configdialog)
     configdialog.pytest_button.click()
     assert configdialog.buttons.button(QDialogButtonBox.Ok).isEnabled()
 
 
 def test_configdialog_wdir_lineedit(qtbot):
-    configdialog = ConfigDialog()
+    configdialog = ConfigDialog(default_config())
     qtbot.addWidget(configdialog)
     wdir = os.path.normpath(os.path.join(os.getcwd(), os.path.pardir))
     configdialog.wdir_lineedit.setText(wdir)
@@ -46,7 +63,7 @@ def test_configdialog_wdir_lineedit(qtbot):
 
 
 def test_configdialog_wdir_button(qtbot, monkeypatch):
-    configdialog = ConfigDialog()
+    configdialog = ConfigDialog(default_config())
     qtbot.addWidget(configdialog)
     wdir = os.path.normpath(os.path.join(os.getcwd(), os.path.pardir))
     monkeypatch.setattr(

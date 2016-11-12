@@ -233,18 +233,20 @@ class UnitTestWidget(QWidget):
             test framework; can be 'nose' or 'py.test'.
             If None, user will be asked.
         """
+        if wdir is None:
+            wdir = self._last_wdir
+            if wdir is None:
+                wdir = to_text_string(self.pathcombo.currentText())
+
         if framework is None:
-            config = ask_for_config()
+            oldconfig = Config(framework=framework, wdir=wdir)
+            config = ask_for_config(oldconfig)
             if config is None:  # if user pressed Cancel
                 return
             framework = config.framework
             if config.wdir:
                 wdir = config.wdir
 
-        if wdir is None:
-            wdir = self._last_wdir
-            if wdir is None:
-                wdir = to_text_string(self.pathcombo.currentText())
         if pythonpath is None:
             pythonpath = self._last_pythonpath
         self._last_wdir = wdir

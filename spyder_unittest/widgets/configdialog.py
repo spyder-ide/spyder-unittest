@@ -45,12 +45,14 @@ class ConfigDialog(QDialog):
     button.
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, config, parent=None):
         """
         Construct a dialog window.
 
         Parameters
         ----------
+        config : Config
+            Initial configuration
         parent : QWidget
         """
         super(ConfigDialog, self).__init__(parent)
@@ -88,8 +90,14 @@ class ConfigDialog(QDialog):
 
         ok_button = self.buttons.button(QDialogButtonBox.Ok)
         ok_button.setEnabled(False)
-        self.pytest_button.clicked.connect(lambda: ok_button.setEnabled(True))
-        self.nose_button.clicked.connect(lambda: ok_button.setEnabled(True))
+        self.pytest_button.toggled.connect(lambda: ok_button.setEnabled(True))
+        self.nose_button.toggled.connect(lambda: ok_button.setEnabled(True))
+
+        if config.framework == 'py.test':
+            self.pytest_button.setChecked(True)
+        elif config.framework == 'nose':
+            self.nose_button.setChecked(True)
+        self.wdir_lineedit.setText(config.wdir)
 
     def select_directory(self):
         """Display dialog for user to select working directory."""
@@ -119,14 +127,14 @@ class ConfigDialog(QDialog):
         return Config(framework=framework, wdir=self.wdir_lineedit.text())
 
 
-def ask_for_config(parent=None):
+def ask_for_config(config, parent=None):
     """
     Ask user to specify a test configuration.
 
     This is a convenience function which displays a modal dialog window
     of type `ConfigDialog`.
     """
-    dialog = ConfigDialog(parent)
+    dialog = ConfigDialog(config, parent)
     result = dialog.exec_()
     if result == QDialog.Accepted:
         return dialog.get_config()
@@ -134,4 +142,5 @@ def ask_for_config(parent=None):
 
 if __name__ == '__main__':
     app = QApplication([])
-    print(ask_for_config())
+    config = Config(framework=None, wdir=getcwd())
+    print(ask_for_config(config))
