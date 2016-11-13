@@ -67,6 +67,11 @@ class UnitTestWidget(QWidget):
     """
     Unit testing widget.
 
+    Fields
+    ------
+    config : Config
+        Configuration for running tests.
+
     Signals
     -------
     sig_finished: Emitted when plugin finishes processing tests.
@@ -86,10 +91,16 @@ class UnitTestWidget(QWidget):
         self.output = None
         self.error_output = None
 
-        self._last_wdir = None
-        self._last_args = None
+        self.config = Config()
         self._last_pythonpath = None
 
+        self.config_button = create_toolbutton(
+            self,
+            icon=ima.icon('configure'),
+            text=_('Config'),
+            tip=_('Configure tests'),
+            triggered=self.configure,
+            text_beside_icon=True)
         self.start_button = create_toolbutton(
             self,
             icon=ima.icon('run'),
@@ -128,6 +139,7 @@ class UnitTestWidget(QWidget):
             tip=_('Expand all'))
 
         hlayout1 = QHBoxLayout()
+        hlayout1.addWidget(self.config_button)
         hlayout1.addWidget(self.start_button)
         hlayout1.addWidget(self.stop_button)
 
@@ -147,7 +159,6 @@ class UnitTestWidget(QWidget):
 
         self.process = None
         self.set_running_state(False)
-        self.start_button.setEnabled(False)
 
         if not is_unittesting_installed():
             for widget in (self.datatree, self.log_button, self.start_button,
@@ -185,6 +196,13 @@ class UnitTestWidget(QWidget):
                 readonly=True,
                 size=(700, 500)).exec_()
 
+    def configure(self):
+        """Configure tests."""
+        oldconfig = self.config
+        config = ask_for_config(oldconfig)
+        if config:
+            self.config = config
+
     def start_test_process(self, wdir=None, pythonpath=None, framework=None):
         """
         Start the process for running tests.
@@ -197,17 +215,14 @@ class UnitTestWidget(QWidget):
         ----------
         wdir : str
             working directory to switch to when running tests.
-            If None, use `self._last_wdir`.
         pythonpath : list of str
             directories to be added to system python path.
             If None, use `self._last_pythonpath`.
         framework : str or None
             test framework; can be 'nose' or 'py.test' or None
         """
-        if wdir is None:
-            wdir = self._last_wdir
-
-        oldconfig = Config(framework=framework, wdir=wdir)
+        oldconfig = Config(framework or self.config.framework, wdir or
+                           self.config.wdir)
         config = ask_for_config(oldconfig)
         if config is None:  # if user pressed Cancel
             return
@@ -216,7 +231,6 @@ class UnitTestWidget(QWidget):
 
         if pythonpath is None:
             pythonpath = self._last_pythonpath
-        self._last_wdir = wdir
         self._last_pythonpath = pythonpath
 
         self.datelabel.setText(_('Running tests, please wait...'))
@@ -419,9 +433,10 @@ def test():
     from spyder.utils.qthelpers import qapplication
     app = qapplication()
     widget = UnitTestWidget(None)
+    wdir = osp.normpath(osp.join(osp.dirname(__file__), osp.pardir))
+    widget.config = Config('py.test', wdir)
     widget.resize(800, 600)
     widget.show()
-    widget.analyze(osp.normpath(osp.join(osp.dirname(__file__), osp.pardir)))
     sys.exit(app.exec_())
 
 

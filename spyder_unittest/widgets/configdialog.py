@@ -31,6 +31,7 @@ except KeyError as error:
     _ = gettext.gettext
 
 Config = namedtuple('Config', ['framework', 'wdir'])
+Config.__new__.__defaults__ = (None, '')
 
 
 class ConfigDialog(QDialog):
