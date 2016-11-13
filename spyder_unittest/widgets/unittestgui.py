@@ -90,8 +90,6 @@ class UnitTestWidget(QWidget):
         self._last_args = None
         self._last_pythonpath = None
 
-        self.pathcombo = PathComboBox(self)
-
         self.start_button = create_toolbutton(
             self,
             icon=ima.icon('run'),
@@ -105,16 +103,6 @@ class UnitTestWidget(QWidget):
             text=_("Stop"),
             tip=_("Stop current profiling"),
             text_beside_icon=True)
-        self.pathcombo.valid.connect(self.start_button.setEnabled)
-        # self.connect(self.pathcombo, SIGNAL('valid(bool)'), self.show_data)
-        # FIXME: The combobox emits this signal on almost any event
-        #        triggering show_data() too early, too often.
-
-        browse_button = create_toolbutton(
-            self,
-            icon=ima.icon('fileopen'),
-            tip=_('Select directory from which to run unit tests'),
-            triggered=self.select_dir)
 
         self.datelabel = QLabel()
 
@@ -140,8 +128,6 @@ class UnitTestWidget(QWidget):
             tip=_('Expand all'))
 
         hlayout1 = QHBoxLayout()
-        hlayout1.addWidget(self.pathcombo)
-        hlayout1.addWidget(browse_button)
         hlayout1.addWidget(self.start_button)
         hlayout1.addWidget(self.stop_button)
 
@@ -164,9 +150,9 @@ class UnitTestWidget(QWidget):
         self.start_button.setEnabled(False)
 
         if not is_unittesting_installed():
-            for widget in (self.datatree, self.pathcombo, self.log_button,
-                           self.start_button, self.stop_button, browse_button,
-                           self.collapse_button, self.expand_button):
+            for widget in (self.datatree, self.log_button, self.start_button,
+                           self.stop_button, self.collapse_button,
+                           self.expand_button):
                 widget.setDisabled(True)
             text = _('<b>Please install the unittesting module</b>')
             self.datelabel.setText(text)
@@ -179,22 +165,7 @@ class UnitTestWidget(QWidget):
         if not is_unittesting_installed():
             return
         self.kill_if_running()
-        # index, _data = self.get_data(filename)
-        index = None  # FIXME: storing data is not implemented yet
-        if index is None:
-            self.pathcombo.addItem(wdir)
-            self.pathcombo.setCurrentIndex(self.pathcombo.count() - 1)
-        else:
-            self.pathcombo.setCurrentIndex(self.pathcombo.findText(wdir))
-        self.pathcombo.selected()
-        if self.pathcombo.is_valid():
-            self.start_test_process(wdir, pythonpath, framework)
-
-    def select_dir(self):
-        """Select directory and run tests."""
-        dirname = getexistingdirectory(self, _("Select directory"), getcwd())
-        if dirname:
-            self.analyze(dirname)
+        self.start_test_process(wdir, pythonpath, framework)
 
     def show_log(self):
         """Show output of testing process."""
@@ -226,7 +197,7 @@ class UnitTestWidget(QWidget):
         ----------
         wdir : str
             working directory to switch to when running tests.
-            If None, use `self._last_wdir` or path of file in combo box.
+            If None, use `self._last_wdir`.
         pythonpath : list of str
             directories to be added to system python path.
             If None, use `self._last_pythonpath`.
@@ -235,8 +206,6 @@ class UnitTestWidget(QWidget):
         """
         if wdir is None:
             wdir = self._last_wdir
-            if wdir is None:
-                wdir = to_text_string(self.pathcombo.currentText())
 
         oldconfig = Config(framework=framework, wdir=wdir)
         config = ask_for_config(oldconfig)
@@ -325,8 +294,6 @@ class UnitTestWidget(QWidget):
         self.set_running_state(False)
         # self.show_errorlog()  # If errors occurred, show them.
         self.output = self.error_output + self.output
-        # FIXME: figure out if show_data should be called here or
-        #        as a signal from the combobox
         self.show_data(justanalyzed=True)
         self.sig_finished.emit()
 
@@ -344,9 +311,6 @@ class UnitTestWidget(QWidget):
         self.log_button.setEnabled(
             self.output is not None and len(self.output) > 0)
         self.kill_if_running()
-        filename = to_text_string(self.pathcombo.currentText())
-        if not filename:
-            return
 
         self.datatree.load_data(self.DATAPATH)
         self.datelabel.setText(_('Sorting data, please wait...'))
