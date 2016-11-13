@@ -16,6 +16,7 @@ from qtpy.QtCore import Qt
 import pytest
 
 # Local imports
+from spyder_unittest.widgets.configdialog import Config
 from spyder_unittest.widgets.unittestgui import UnitTestWidget
 
 try:
@@ -37,13 +38,12 @@ def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
     MockQMessageBox = Mock()
     monkeypatch.setattr('spyder_unittest.widgets.unittestgui.QMessageBox',
                         MockQMessageBox)
-    monkeypatch.setattr('spyder_unittest.widgets.unittestgui.ask_for_config',
-                        lambda config: config)
 
     widget = UnitTestWidget(None)
     qtbot.addWidget(widget)
+    config = Config(wdir=tmpdir.strpath, framework=framework)
     with qtbot.waitSignal(widget.sig_finished, timeout=10000, raising=True):
-        widget.analyze(tmpdir.strpath, framework=framework)
+        widget.run_tests(config)
 
     MockQMessageBox.assert_not_called()
     dt = widget.datatree

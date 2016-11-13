@@ -92,21 +92,21 @@ class UnitTestWidget(QWidget):
         self.error_output = None
 
         self.config = Config()
-        self._last_pythonpath = None
+        self._last_pythonpath = []
 
         self.config_button = create_toolbutton(
             self,
             icon=ima.icon('configure'),
             text=_('Config'),
             tip=_('Configure tests'),
-            triggered=self.configure,
+            triggered=lambda checked: self.configure(),
             text_beside_icon=True)
         self.start_button = create_toolbutton(
             self,
             icon=ima.icon('run'),
             text=_("Run tests"),
             tip=_("Run unit testing"),
-            triggered=self.start_test_process,
+            triggered=lambda checked: self.maybe_configure_and_start(),
             text_beside_icon=True)
         self.stop_button = create_toolbutton(
             self,
@@ -171,13 +171,6 @@ class UnitTestWidget(QWidget):
         else:
             pass  # self.show_data()
 
-    def analyze(self, wdir, pythonpath=None, framework=None):
-        """Run tests."""
-        if not is_unittesting_installed():
-            return
-        self.kill_if_running()
-        self.start_test_process(wdir, pythonpath, framework)
-
     def show_log(self):
         """Show output of testing process."""
         if self.output:
@@ -203,35 +196,44 @@ class UnitTestWidget(QWidget):
         if config:
             self.config = config
 
-    def start_test_process(self, wdir=None, pythonpath=None, framework=None):
-        """
-        Start the process for running tests.
+    def config_is_valid(self):
+        """Return whether configuration for running tests is valid."""
+        return self.config.framework and osp.isdir(self.config.wdir)
 
-        First ask user to configure test process.
+    def maybe_configure_and_start(self, pythonpath=None):
+        """
+        Ask for configuration if necessary and then run tests.
+
+        If the current test configuration is not valid (or not set(,
+        then ask the user to configure. Then run the tests.
+        """
+        if not self.config_is_valid():
+            self.configure()
+        if self.config_is_valid():
+            self.run_tests(pythonpath=pythonpath)
+
+    def run_tests(self, config=None, pythonpath=None):
+        """
+        Run unit tests.
+
         The process's output is consumed by `read_output()`.
         When the process finishes, the `finish` signal is emitted.
 
         Parameters
         ----------
-        wdir : str
-            working directory to switch to when running tests.
+        config : Config or None
+            configuration for unit tests. If None, use `self.config`.
+            In either case, configuration should be valid.
         pythonpath : list of str
             directories to be added to system python path.
             If None, use `self._last_pythonpath`.
-        framework : str or None
-            test framework; can be 'nose' or 'py.test' or None
         """
-        oldconfig = Config(framework or self.config.framework, wdir or
-                           self.config.wdir)
-        config = ask_for_config(oldconfig)
-        if config is None:  # if user pressed Cancel
-            return
+        if config is None:
+            config = self.config
         framework = config.framework
         wdir = config.wdir
-
         if pythonpath is None:
             pythonpath = self._last_pythonpath
-        self._last_pythonpath = pythonpath
 
         self.datelabel.setText(_('Running tests, please wait...'))
 

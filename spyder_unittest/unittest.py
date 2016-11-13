@@ -69,7 +69,7 @@ class UnitTestPlugin(UnitTestWidget, SpyderPluginMixin):
             _("Run unit tests"),
             icon=ima.icon('profiler'),
             shortcut="Shift+Alt+F11",
-            triggered=self.run_unittesting)
+            triggered=self.maybe_configure_and_start)
         unittesting_act.setEnabled(is_unittesting_installed())
 
         self.main.run_menu_actions += [unittesting_act]
@@ -88,17 +88,17 @@ class UnitTestPlugin(UnitTestWidget, SpyderPluginMixin):
         pass
 
     # ----- Public API --------------------------------------------------------
-    def run_unittesting(self):
-        """Run unit testing."""
-        filename = self.main.editor.get_current_filename()
-        dirname = osp.dirname(filename)
-        self.analyze(dirname)
+    def maybe_configure_and_start(self):
+        """
+        Ask for configuration if necessary and then run tests.
 
-    def analyze(self, wdir):
-        """Reimplement analyze method."""
+        If the current test configuration is not valid (or not set(,
+        then ask the user to configure. Then run the tests.
+        """
         if self.dockwidget and not self.ismaximized:
             self.dockwidget.setVisible(True)
             self.dockwidget.setFocus()
             self.dockwidget.raise_()
         pythonpath = self.main.get_spyder_pythonpath()
-        UnitTestWidget.analyze(self, wdir, pythonpath=pythonpath)
+        super(UnitTestWidget, self).maybe_configure_and_start(
+            pythonpath=pythonpath)
