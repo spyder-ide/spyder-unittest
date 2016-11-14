@@ -7,9 +7,6 @@
 # -----------------------------------------------------------------------------
 """Unit testing Plugin."""
 
-# Standard library imports
-import os.path as osp
-
 # Third party imports
 from qtpy.QtCore import Signal
 from spyder.config.base import get_translation
@@ -87,18 +84,29 @@ class UnitTestPlugin(UnitTestWidget, SpyderPluginMixin):
         """Apply configuration file's plugin settings."""
         pass
 
+    def get_pythonpath(self):
+        """
+        Return directories to be added to the Python path.
+
+        Use Python path from Spyder. Overrides function in base class.
+
+        Returns
+        -------
+        list of str
+        """
+        return self.main.get_spyder_pythonpath()
+
     # ----- Public API --------------------------------------------------------
     def maybe_configure_and_start(self):
         """
         Ask for configuration if necessary and then run tests.
 
-        If the current test configuration is not valid (or not set(,
-        then ask the user to configure. Then run the tests.
+        Raise unittest widget. If the current test configuration is
+        not valid (or not set), then ask the user to configure. Then
+        run the tests.
         """
         if self.dockwidget and not self.ismaximized:
             self.dockwidget.setVisible(True)
             self.dockwidget.setFocus()
             self.dockwidget.raise_()
-        pythonpath = self.main.get_spyder_pythonpath()
-        super(UnitTestWidget, self).maybe_configure_and_start(
-            pythonpath=pythonpath)
+        super(UnitTestPlugin, self).maybe_configure_and_start()

@@ -90,9 +90,7 @@ class UnitTestWidget(QWidget):
 
         self.output = None
         self.error_output = None
-
         self.config = Config()
-        self._last_pythonpath = []
 
         self.config_button = create_toolbutton(
             self,
@@ -189,6 +187,19 @@ class UnitTestWidget(QWidget):
                 readonly=True,
                 size=(700, 500)).exec_()
 
+    def get_pythonpath(self):
+        """
+        Return directories to be added to the Python path.
+
+        This function returns an empty list but it can be overridden
+        in subclasses.
+
+        Returns
+        -------
+        list of str
+        """
+        return []
+
     def configure(self):
         """Configure tests."""
         oldconfig = self.config
@@ -200,7 +211,7 @@ class UnitTestWidget(QWidget):
         """Return whether configuration for running tests is valid."""
         return self.config.framework and osp.isdir(self.config.wdir)
 
-    def maybe_configure_and_start(self, pythonpath=None):
+    def maybe_configure_and_start(self):
         """
         Ask for configuration if necessary and then run tests.
 
@@ -210,9 +221,9 @@ class UnitTestWidget(QWidget):
         if not self.config_is_valid():
             self.configure()
         if self.config_is_valid():
-            self.run_tests(pythonpath=pythonpath)
+            self.run_tests()
 
-    def run_tests(self, config=None, pythonpath=None):
+    def run_tests(self, config=None):
         """
         Run unit tests.
 
@@ -224,16 +235,12 @@ class UnitTestWidget(QWidget):
         config : Config or None
             configuration for unit tests. If None, use `self.config`.
             In either case, configuration should be valid.
-        pythonpath : list of str
-            directories to be added to system python path.
-            If None, use `self._last_pythonpath`.
         """
         if config is None:
             config = self.config
         framework = config.framework
         wdir = config.wdir
-        if pythonpath is None:
-            pythonpath = self._last_pythonpath
+        pythonpath = self.get_pythonpath()
 
         self.datelabel.setText(_('Running tests, please wait...'))
 
@@ -435,8 +442,15 @@ def test():
     from spyder.utils.qthelpers import qapplication
     app = qapplication()
     widget = UnitTestWidget(None)
-    wdir = osp.normpath(osp.join(osp.dirname(__file__), osp.pardir))
+
+    # set wdir to .../spyder_unittest/widgets
+    wdir = osp.abspath(osp.join(osp.dirname(__file__), osp.pardir))
     widget.config = Config('py.test', wdir)
+
+    # add .../spyder_unittest to python path
+    rootdir = osp.abspath(osp.join(wdir, osp.pardir))
+    widget.get_pythonpath = lambda: [rootdir]
+
     widget.resize(800, 600)
     widget.show()
     sys.exit(app.exec_())
