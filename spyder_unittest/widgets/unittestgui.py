@@ -112,9 +112,6 @@ class UnitTestWidget(QWidget):
             text=_("Stop"),
             tip=_("Stop current profiling"),
             text_beside_icon=True)
-
-        self.datelabel = QLabel()
-
         self.log_button = create_toolbutton(
             self,
             icon=ima.icon('log'),
@@ -122,9 +119,6 @@ class UnitTestWidget(QWidget):
             text_beside_icon=True,
             tip=_("Show program's output"),
             triggered=self.show_log)
-
-        self.datatree = UnitTestDataTree(self)
-
         self.collapse_button = create_toolbutton(
             self,
             icon=ima.icon('collapse'),
@@ -136,22 +130,21 @@ class UnitTestWidget(QWidget):
             triggered=lambda dD=1: self.datatree.expandAll(),
             tip=_('Expand all'))
 
-        hlayout1 = QHBoxLayout()
-        hlayout1.addWidget(self.config_button)
-        hlayout1.addWidget(self.start_button)
-        hlayout1.addWidget(self.stop_button)
+        self.datatree = UnitTestDataTree(self)
 
-        hlayout2 = QHBoxLayout()
-        hlayout2.addWidget(self.collapse_button)
-        hlayout2.addWidget(self.expand_button)
-        hlayout2.addStretch()
-        hlayout2.addWidget(self.datelabel)
-        hlayout2.addStretch()
-        hlayout2.addWidget(self.log_button)
+        hlayout = QHBoxLayout()
+        hlayout.addWidget(self.config_button)
+        hlayout.addStretch()
+        hlayout.addWidget(self.start_button)
+        hlayout.addWidget(self.stop_button)
+        hlayout.addStretch()
+        hlayout.addWidget(self.log_button)
+        hlayout.addStretch()
+        hlayout.addWidget(self.collapse_button)
+        hlayout.addWidget(self.expand_button)
 
         layout = QVBoxLayout()
-        layout.addLayout(hlayout1)
-        layout.addLayout(hlayout2)
+        layout.addLayout(hlayout)
         layout.addWidget(self.datatree)
         self.setLayout(layout)
 
@@ -163,9 +156,6 @@ class UnitTestWidget(QWidget):
                            self.stop_button, self.collapse_button,
                            self.expand_button):
                 widget.setDisabled(True)
-            text = _('<b>Please install the unittesting module</b>')
-            self.datelabel.setText(text)
-            self.datelabel.setOpenExternalLinks(True)
         else:
             pass  # self.show_data()
 
@@ -241,8 +231,6 @@ class UnitTestWidget(QWidget):
         framework = config.framework
         wdir = config.wdir
         pythonpath = self.get_pythonpath()
-
-        self.datelabel.setText(_('Running tests, please wait...'))
 
         self.process = QProcess(self)
         self.process.setProcessChannelMode(QProcess.SeparateChannels)
@@ -336,14 +324,8 @@ class UnitTestWidget(QWidget):
         self.kill_if_running()
 
         self.datatree.load_data(self.DATAPATH)
-        self.datelabel.setText(_('Sorting data, please wait...'))
         QApplication.processEvents()
         self.datatree.show_tree()
-
-        text_style = "<span style=\'color: #444444\'><b>%s </b></span>"
-        date_text = text_style % time.strftime("%d %b %Y %H:%M",
-                                               time.localtime())
-        self.datelabel.setText(date_text)
 
 
 class UnitTestDataTree(QTreeWidget):
