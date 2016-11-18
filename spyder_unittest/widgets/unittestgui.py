@@ -13,22 +13,19 @@ from __future__ import with_statement
 import os
 import os.path as osp
 import sys
-import time
 
 # Third party imports
 from lxml import etree
-from qtpy.compat import getexistingdirectory
 from qtpy.QtCore import (QByteArray, QProcess, QProcessEnvironment, Qt,
                          QTextCodec, Signal)
 from qtpy.QtGui import QBrush, QColor, QFont
-from qtpy.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMessageBox,
+from qtpy.QtWidgets import (QApplication, QHBoxLayout, QMessageBox,
                             QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 from spyder.config.base import get_conf_path, get_translation
-from spyder.py3compat import getcwd, to_text_string
+from spyder.py3compat import to_text_string
 from spyder.utils import icon_manager as ima
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH
 from spyder.utils.qthelpers import create_toolbutton
-from spyder.widgets.comboboxes import PathComboBox
 from spyder.widgets.variableexplorer.texteditor import TextEditor
 
 # Local imports
@@ -168,15 +165,6 @@ class UnitTestWidget(QWidget):
                 readonly=True,
                 size=(700, 500)).exec_()
 
-    def show_errorlog(self):
-        """Show errors of testing process."""
-        if self.error_output:
-            TextEditor(
-                self.error_output,
-                title=_("Unit testing output"),
-                readonly=True,
-                size=(700, 500)).exec_()
-
     def get_pythonpath(self):
         """
         Return directories to be added to the Python path.
@@ -305,7 +293,6 @@ class UnitTestWidget(QWidget):
     def finished(self):
         """Testing has finished."""
         self.set_running_state(False)
-        # self.show_errorlog()  # If errors occurred, show them.
         self.output = self.error_output + self.output
         self.show_data(justanalyzed=True)
         self.sig_finished.emit()
@@ -429,16 +416,21 @@ class UnitTestDataTree(QTreeWidget):
 
 
 def test():
-    """Run widget test."""
+    """
+    Run widget test.
+
+    Show the unittest widgets, configured so that our own tests are run when
+    the user clicks "Run tests".
+    """
     from spyder.utils.qthelpers import qapplication
     app = qapplication()
     widget = UnitTestWidget(None)
 
-    # set wdir to .../spyder_unittest/widgets
+    # set wdir to .../spyder_unittest
     wdir = osp.abspath(osp.join(osp.dirname(__file__), osp.pardir))
     widget.config = Config('py.test', wdir)
 
-    # add .../spyder_unittest to python path
+    # add wdir's parent to python path, so that `import spyder_unittest` works
     rootdir = osp.abspath(osp.join(wdir, osp.pardir))
     widget.get_pythonpath = lambda: [rootdir]
 
