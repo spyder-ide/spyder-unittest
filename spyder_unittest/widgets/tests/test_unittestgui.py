@@ -54,8 +54,3 @@ def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
     assert dt.topLevelItem(0).data(2, Qt.DisplayRole) is None
     assert dt.topLevelItem(1).data(0, Qt.DisplayRole) == 'failure'
     assert dt.topLevelItem(1).data(1, Qt.DisplayRole) == 'test_foo.test_fail'
-    if framework == 'py.test':
-        expected = 'assert (1 + 1) == 3'
-    else:
-        expected = 'builtins.AssertionError'
-    assert dt.topLevelItem(1).data(2, Qt.DisplayRole) == expected
