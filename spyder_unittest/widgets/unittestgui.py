@@ -276,6 +276,8 @@ class UnitTestWidget(QWidget):
         if not running:
             QMessageBox.critical(self,
                                  _("Error"), _("Process failed to start"))
+        else:
+            self.datatree.show_message(_('Running tests ...'))
 
     def set_running_state(self, state=True):
         """Set running state."""
@@ -355,6 +357,19 @@ class UnitTestDataTree(QTreeWidget):
         for col in range(self.columnCount() - 1):
             self.resizeColumnToContents(col)
 
+    def show_message(self, msg):
+        """Clear existing data and show a message instead."""
+        self.clear()
+        item = QTreeWidgetItem(self)
+        item.setData(0, Qt.DisplayRole, msg)
+        item.setFirstColumnSpanned(True)
+        item.setTextAlignment(0, Qt.AlignCenter)
+        font = item.font(0)
+        font.setStyle(QFont.StyleItalic)
+        item.setFont(0, font)
+        for col in range(self.columnCount() - 1):
+            self.resizeColumnToContents(col)
+
     def load_data(self, profdatafile):
         """Load unit testing data."""
         self.data = etree.parse(profdatafile).getroot()
@@ -362,13 +377,7 @@ class UnitTestDataTree(QTreeWidget):
     def populate_tree(self):
         """Create each item (and associated data) in the tree."""
         if not len(self.data):
-            warn_item = QTreeWidgetItem(self)
-            warn_item.setData(0, Qt.DisplayRole, "No results to show.")
-            warn_item.setFirstColumnSpanned(True)
-            warn_item.setTextAlignment(0, Qt.AlignCenter)
-            font = warn_item.font(0)
-            font.setStyle(QFont.StyleItalic)
-            warn_item.setFont(0, font)
+            self.show_message(_('No results to show.'))
             return
 
         try:
