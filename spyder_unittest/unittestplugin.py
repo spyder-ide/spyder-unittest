@@ -7,6 +7,9 @@
 # -----------------------------------------------------------------------------
 """Unit testing Plugin."""
 
+# Standard library imports
+import os.path
+
 # Third party imports
 from qtpy.QtCore import Signal
 from spyder.config.base import get_translation
@@ -15,6 +18,7 @@ from spyder.utils import icon_manager as ima
 from spyder.utils.qthelpers import create_action
 
 # Local imports
+from .widgets.configdialog import Config
 from .widgets.unittestgui import UnitTestWidget, is_unittesting_installed
 
 _ = get_translation("unittest", dirname="spyder_unittest")
@@ -95,6 +99,17 @@ class UnitTestPlugin(UnitTestWidget, SpyderPluginMixin):
         list of str
         """
         return self.main.get_spyder_pythonpath()
+
+    def get_default_config(self):
+        """
+        Return configuration which is proposed when current config is invalid.
+
+        Propose to use directory of current file as working directory for
+        testing.
+        """
+        filename = self.main.editor.get_current_filename()
+        dirname = os.path.dirname(filename)
+        return Config(wdir=dirname)
 
     # ----- Public API --------------------------------------------------------
     def maybe_configure_and_start(self):

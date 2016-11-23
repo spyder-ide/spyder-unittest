@@ -87,7 +87,7 @@ class UnitTestWidget(QWidget):
 
         self.output = None
         self.error_output = None
-        self.config = Config()
+        self.config = None
 
         self.config_button = create_toolbutton(
             self,
@@ -178,16 +178,28 @@ class UnitTestWidget(QWidget):
         """
         return []
 
+    def get_default_config(self):
+        """
+        Return configuration which is proposed when current config is invalid.
+
+        This function can be overriden in subclasses.
+        """
+        return Config()
+
     def configure(self):
         """Configure tests."""
-        oldconfig = self.config
+        if self.config:
+            oldconfig = self.config
+        else:
+            oldconfig = self.get_default_config()
         config = ask_for_config(oldconfig)
         if config:
             self.config = config
 
     def config_is_valid(self):
         """Return whether configuration for running tests is valid."""
-        return self.config.framework and osp.isdir(self.config.wdir)
+        return (self.config and self.config.framework and
+                osp.isdir(self.config.wdir))
 
     def maybe_configure_and_start(self):
         """
@@ -428,7 +440,7 @@ def test():
 
     # set wdir to .../spyder_unittest
     wdir = osp.abspath(osp.join(osp.dirname(__file__), osp.pardir))
-    widget.config = Config('py.test', wdir)
+    widget.get_default_config = lambda: Config('py.test', wdir)
 
     # add wdir's parent to python path, so that `import spyder_unittest` works
     rootdir = osp.abspath(osp.join(wdir, osp.pardir))
