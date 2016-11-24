@@ -84,7 +84,7 @@ class ConfigDialog(QDialog):
         layout.addSpacing(20)
 
         self.buttons = QDialogButtonBox(QDialogButtonBox.Ok |
-                                        QDialogButtonBox.Cancel, self)
+                                        QDialogButtonBox.Cancel)
         layout.addWidget(self.buttons)
         self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
