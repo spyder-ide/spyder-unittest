@@ -19,9 +19,9 @@ from lxml import etree
 from qtpy.QtCore import (QByteArray, QProcess, QProcessEnvironment, Qt,
                          QTextCodec, Signal)
 from qtpy.QtGui import QBrush, QColor, QFont
-from qtpy.QtWidgets import (QApplication, QHBoxLayout, QMenu, QMessageBox,
-                            QToolButton, QTreeWidget, QTreeWidgetItem,
-                            QVBoxLayout, QWidget)
+from qtpy.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMenu,
+                            QMessageBox, QToolButton, QTreeWidget,
+                            QTreeWidgetItem, QVBoxLayout, QWidget)
 from spyder.config.base import get_conf_path, get_translation
 from spyder.py3compat import to_text_string
 from spyder.utils import icon_manager as ima
@@ -106,6 +106,8 @@ class UnitTestWidget(QWidget):
             tip=_("Stop current profiling"),
             text_beside_icon=True)
 
+        self.status_label = QLabel('', self)
+
         self.config_action = create_action(
             self,
             text=_("Configure ..."),
@@ -142,6 +144,8 @@ class UnitTestWidget(QWidget):
         hlayout = QHBoxLayout()
         hlayout.addWidget(self.start_button)
         hlayout.addWidget(self.stop_button)
+        hlayout.addStretch()
+        hlayout.addWidget(self.status_label)
         hlayout.addStretch()
         hlayout.addWidget(self.options_button)
 
@@ -282,7 +286,8 @@ class UnitTestWidget(QWidget):
             QMessageBox.critical(self,
                                  _("Error"), _("Process failed to start"))
         else:
-            self.datatree.show_message(_('Running tests ...'))
+            self.datatree.clear()
+            self.status_label.setText(_('<b>Running tests ...<b>'))
 
     def set_running_state(self, state=True):
         """Set running state."""
@@ -331,7 +336,8 @@ class UnitTestWidget(QWidget):
 
         self.datatree.load_data(self.DATAPATH)
         QApplication.processEvents()
-        self.datatree.show_tree()
+        msg = self.datatree.show_tree()
+        self.status_label.setText(msg)
 
 
 class UnitTestDataTree(QTreeWidget):
@@ -357,22 +363,10 @@ class UnitTestDataTree(QTreeWidget):
     def show_tree(self):
         """Populate the tree with unit testing data and display it."""
         self.clear()  # Clear before re-populating
-        self.populate_tree()
+        msg = self.populate_tree()
         for col in range(self.columnCount() - 1):
             self.resizeColumnToContents(col)
-
-    def show_message(self, msg):
-        """Clear existing data and show a message instead."""
-        self.clear()
-        item = QTreeWidgetItem(self)
-        item.setData(0, Qt.DisplayRole, msg)
-        item.setFirstColumnSpanned(True)
-        item.setTextAlignment(0, Qt.AlignCenter)
-        font = item.font(0)
-        font.setStyle(QFont.StyleItalic)
-        item.setFont(0, font)
-        for col in range(self.columnCount() - 1):
-            self.resizeColumnToContents(col)
+        return msg
 
     def load_data(self, profdatafile):
         """Load unit testing data."""
@@ -390,6 +384,9 @@ class UnitTestDataTree(QTreeWidget):
             monospace_font = QFont("Courier New")
             monospace_font.setPointSize(10)
 
+        num_passed_tests = 0
+        num_failed_tests = 0
+
         for testcase in self.data:
             testcase_item = QTreeWidgetItem(self)
             testcase_item.setData(1, Qt.DisplayRole, "{0}.{1}".format(
@@ -405,6 +402,11 @@ class UnitTestDataTree(QTreeWidget):
                 color = COLORS[status]
                 for col in range(self.columnCount()):
                     testcase_item.setBackground(col, color)
+
+                if color == COLOR_OK:
+                    num_passed_tests += 1
+                else:
+                    num_failed_tests += 1
 
                 type_ = test_error.get("type")
                 message = test_error.get("message")
@@ -425,6 +427,18 @@ class UnitTestDataTree(QTreeWidget):
                         error_content_item.setFont(0, monospace_font)
             else:
                 testcase_item.setData(0, Qt.DisplayRole, "ok")
+                num_passed_tests += 1
+
+        if num_failed_tests == 1:
+            test_or_tests = _('test')
+        else:
+            test_or_tests = _('tests')
+        failed_txt = '{} {} failed'.format(num_failed_tests, test_or_tests)
+        passed_txt = '{} passed'.format(num_passed_tests)
+        num_other_tests = len(self.data) - num_failed_tests - num_passed_tests
+        other_txt = '{} other'.format(num_other_tests)
+        msg = '<b>{}, {}, {}</b>'.format(failed_txt, passed_txt, other_txt)
+        return msg
 
     def item_activated(self, item):
         """Called if user clicks on item."""
