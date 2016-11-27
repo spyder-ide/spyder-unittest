@@ -19,13 +19,14 @@ from lxml import etree
 from qtpy.QtCore import (QByteArray, QProcess, QProcessEnvironment, Qt,
                          QTextCodec, Signal)
 from qtpy.QtGui import QBrush, QColor, QFont
-from qtpy.QtWidgets import (QApplication, QHBoxLayout, QMessageBox,
-                            QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
+from qtpy.QtWidgets import (QApplication, QHBoxLayout, QMenu, QMessageBox,
+                            QToolButton, QTreeWidget, QTreeWidgetItem,
+                            QVBoxLayout, QWidget)
 from spyder.config.base import get_conf_path, get_translation
 from spyder.py3compat import to_text_string
 from spyder.utils import icon_manager as ima
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH
-from spyder.utils.qthelpers import create_toolbutton
+from spyder.utils.qthelpers import create_action, create_toolbutton
 from spyder.widgets.variableexplorer.texteditor import TextEditor
 
 # Local imports
@@ -89,13 +90,8 @@ class UnitTestWidget(QWidget):
         self.error_output = None
         self.config = None
 
-        self.config_button = create_toolbutton(
-            self,
-            icon=ima.icon('configure'),
-            text=_('Config'),
-            tip=_('Configure tests'),
-            triggered=lambda checked: self.configure(),
-            text_beside_icon=True)
+        self.datatree = UnitTestDataTree(self)
+
         self.start_button = create_toolbutton(
             self,
             icon=ima.icon('run'),
@@ -109,36 +105,45 @@ class UnitTestWidget(QWidget):
             text=_("Stop"),
             tip=_("Stop current profiling"),
             text_beside_icon=True)
-        self.log_button = create_toolbutton(
-            self,
-            icon=ima.icon('log'),
-            text=_("Output"),
-            text_beside_icon=True,
-            tip=_("Show program's output"),
-            triggered=self.show_log)
-        self.collapse_button = create_toolbutton(
-            self,
-            icon=ima.icon('collapse'),
-            triggered=lambda dD=-1: self.datatree.collapseAll(),
-            tip=_('Collapse all'))
-        self.expand_button = create_toolbutton(
-            self,
-            icon=ima.icon('expand'),
-            triggered=lambda dD=1: self.datatree.expandAll(),
-            tip=_('Expand all'))
 
-        self.datatree = UnitTestDataTree(self)
+        self.config_action = create_action(
+            self,
+            text=_("Configure ..."),
+            icon=ima.icon('configure'),
+            triggered=self.configure)
+        self.log_action = create_action(
+            self,
+            text=_('Show output'),
+            icon=ima.icon('log'),
+            triggered=self.show_log)
+        self.collapse_action = create_action(
+            self,
+            text=_('Collapse all'),
+            icon=ima.icon('collapse'),
+            triggered=self.datatree.collapseAll())
+        self.expand_action = create_action(
+            self,
+            text=_('Expand all'),
+            icon=ima.icon('expand'),
+            triggered=self.datatree.expandAll())
+
+        options_menu = QMenu()
+        options_menu.addAction(self.config_action)
+        options_menu.addAction(self.log_action)
+        options_menu.addAction(self.collapse_action)
+        options_menu.addAction(self.expand_action)
+
+        self.options_button = QToolButton(self)
+        self.options_button.setIcon(ima.icon('tooloptions'))
+        self.options_button.setPopupMode(QToolButton.InstantPopup)
+        self.options_button.setMenu(options_menu)
+        self.options_button.setAutoRaise(True)
 
         hlayout = QHBoxLayout()
-        hlayout.addWidget(self.config_button)
-        hlayout.addStretch()
         hlayout.addWidget(self.start_button)
         hlayout.addWidget(self.stop_button)
         hlayout.addStretch()
-        hlayout.addWidget(self.log_button)
-        hlayout.addStretch()
-        hlayout.addWidget(self.collapse_button)
-        hlayout.addWidget(self.expand_button)
+        hlayout.addWidget(self.options_button)
 
         layout = QVBoxLayout()
         layout.addLayout(hlayout)
@@ -149,9 +154,9 @@ class UnitTestWidget(QWidget):
         self.set_running_state(False)
 
         if not is_unittesting_installed():
-            for widget in (self.datatree, self.log_button, self.start_button,
-                           self.stop_button, self.collapse_button,
-                           self.expand_button):
+            for widget in (self.datatree, self.log_action, self.start_button,
+                           self.stop_button, self.collapse_action,
+                           self.expand_action):
                 widget.setDisabled(True)
         else:
             pass  # self.show_data()
@@ -320,7 +325,7 @@ class UnitTestWidget(QWidget):
         """Show test results."""
         if not justanalyzed:
             self.output = None
-        self.log_button.setEnabled(
+        self.log_action.setEnabled(
             self.output is not None and len(self.output) > 0)
         self.kill_if_running()
 
