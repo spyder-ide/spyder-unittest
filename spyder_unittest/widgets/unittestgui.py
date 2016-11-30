@@ -413,7 +413,7 @@ class UnitTestDataTree(QTreeWidget):
 
                 if color == COLOR_OK:
                     num_passed_tests += 1
-                else:
+                elif color == COLOR_FAIL:
                     num_failed_tests += 1
 
                 type_ = test_error.get("type")
