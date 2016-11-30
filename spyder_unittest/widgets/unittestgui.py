@@ -88,23 +88,13 @@ class UnitTestWidget(QWidget):
 
         self.output = None
         self.error_output = None
+        self.process = None
         self.config = None
 
         self.datatree = UnitTestDataTree(self)
 
-        self.start_button = create_toolbutton(
-            self,
-            icon=ima.icon('run'),
-            text=_("Run tests"),
-            tip=_("Run unit testing"),
-            triggered=lambda checked: self.maybe_configure_and_start(),
-            text_beside_icon=True)
-        self.stop_button = create_toolbutton(
-            self,
-            icon=ima.icon('stop'),
-            text=_("Stop"),
-            tip=_("Stop current profiling"),
-            text_beside_icon=True)
+        self.start_button = create_toolbutton(self, text_beside_icon=True)
+        self.set_running_state(False)
 
         self.status_label = QLabel('', self)
 
@@ -143,7 +133,6 @@ class UnitTestWidget(QWidget):
 
         hlayout = QHBoxLayout()
         hlayout.addWidget(self.start_button)
-        hlayout.addWidget(self.stop_button)
         hlayout.addStretch()
         hlayout.addWidget(self.status_label)
         hlayout.addStretch()
@@ -154,13 +143,9 @@ class UnitTestWidget(QWidget):
         layout.addWidget(self.datatree)
         self.setLayout(layout)
 
-        self.process = None
-        self.set_running_state(False)
-
         if not is_unittesting_installed():
             for widget in (self.datatree, self.log_action, self.start_button,
-                           self.stop_button, self.collapse_action,
-                           self.expand_action):
+                           self.collapse_action, self.expand_action):
                 widget.setDisabled(True)
         else:
             pass  # self.show_data()
@@ -248,7 +233,6 @@ class UnitTestWidget(QWidget):
         self.process.readyReadStandardError.connect(
             lambda: self.read_output(error=True))
         self.process.finished.connect(self.finished)
-        self.stop_button.clicked.connect(self.process.kill)
 
         if pythonpath is not None:
             env = [
@@ -289,10 +273,34 @@ class UnitTestWidget(QWidget):
             self.datatree.clear()
             self.status_label.setText(_('<b>Running tests ...<b>'))
 
-    def set_running_state(self, state=True):
-        """Set running state."""
-        self.start_button.setEnabled(not state)
-        self.stop_button.setEnabled(state)
+    def set_running_state(self, state):
+        """
+        Change start/stop button according to whether tests are running.
+
+        If tests are running, then display a stop button, otherwise display
+        a start button.
+
+        Parameters
+        ----------
+        state : bool
+            Set to True if tests are running.
+        """
+        button = self.start_button
+        try:
+            button.clicked.disconnect()
+        except TypeError:  # raised if not connected to any handler
+            pass
+        if state:
+            button.setIcon(ima.icon('stop'))
+            button.setText(_('Stop'))
+            button.setToolTip(_('Stop current test process'))
+            button.clicked.connect(lambda checked: self.kill_if_running())
+        else:
+            button.setIcon(ima.icon('run'))
+            button.setText(_("Run tests"))
+            button.setToolTip(_('Run unit tests'))
+            button.clicked.connect(
+                lambda checked: self.maybe_configure_and_start())
 
     def read_output(self, error=False):
         """Read output of testing process."""
