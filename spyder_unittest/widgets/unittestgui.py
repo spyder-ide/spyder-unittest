@@ -13,23 +13,24 @@ from __future__ import with_statement
 import os
 import os.path as osp
 import sys
-import time
 
 # Third party imports
 from lxml import etree
-from qtpy.compat import getexistingdirectory
 from qtpy.QtCore import (QByteArray, QProcess, QProcessEnvironment, Qt,
                          QTextCodec, Signal)
 from qtpy.QtGui import QBrush, QColor, QFont
-from qtpy.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMessageBox,
-                            QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
+from qtpy.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMenu,
+                            QMessageBox, QToolButton, QTreeWidget,
+                            QTreeWidgetItem, QVBoxLayout, QWidget)
 from spyder.config.base import get_conf_path, get_translation
-from spyder.py3compat import getcwd, to_text_string
+from spyder.py3compat import to_text_string
 from spyder.utils import icon_manager as ima
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH
-from spyder.utils.qthelpers import create_toolbutton
-from spyder.widgets.comboboxes import PathComboBox
+from spyder.utils.qthelpers import create_action, create_toolbutton
 from spyder.widgets.variableexplorer.texteditor import TextEditor
+
+# Local imports
+from spyder_unittest.widgets.configdialog import Config, ask_for_config
 
 locale_codec = QTextCodec.codecForLocale()
 
@@ -64,6 +65,11 @@ class UnitTestWidget(QWidget):
     """
     Unit testing widget.
 
+    Fields
+    ------
+    config : Config
+        Configuration for running tests.
+
     Signals
     -------
     sig_finished: Emitted when plugin finishes processing tests.
@@ -82,116 +88,67 @@ class UnitTestWidget(QWidget):
 
         self.output = None
         self.error_output = None
-
-        self._last_wdir = None
-        self._last_args = None
-        self._last_pythonpath = None
-
-        self.pathcombo = PathComboBox(self)
-
-        self.start_button = create_toolbutton(
-            self,
-            icon=ima.icon('run'),
-            text=_("Run tests"),
-            tip=_("Run unit testing"),
-            triggered=self.start_test_process,
-            text_beside_icon=True)
-        self.stop_button = create_toolbutton(
-            self,
-            icon=ima.icon('stop'),
-            text=_("Stop"),
-            tip=_("Stop current profiling"),
-            text_beside_icon=True)
-        self.pathcombo.valid.connect(self.start_button.setEnabled)
-        # self.connect(self.pathcombo, SIGNAL('valid(bool)'), self.show_data)
-        # FIXME: The combobox emits this signal on almost any event
-        #        triggering show_data() too early, too often.
-
-        browse_button = create_toolbutton(
-            self,
-            icon=ima.icon('fileopen'),
-            tip=_('Select directory from which to run unit tests'),
-            triggered=self.select_dir)
-
-        self.datelabel = QLabel()
-
-        self.log_button = create_toolbutton(
-            self,
-            icon=ima.icon('log'),
-            text=_("Output"),
-            text_beside_icon=True,
-            tip=_("Show program's output"),
-            triggered=self.show_log)
+        self.process = None
+        self.config = None
 
         self.datatree = UnitTestDataTree(self)
 
-        self.collapse_button = create_toolbutton(
+        self.start_button = create_toolbutton(self, text_beside_icon=True)
+        self.set_running_state(False)
+
+        self.status_label = QLabel('', self)
+
+        self.config_action = create_action(
             self,
+            text=_("Configure ..."),
+            icon=ima.icon('configure'),
+            triggered=self.configure)
+        self.log_action = create_action(
+            self,
+            text=_('Show output'),
+            icon=ima.icon('log'),
+            triggered=self.show_log)
+        self.collapse_action = create_action(
+            self,
+            text=_('Collapse all'),
             icon=ima.icon('collapse'),
-            triggered=lambda dD=-1: self.datatree.collapseAll(),
-            tip=_('Collapse all'))
-        self.expand_button = create_toolbutton(
+            triggered=self.datatree.collapseAll())
+        self.expand_action = create_action(
             self,
+            text=_('Expand all'),
             icon=ima.icon('expand'),
-            triggered=lambda dD=1: self.datatree.expandAll(),
-            tip=_('Expand all'))
+            triggered=self.datatree.expandAll())
 
-        hlayout1 = QHBoxLayout()
-        hlayout1.addWidget(self.pathcombo)
-        hlayout1.addWidget(browse_button)
-        hlayout1.addWidget(self.start_button)
-        hlayout1.addWidget(self.stop_button)
+        options_menu = QMenu()
+        options_menu.addAction(self.config_action)
+        options_menu.addAction(self.log_action)
+        options_menu.addAction(self.collapse_action)
+        options_menu.addAction(self.expand_action)
 
-        hlayout2 = QHBoxLayout()
-        hlayout2.addWidget(self.collapse_button)
-        hlayout2.addWidget(self.expand_button)
-        hlayout2.addStretch()
-        hlayout2.addWidget(self.datelabel)
-        hlayout2.addStretch()
-        hlayout2.addWidget(self.log_button)
+        self.options_button = QToolButton(self)
+        self.options_button.setIcon(ima.icon('tooloptions'))
+        self.options_button.setPopupMode(QToolButton.InstantPopup)
+        self.options_button.setMenu(options_menu)
+        self.options_button.setAutoRaise(True)
+
+        hlayout = QHBoxLayout()
+        hlayout.addWidget(self.start_button)
+        hlayout.addStretch()
+        hlayout.addWidget(self.status_label)
+        hlayout.addStretch()
+        hlayout.addWidget(self.options_button)
 
         layout = QVBoxLayout()
-        layout.addLayout(hlayout1)
-        layout.addLayout(hlayout2)
+        layout.addLayout(hlayout)
         layout.addWidget(self.datatree)
         self.setLayout(layout)
 
-        self.process = None
-        self.set_running_state(False)
-        self.start_button.setEnabled(False)
-
         if not is_unittesting_installed():
-            for widget in (self.datatree, self.pathcombo, self.log_button,
-                           self.start_button, self.stop_button, browse_button,
-                           self.collapse_button, self.expand_button):
+            for widget in (self.datatree, self.log_action, self.start_button,
+                           self.collapse_action, self.expand_action):
                 widget.setDisabled(True)
-            text = _('<b>Please install the unittesting module</b>')
-            self.datelabel.setText(text)
-            self.datelabel.setOpenExternalLinks(True)
         else:
             pass  # self.show_data()
-
-    def analyze(self, wdir, pythonpath=None):
-        """Run tests."""
-        if not is_unittesting_installed():
-            return
-        self.kill_if_running()
-        # index, _data = self.get_data(filename)
-        index = None  # FIXME: storing data is not implemented yet
-        if index is None:
-            self.pathcombo.addItem(wdir)
-            self.pathcombo.setCurrentIndex(self.pathcombo.count() - 1)
-        else:
-            self.pathcombo.setCurrentIndex(self.pathcombo.findText(wdir))
-        self.pathcombo.selected()
-        if self.pathcombo.is_valid():
-            self.start_test_process(wdir, pythonpath)
-
-    def select_dir(self):
-        """Select directory and run tests."""
-        dirname = getexistingdirectory(self, _("Select directory"), getcwd())
-        if dirname:
-            self.analyze(dirname)
 
     def show_log(self):
         """Show output of testing process."""
@@ -202,41 +159,72 @@ class UnitTestWidget(QWidget):
                 readonly=True,
                 size=(700, 500)).exec_()
 
-    def show_errorlog(self):
-        """Show errors of testing process."""
-        if self.error_output:
-            TextEditor(
-                self.error_output,
-                title=_("Unit testing output"),
-                readonly=True,
-                size=(700, 500)).exec_()
-
-    def start_test_process(self, wdir=None, pythonpath=None):
+    def get_pythonpath(self):
         """
-        Start the process for running tests.
+        Return directories to be added to the Python path.
+
+        This function returns an empty list but it can be overridden
+        in subclasses.
+
+        Returns
+        -------
+        list of str
+        """
+        return []
+
+    def get_default_config(self):
+        """
+        Return configuration which is proposed when current config is invalid.
+
+        This function can be overriden in subclasses.
+        """
+        return Config()
+
+    def configure(self):
+        """Configure tests."""
+        if self.config:
+            oldconfig = self.config
+        else:
+            oldconfig = self.get_default_config()
+        config = ask_for_config(oldconfig)
+        if config:
+            self.config = config
+
+    def config_is_valid(self):
+        """Return whether configuration for running tests is valid."""
+        return (self.config and self.config.framework and
+                osp.isdir(self.config.wdir))
+
+    def maybe_configure_and_start(self):
+        """
+        Ask for configuration if necessary and then run tests.
+
+        If the current test configuration is not valid (or not set(,
+        then ask the user to configure. Then run the tests.
+        """
+        if not self.config_is_valid():
+            self.configure()
+        if self.config_is_valid():
+            self.run_tests()
+
+    def run_tests(self, config=None):
+        """
+        Run unit tests.
 
         The process's output is consumed by `read_output()`.
         When the process finishes, the `finish` signal is emitted.
 
         Parameters
         ----------
-        wdir : str
-            working directory to switch to when running tests.
-            If None, use `self._last_wdir` or path of file in combo box.
-        pythonpath : list of str
-            directories to be added to system python path.
-            If None, use `self._last_pythonpath`.
+        config : Config or None
+            configuration for unit tests. If None, use `self.config`.
+            In either case, configuration should be valid.
         """
-        if wdir is None:
-            wdir = self._last_wdir
-            if wdir is None:
-                wdir = to_text_string(self.pathcombo.currentText())
-        if pythonpath is None:
-            pythonpath = self._last_pythonpath
-        self._last_wdir = wdir
-        self._last_pythonpath = pythonpath
-
-        self.datelabel.setText(_('Running tests, please wait...'))
+        if config is None:
+            config = self.config
+        framework = config.framework
+        wdir = config.wdir
+        pythonpath = self.get_pythonpath()
 
         self.process = QProcess(self)
         self.process.setProcessChannelMode(QProcess.SeparateChannels)
@@ -245,7 +233,6 @@ class UnitTestWidget(QWidget):
         self.process.readyReadStandardError.connect(
             lambda: self.read_output(error=True))
         self.process.finished.connect(self.finished)
-        self.stop_button.clicked.connect(self.process.kill)
 
         if pythonpath is not None:
             env = [
@@ -262,12 +249,18 @@ class UnitTestWidget(QWidget):
         self.output = ''
         self.error_output = ''
 
-        executable = "py.test"
+        if framework == 'nose':
+            executable = "nosetests"
+            p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
+        elif framework == 'py.test':
+            executable = "py.test"
+            p_args = ['--junit-xml', self.DATAPATH]
+        else:
+            raise ValueError('Unknown framework')
+
         if os.name == 'nt':
             executable += '.exe'
-        p_args = ['--junit-xml', self.DATAPATH]
-        # executable = "nosetests"
-        # p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
+
         self.process.start(executable, p_args)
 
         running = self.process.waitForStarted()
@@ -276,11 +269,38 @@ class UnitTestWidget(QWidget):
         if not running:
             QMessageBox.critical(self,
                                  _("Error"), _("Process failed to start"))
+        else:
+            self.datatree.clear()
+            self.status_label.setText(_('<b>Running tests ...<b>'))
 
-    def set_running_state(self, state=True):
-        """Set running state."""
-        self.start_button.setEnabled(not state)
-        self.stop_button.setEnabled(state)
+    def set_running_state(self, state):
+        """
+        Change start/stop button according to whether tests are running.
+
+        If tests are running, then display a stop button, otherwise display
+        a start button.
+
+        Parameters
+        ----------
+        state : bool
+            Set to True if tests are running.
+        """
+        button = self.start_button
+        try:
+            button.clicked.disconnect()
+        except TypeError:  # raised if not connected to any handler
+            pass
+        if state:
+            button.setIcon(ima.icon('stop'))
+            button.setText(_('Stop'))
+            button.setToolTip(_('Stop current test process'))
+            button.clicked.connect(lambda checked: self.kill_if_running())
+        else:
+            button.setIcon(ima.icon('run'))
+            button.setText(_("Run tests"))
+            button.setToolTip(_('Run unit tests'))
+            button.clicked.connect(
+                lambda checked: self.maybe_configure_and_start())
 
     def read_output(self, error=False):
         """Read output of testing process."""
@@ -303,10 +323,7 @@ class UnitTestWidget(QWidget):
     def finished(self):
         """Testing has finished."""
         self.set_running_state(False)
-        # self.show_errorlog()  # If errors occurred, show them.
         self.output = self.error_output + self.output
-        # FIXME: figure out if show_data should be called here or
-        #        as a signal from the combobox
         self.show_data(justanalyzed=True)
         self.sig_finished.emit()
 
@@ -321,22 +338,14 @@ class UnitTestWidget(QWidget):
         """Show test results."""
         if not justanalyzed:
             self.output = None
-        self.log_button.setEnabled(
+        self.log_action.setEnabled(
             self.output is not None and len(self.output) > 0)
         self.kill_if_running()
-        filename = to_text_string(self.pathcombo.currentText())
-        if not filename:
-            return
 
         self.datatree.load_data(self.DATAPATH)
-        self.datelabel.setText(_('Sorting data, please wait...'))
         QApplication.processEvents()
-        self.datatree.show_tree()
-
-        text_style = "<span style=\'color: #444444\'><b>%s </b></span>"
-        date_text = text_style % time.strftime("%d %b %Y %H:%M",
-                                               time.localtime())
-        self.datelabel.setText(date_text)
+        msg = self.datatree.show_tree()
+        self.status_label.setText(msg)
 
 
 class UnitTestDataTree(QTreeWidget):
@@ -362,9 +371,10 @@ class UnitTestDataTree(QTreeWidget):
     def show_tree(self):
         """Populate the tree with unit testing data and display it."""
         self.clear()  # Clear before re-populating
-        self.populate_tree()
+        msg = self.populate_tree()
         for col in range(self.columnCount() - 1):
             self.resizeColumnToContents(col)
+        return msg
 
     def load_data(self, profdatafile):
         """Load unit testing data."""
@@ -373,13 +383,7 @@ class UnitTestDataTree(QTreeWidget):
     def populate_tree(self):
         """Create each item (and associated data) in the tree."""
         if not len(self.data):
-            warn_item = QTreeWidgetItem(self)
-            warn_item.setData(0, Qt.DisplayRole, "No results to show.")
-            warn_item.setFirstColumnSpanned(True)
-            warn_item.setTextAlignment(0, Qt.AlignCenter)
-            font = warn_item.font(0)
-            font.setStyle(QFont.StyleItalic)
-            warn_item.setFont(0, font)
+            self.show_message(_('No results to show.'))
             return
 
         try:
@@ -387,6 +391,9 @@ class UnitTestDataTree(QTreeWidget):
         except AttributeError:  # If run standalone for testing
             monospace_font = QFont("Courier New")
             monospace_font.setPointSize(10)
+
+        num_passed_tests = 0
+        num_failed_tests = 0
 
         for testcase in self.data:
             testcase_item = QTreeWidgetItem(self)
@@ -403,6 +410,11 @@ class UnitTestDataTree(QTreeWidget):
                 color = COLORS[status]
                 for col in range(self.columnCount()):
                     testcase_item.setBackground(col, color)
+
+                if color == COLOR_OK:
+                    num_passed_tests += 1
+                elif color == COLOR_FAIL:
+                    num_failed_tests += 1
 
                 type_ = test_error.get("type")
                 message = test_error.get("message")
@@ -423,6 +435,18 @@ class UnitTestDataTree(QTreeWidget):
                         error_content_item.setFont(0, monospace_font)
             else:
                 testcase_item.setData(0, Qt.DisplayRole, "ok")
+                num_passed_tests += 1
+
+        if num_failed_tests == 1:
+            test_or_tests = _('test')
+        else:
+            test_or_tests = _('tests')
+        failed_txt = '{} {} failed'.format(num_failed_tests, test_or_tests)
+        passed_txt = '{} passed'.format(num_passed_tests)
+        num_other_tests = len(self.data) - num_failed_tests - num_passed_tests
+        other_txt = '{} other'.format(num_other_tests)
+        msg = '<b>{}, {}, {}</b>'.format(failed_txt, passed_txt, other_txt)
+        return msg
 
     def item_activated(self, item):
         """Called if user clicks on item."""
@@ -431,13 +455,26 @@ class UnitTestDataTree(QTreeWidget):
 
 
 def test():
-    """Run widget test."""
+    """
+    Run widget test.
+
+    Show the unittest widgets, configured so that our own tests are run when
+    the user clicks "Run tests".
+    """
     from spyder.utils.qthelpers import qapplication
     app = qapplication()
     widget = UnitTestWidget(None)
+
+    # set wdir to .../spyder_unittest
+    wdir = osp.abspath(osp.join(osp.dirname(__file__), osp.pardir))
+    widget.get_default_config = lambda: Config('py.test', wdir)
+
+    # add wdir's parent to python path, so that `import spyder_unittest` works
+    rootdir = osp.abspath(osp.join(wdir, osp.pardir))
+    widget.get_pythonpath = lambda: [rootdir]
+
     widget.resize(800, 600)
     widget.show()
-    widget.analyze(osp.normpath(osp.join(osp.dirname(__file__), osp.pardir)))
     sys.exit(app.exec_())
 
 

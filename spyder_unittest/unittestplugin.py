@@ -8,7 +8,7 @@
 """Unit testing Plugin."""
 
 # Standard library imports
-import os.path as osp
+import os.path
 
 # Third party imports
 from qtpy.QtCore import Signal
@@ -18,6 +18,7 @@ from spyder.utils import icon_manager as ima
 from spyder.utils.qthelpers import create_action
 
 # Local imports
+from .widgets.configdialog import Config
 from .widgets.unittestgui import UnitTestWidget, is_unittesting_installed
 
 _ = get_translation("unittest", dirname="spyder_unittest")
@@ -69,7 +70,7 @@ class UnitTestPlugin(UnitTestWidget, SpyderPluginMixin):
             _("Run unit tests"),
             icon=ima.icon('profiler'),
             shortcut="Shift+Alt+F11",
-            triggered=self.run_unittesting)
+            triggered=self.maybe_configure_and_start)
         unittesting_act.setEnabled(is_unittesting_installed())
 
         self.main.run_menu_actions += [unittesting_act]
@@ -87,18 +88,40 @@ class UnitTestPlugin(UnitTestWidget, SpyderPluginMixin):
         """Apply configuration file's plugin settings."""
         pass
 
-    # ----- Public API --------------------------------------------------------
-    def run_unittesting(self):
-        """Run unit testing."""
-        filename = self.main.editor.get_current_filename()
-        dirname = osp.dirname(filename)
-        self.analyze(dirname)
+    def get_pythonpath(self):
+        """
+        Return directories to be added to the Python path.
 
-    def analyze(self, wdir):
-        """Reimplement analyze method."""
+        Use Python path from Spyder. Overrides function in base class.
+
+        Returns
+        -------
+        list of str
+        """
+        return self.main.get_spyder_pythonpath()
+
+    def get_default_config(self):
+        """
+        Return configuration which is proposed when current config is invalid.
+
+        Propose to use directory of current file as working directory for
+        testing.
+        """
+        filename = self.main.editor.get_current_filename()
+        dirname = os.path.dirname(filename)
+        return Config(wdir=dirname)
+
+    # ----- Public API --------------------------------------------------------
+    def maybe_configure_and_start(self):
+        """
+        Ask for configuration if necessary and then run tests.
+
+        Raise unittest widget. If the current test configuration is
+        not valid (or not set), then ask the user to configure. Then
+        run the tests.
+        """
         if self.dockwidget and not self.ismaximized:
             self.dockwidget.setVisible(True)
             self.dockwidget.setFocus()
             self.dockwidget.raise_()
-        pythonpath = self.main.get_spyder_pythonpath()
-        UnitTestWidget.analyze(self, wdir, pythonpath=pythonpath)
+        super(UnitTestPlugin, self).maybe_configure_and_start()

@@ -12,14 +12,17 @@
 [![Join the chat at https://gitter.im/spyder-ide/public](https://badges.gitter.im/spyder-ide/public.svg)](https://gitter.im/spyder-ide/public)
 
 ## Description
+
+![screenshot](./screenshot.png)
+
 This is a plugin for Spyder that integrates popular unit test
 frameworks. It allows you to run tests and view the results.
 
-
 ## Status
 
-This is a work in progress. Only basic functionality is implemented.
-At the moment, it only supports the py.test testing framework.
+This is a work in progress. It is useable, but only the basic functionality 
+is implemented at the moment. The plugin supports the py.test and nose 
+testing frameworks.
 
 ## Installation
 
@@ -36,5 +39,11 @@ The plugin is not yet included in PyPI.
 ## Usage
 
 The plugin adds an item `Run unit tests` to the `Run` menu in Spyder.
-Click on this to run the unit tests. A window pane will pop up with
-the results.
+Click on this to run the unit tests. After you specify the testing framework 
+and the directory under which the tests are stored, the tests are run. 
+The `Unit testing` window pane (displayed at the top of this file) will pop up 
+with the results.
+
+If you want to run tests in a different directory or switch testing
+frameworks, click `Configure` in the Options menu (cogwheel icon), 
+which is located in the upper right corner of the `Unit testing` pane.
