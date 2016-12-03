@@ -10,29 +10,24 @@
 from __future__ import with_statement
 
 # Standard library imports
-import os
 import os.path as osp
 import sys
 
 # Third party imports
 from lxml import etree
-from qtpy.QtCore import (QByteArray, QProcess, QProcessEnvironment, Qt,
-                         QTextCodec, Signal)
+from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QBrush, QColor, QFont
-from qtpy.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMenu,
-                            QMessageBox, QToolButton, QTreeWidget,
-                            QTreeWidgetItem, QVBoxLayout, QWidget)
-from spyder.config.base import get_conf_path, get_translation
-from spyder.py3compat import to_text_string
+from qtpy.QtWidgets import (QHBoxLayout, QLabel, QMenu, QMessageBox,
+                            QToolButton, QTreeWidget, QTreeWidgetItem,
+                            QVBoxLayout, QWidget)
+from spyder.config.base import get_translation
 from spyder.utils import icon_manager as ima
-from spyder.utils.misc import add_pathlist_to_PYTHONPATH
 from spyder.utils.qthelpers import create_action, create_toolbutton
 from spyder.widgets.variableexplorer.texteditor import TextEditor
 
 # Local imports
+from spyder_unittest.backend.testrunner import TestRunner
 from spyder_unittest.widgets.configdialog import Config, ask_for_config
-
-locale_codec = QTextCodec.codecForLocale()
 
 # This is needed for testing this module as a stand alone script
 try:
@@ -75,7 +70,6 @@ class UnitTestWidget(QWidget):
     sig_finished: Emitted when plugin finishes processing tests.
     """
 
-    DATAPATH = get_conf_path('unittest.results')
     VERSION = '0.0.1'
 
     sig_finished = Signal()
@@ -86,11 +80,7 @@ class UnitTestWidget(QWidget):
 
         self.setWindowTitle("Unit testing")
 
-        self.output = None
-        self.error_output = None
-        self.process = None
         self.config = None
-
         self.datatree = UnitTestDataTree(self)
 
         self.start_button = create_toolbutton(self, text_beside_icon=True)
@@ -222,55 +212,15 @@ class UnitTestWidget(QWidget):
         """
         if config is None:
             config = self.config
-        framework = config.framework
-        wdir = config.wdir
         pythonpath = self.get_pythonpath()
-
-        self.process = QProcess(self)
-        self.process.setProcessChannelMode(QProcess.SeparateChannels)
-        self.process.setWorkingDirectory(wdir)
-        self.process.readyReadStandardOutput.connect(self.read_output)
-        self.process.readyReadStandardError.connect(
-            lambda: self.read_output(error=True))
-        self.process.finished.connect(self.finished)
-
-        if pythonpath is not None:
-            env = [
-                to_text_string(_pth)
-                for _pth in self.process.systemEnvironment()
-            ]
-            add_pathlist_to_PYTHONPATH(env, pythonpath)
-            processEnvironment = QProcessEnvironment()
-            for envItem in env:
-                envName, separator, envValue = envItem.partition('=')
-                processEnvironment.insert(envName, envValue)
-            self.process.setProcessEnvironment(processEnvironment)
-
-        self.output = ''
-        self.error_output = ''
-
-        if framework == 'nose':
-            executable = "nosetests"
-            p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
-        elif framework == 'py.test':
-            executable = "py.test"
-            p_args = ['--junit-xml', self.DATAPATH]
-        else:
-            raise ValueError('Unknown framework')
-
-        if os.name == 'nt':
-            executable += '.exe'
-
-        self.process.start(executable, p_args)
-
-        running = self.process.waitForStarted()
-        self.set_running_state(running)
-
-        if not running:
+        testrunner = TestRunner(self, self.datatree)
+        try:
+            testrunner.start(config, pythonpath)
+        except RuntimeError:
             QMessageBox.critical(self,
                                  _("Error"), _("Process failed to start"))
         else:
-            self.datatree.clear()
+            self.set_running_state(True)
             self.status_label.setText(_('<b>Running tests ...<b>'))
 
     def set_running_state(self, state):
@@ -301,51 +251,6 @@ class UnitTestWidget(QWidget):
             button.setToolTip(_('Run unit tests'))
             button.clicked.connect(
                 lambda checked: self.maybe_configure_and_start())
-
-    def read_output(self, error=False):
-        """Read output of testing process."""
-        if error:
-            self.process.setReadChannel(QProcess.StandardError)
-        else:
-            self.process.setReadChannel(QProcess.StandardOutput)
-        qba = QByteArray()
-        while self.process.bytesAvailable():
-            if error:
-                qba += self.process.readAllStandardError()
-            else:
-                qba += self.process.readAllStandardOutput()
-        text = to_text_string(locale_codec.toUnicode(qba.data()))
-        if error:
-            self.error_output += text
-        else:
-            self.output += text
-
-    def finished(self):
-        """Testing has finished."""
-        self.set_running_state(False)
-        self.output = self.error_output + self.output
-        self.show_data(justanalyzed=True)
-        self.sig_finished.emit()
-
-    def kill_if_running(self):
-        """Kill testing process if it is running."""
-        if self.process is not None:
-            if self.process.state() == QProcess.Running:
-                self.process.kill()
-                self.process.waitForFinished()
-
-    def show_data(self, justanalyzed=False):
-        """Show test results."""
-        if not justanalyzed:
-            self.output = None
-        self.log_action.setEnabled(
-            self.output is not None and len(self.output) > 0)
-        self.kill_if_running()
-
-        self.datatree.load_data(self.DATAPATH)
-        QApplication.processEvents()
-        msg = self.datatree.show_tree()
-        self.status_label.setText(msg)
 
 
 class UnitTestDataTree(QTreeWidget):
