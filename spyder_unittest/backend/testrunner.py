@@ -8,15 +8,38 @@
 """Classes for running tests within various frameworks."""
 
 # Standard library imports
+from collections import namedtuple
 import os
 
 # Third party imports
+from lxml import etree
 from qtpy.QtCore import (QByteArray, QObject, QProcess, QProcessEnvironment,
                          QTextCodec)
 from qtpy.QtWidgets import QApplication
 from spyder.config.base import get_conf_path
 from spyder.py3compat import to_text_string
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH
+
+# Class representing test results
+TestResult = namedtuple('TestResult', [
+    'category', 'status', 'name', 'message', 'time', 'extra_text'
+])
+
+
+class Category:
+    """Enum type representing category of test result."""
+
+    OK = 1
+    FAIL = 2
+    SKIP = 3
+
+
+STATUS_TO_CATEGORY = {
+    'ok': Category.OK,
+    'failure': Category.FAIL,  # py.test
+    'error': Category.FAIL,  # nose
+    'skipped': Category.SKIP,  # py.test, nose
+}
 
 
 class TestRunner(QObject):
@@ -121,7 +144,33 @@ class TestRunner(QObject):
             self.output is not None and len(self.output) > 0)
         self.kill_if_running()
 
-        self.datatree.load_data(self.DATAPATH)
+        self.load_data()
         QApplication.processEvents()
         msg = self.datatree.show_tree()
         self.widget.status_label.setText(msg)
+
+    def load_data(self):
+        """Load unit testing data."""
+        data = etree.parse(self.DATAPATH).getroot()
+        testresults = []
+        for testcase in data:
+            name = '{0}.{1}'.format(
+                testcase.get('classname'), testcase.get('name'))
+            time = float(testcase.get('time'))
+            if len(testcase):
+                test_error = testcase[0]
+                status = test_error.tag
+                type_ = test_error.get('type')
+                message = test_error.get('message', default='')
+                if type_ and message:
+                    message = '{0}: {1}'.format(type_, message)
+                elif type_:
+                    message = type_
+                extra_text = test_error.text or ''
+            else:
+                status = 'ok'
+                message = extra_text = ''
+            category = STATUS_TO_CATEGORY[status]
+            testresults.append(
+                TestResult(category, status, name, message, time, extra_text))
+        self.datatree.testresults = testresults

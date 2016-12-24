@@ -10,12 +10,11 @@
 from __future__ import with_statement
 
 # Standard library imports
-from collections import Counter, namedtuple
+from collections import Counter
 import os.path as osp
 import sys
 
 # Third party imports
-from lxml import etree
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QBrush, QColor, QFont
 from qtpy.QtWidgets import (QHBoxLayout, QLabel, QMenu, QMessageBox,
@@ -27,7 +26,7 @@ from spyder.utils.qthelpers import create_action, create_toolbutton
 from spyder.widgets.variableexplorer.texteditor import TextEditor
 
 # Local imports
-from spyder_unittest.backend.testrunner import TestRunner
+from spyder_unittest.backend.testrunner import Category, TestRunner
 from spyder_unittest.widgets.configdialog import Config, ask_for_config
 
 # This is needed for testing this module as a stand alone script
@@ -38,26 +37,6 @@ except KeyError as error:
     _ = gettext.gettext
 
 COL_POS = 0  # Position is not displayed but set as Qt.UserRole
-
-
-class Category:
-    """Enum type representing category of test result."""
-
-    OK = 1
-    FAIL = 2
-    SKIP = 3
-
-
-TestResult = namedtuple('TestResult', [
-    'category', 'status', 'name', 'message', 'time', 'extra_text'
-])
-
-STATUS_TO_CATEGORY = {
-    'ok': Category.OK,
-    'failure': Category.FAIL,  # py.test
-    'error': Category.FAIL,  # nose
-    'skipped': Category.SKIP,  # py.test, nose
-}
 
 COLORS = {
     Category.OK: QBrush(QColor("#C1FFBA")),
@@ -279,15 +258,13 @@ class UnitTestDataTree(QTreeWidget):
         self.header_list = [
             _('Status'), _('Name'), _('Message'), _('Time (ms)')
         ]
-        self.testresults = None  # To be filled by self.load_data()
+        self.testresults = []
         self.header().setDefaultAlignment(Qt.AlignCenter)
         self.setColumnCount(len(self.header_list))
         self.setHeaderLabels(self.header_list)
         self.clear()
         self.setItemsExpandable(True)
         self.setSortingEnabled(False)
-        # self.connect(self, SIGNAL('itemActivated(QTreeWidgetItem*,int)'),
-        #              self.item_activated)
 
     def show_tree(self):
         """Populate the tree with unit testing data and display it."""
@@ -297,36 +274,10 @@ class UnitTestDataTree(QTreeWidget):
             self.resizeColumnToContents(col)
         return msg
 
-    def load_data(self, profdatafile):
-        """Load unit testing data."""
-        data = etree.parse(profdatafile).getroot()
-        self.testresults = []
-        for testcase in data:
-            name = '{0}.{1}'.format(
-                testcase.get('classname'), testcase.get('name'))
-            time = float(testcase.get('time'))
-            if len(testcase):
-                test_error = testcase[0]
-                status = test_error.tag
-                type_ = test_error.get('type')
-                message = test_error.get('message', default='')
-                if type_ and message:
-                    message = '{0}: {1}'.format(type_, message)
-                elif type_:
-                    message = type_
-                extra_text = test_error.text or ''
-            else:
-                status = 'ok'
-                message = extra_text = ''
-            category = STATUS_TO_CATEGORY[status]
-            self.testresults.append(
-                TestResult(category, status, name, message, time, extra_text))
-
     def populate_tree(self):
         """Create each item (and associated data) in the tree."""
         if not len(self.testresults):
-            self.show_message(_('No results to show.'))
-            return
+            return _('No results to show.')
 
         try:
             monospace_font = self.window().editor.get_plugin_font()
