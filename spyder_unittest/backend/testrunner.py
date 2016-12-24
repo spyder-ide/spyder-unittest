@@ -43,11 +43,37 @@ STATUS_TO_CATEGORY = {
 
 
 class TestRunner(QObject):
-    """Class for running tests with py.test or nose."""
+    """
+    Class for running tests with py.test or nose.
+
+    Fields
+    ------
+    widget : UnitTestWidget
+        Unit test widget which constructed the test runner.
+    datatree : UnitTestDataTree
+        Data tree widget which will report the results.
+    output : str
+        Standard output emitted by the unit test process.
+    error_output : str
+        Standard error emitted by the unit test process.
+    process : QProcess or None
+        Process running the unit test suite.
+    """
 
     DATAPATH = get_conf_path('unittest.results')
 
     def __init__(self, widget, datatree):
+        """
+        Construct test runner.
+
+        Parameters
+        ----------
+        widget : UnitTestWidget
+            Unit test widget which constructed the test runner.
+        datatree : UnitTestDataTree
+            Data tree widget which will report the results.
+        """
+
         QObject.__init__(self, widget)
         self.widget = widget
         self.datatree = datatree
@@ -56,7 +82,24 @@ class TestRunner(QObject):
         self.process = None
 
     def start(self, config, pythonpath):
-        """Raises RuntimeError if process failed to start."""
+        """
+        Start process which will run the unit test suite.
+
+        The test results are written to the file self.`DATAPATH`.
+        The standard output and standard error are also recorded.
+
+        Parameters
+        ----------
+        config : TestConfig
+            Unit test configuration.
+        pythonpath : list of str
+            List of directories to be added to the Python path
+
+        Raises
+        ------
+        RuntimeError
+            If process failed to start.
+        """
 
         framework = config.framework
         wdir = config.wdir
@@ -104,7 +147,14 @@ class TestRunner(QObject):
         self.datatree.clear()
 
     def read_output(self, error=False):
-        """Read output of testing process."""
+        """
+        Read output of testing process.
+
+        Parameters
+        ----------
+        error : bool
+            If False, read standard output, else read standard error.
+        """
         if error:
             self.process.setReadChannel(QProcess.StandardError)
         else:
@@ -123,7 +173,11 @@ class TestRunner(QObject):
             self.output += text
 
     def finished(self):
-        """Testing has finished."""
+        """
+        Called when the unit test process has finished.
+
+        This function reads the results and show them in the unit test widget.
+        """
         self.widget.set_running_state(False)
         self.output = self.error_output + self.output
         self.show_data(justanalyzed=True)
@@ -150,7 +204,12 @@ class TestRunner(QObject):
         self.widget.status_label.setText(msg)
 
     def load_data(self):
-        """Load unit testing data."""
+        """
+        Read and parse unit test results.
+
+        This function reads the unit test results from `self.DATAPATH`,
+        parses them, and sends the parsed results to the unit test data tree.
+        """
         data = etree.parse(self.DATAPATH).getroot()
         testresults = []
         for testcase in data:
