@@ -10,6 +10,7 @@
 from __future__ import with_statement
 
 # Standard library imports
+from collections import Counter, namedtuple
 import os.path as osp
 import sys
 
@@ -38,14 +39,30 @@ except KeyError as error:
 
 COL_POS = 0  # Position is not displayed but set as Qt.UserRole
 
-COLOR_OK = QBrush(QColor("#C1FFBA"))
-COLOR_SKIP = QBrush(QColor("#C5C5C5"))
-COLOR_FAIL = QBrush(QColor("#FF0000"))
+
+class Category:
+    """Enum type representing category of test result."""
+
+    OK = 1
+    FAIL = 2
+    SKIP = 3
+
+
+TestResult = namedtuple('TestResult', [
+    'category', 'status', 'name', 'message', 'time', 'extra_text'
+])
+
+STATUS_TO_CATEGORY = {
+    'ok': Category.OK,
+    'failure': Category.FAIL,  # py.test
+    'error': Category.FAIL,  # nose
+    'skipped': Category.SKIP,  # py.test, nose
+}
+
 COLORS = {
-    "ok": COLOR_OK,
-    "failure": COLOR_FAIL,  # py.test
-    "error": COLOR_FAIL,  # nose
-    "skipped": COLOR_SKIP,  # py.test, nose
+    Category.OK: QBrush(QColor("#C1FFBA")),
+    Category.FAIL: QBrush(QColor("#FF0000")),
+    Category.SKIP: QBrush(QColor("#C5C5C5"))
 }
 
 
@@ -262,8 +279,7 @@ class UnitTestDataTree(QTreeWidget):
         self.header_list = [
             _('Status'), _('Name'), _('Message'), _('Time (ms)')
         ]
-        self.data = None  # To be filled by self.load_data()
-        self.max_time = 0  # To be filled by self.load_data()
+        self.testresults = None  # To be filled by self.load_data()
         self.header().setDefaultAlignment(Qt.AlignCenter)
         self.setColumnCount(len(self.header_list))
         self.setHeaderLabels(self.header_list)
@@ -283,11 +299,32 @@ class UnitTestDataTree(QTreeWidget):
 
     def load_data(self, profdatafile):
         """Load unit testing data."""
-        self.data = etree.parse(profdatafile).getroot()
+        data = etree.parse(profdatafile).getroot()
+        self.testresults = []
+        for testcase in data:
+            name = '{0}.{1}'.format(
+                testcase.get('classname'), testcase.get('name'))
+            time = float(testcase.get('time'))
+            if len(testcase):
+                test_error = testcase[0]
+                status = test_error.tag
+                type_ = test_error.get('type')
+                message = test_error.get('message', default='')
+                if type_ and message:
+                    message = '{0}: {1}'.format(type_, message)
+                elif type_:
+                    message = type_
+                extra_text = test_error.text or ''
+            else:
+                status = 'ok'
+                message = extra_text = ''
+            category = STATUS_TO_CATEGORY[status]
+            self.testresults.append(
+                TestResult(category, status, name, message, time, extra_text))
 
     def populate_tree(self):
         """Create each item (and associated data) in the tree."""
-        if not len(self.data):
+        if not len(self.testresults):
             self.show_message(_('No results to show.'))
             return
 
@@ -297,59 +334,31 @@ class UnitTestDataTree(QTreeWidget):
             monospace_font = QFont("Courier New")
             monospace_font.setPointSize(10)
 
-        num_passed_tests = 0
-        num_failed_tests = 0
-
-        for testcase in self.data:
+        for testresult in self.testresults:
             testcase_item = QTreeWidgetItem(self)
-            testcase_item.setData(1, Qt.DisplayRole, "{0}.{1}".format(
-                testcase.get("classname"), testcase.get("name")))
-            testcase_item.setData(3, Qt.DisplayRole,
-                                  float(testcase.get("time")) * 1e3)
+            testcase_item.setData(0, Qt.DisplayRole, testresult.status)
+            testcase_item.setData(1, Qt.DisplayRole, testresult.name)
+            testcase_item.setData(2, Qt.DisplayRole, testresult.message)
+            testcase_item.setData(3, Qt.DisplayRole, testresult.time * 1e3)
+            color = COLORS[testresult.category]
+            for col in range(self.columnCount()):
+                testcase_item.setBackground(col, color)
+            if testresult.extra_text:
+                for line in testresult.extra_text.rstrip().split("\n"):
+                    error_content_item = QTreeWidgetItem(testcase_item)
+                    error_content_item.setData(0, Qt.DisplayRole, line)
+                    error_content_item.setFirstColumnSpanned(True)
+                    error_content_item.setFont(0, monospace_font)
 
-            if len(testcase):
-                test_error = testcase[0]
-
-                status = test_error.tag
-                testcase_item.setData(0, Qt.DisplayRole, status)
-                color = COLORS[status]
-                for col in range(self.columnCount()):
-                    testcase_item.setBackground(col, color)
-
-                if color == COLOR_OK:
-                    num_passed_tests += 1
-                elif color == COLOR_FAIL:
-                    num_failed_tests += 1
-
-                type_ = test_error.get("type")
-                message = test_error.get("message")
-                if type_ and message:
-                    text = "{0}: {1}".format(type_, message)
-                elif type_:
-                    text = type_
-                else:
-                    text = message
-                testcase_item.setData(2, Qt.DisplayRole, text)
-
-                text = test_error.text
-                if text:
-                    for line in text.rstrip().split("\n"):
-                        error_content_item = QTreeWidgetItem(testcase_item)
-                        error_content_item.setData(0, Qt.DisplayRole, line)
-                        error_content_item.setFirstColumnSpanned(True)
-                        error_content_item.setFont(0, monospace_font)
-            else:
-                testcase_item.setData(0, Qt.DisplayRole, "ok")
-                num_passed_tests += 1
-
-        if num_failed_tests == 1:
+        counts = Counter(res.category for res in self.testresults)
+        if counts[Category.FAIL] == 1:
             test_or_tests = _('test')
         else:
             test_or_tests = _('tests')
-        failed_txt = '{} {} failed'.format(num_failed_tests, test_or_tests)
-        passed_txt = '{} passed'.format(num_passed_tests)
-        num_other_tests = len(self.data) - num_failed_tests - num_passed_tests
-        other_txt = '{} other'.format(num_other_tests)
+        failed_txt = '{} {} failed'.format(counts[Category.FAIL],
+                                           test_or_tests)
+        passed_txt = '{} passed'.format(counts[Category.OK])
+        other_txt = '{} other'.format(counts[Category.SKIP])
         msg = '<b>{}, {}, {}</b>'.format(failed_txt, passed_txt, other_txt)
         return msg
 

@@ -51,6 +51,6 @@ def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
     assert itemcount == 2
     assert dt.topLevelItem(0).data(0, Qt.DisplayRole) == 'ok'
     assert dt.topLevelItem(0).data(1, Qt.DisplayRole) == 'test_foo.test_ok'
-    assert dt.topLevelItem(0).data(2, Qt.DisplayRole) is None
+    assert dt.topLevelItem(0).data(2, Qt.DisplayRole) == ''
     assert dt.topLevelItem(1).data(0, Qt.DisplayRole) == 'failure'
     assert dt.topLevelItem(1).data(1, Qt.DisplayRole) == 'test_foo.test_fail'
