@@ -49,10 +49,6 @@ class TestRunner(QObject):
 
     Fields
     ------
-    output : str
-        Standard output emitted by the unit test process.
-    error_output : str
-        Standard error emitted by the unit test process.
     process : QProcess or None
         Process running the unit test suite.
 
@@ -77,8 +73,6 @@ class TestRunner(QObject):
         """
 
         QObject.__init__(self, widget)
-        self.output = None
-        self.error_output = None
         self.process = None
 
     def start(self, config, pythonpath):
@@ -105,11 +99,8 @@ class TestRunner(QObject):
         wdir = config.wdir
 
         self.process = QProcess(self)
-        self.process.setProcessChannelMode(QProcess.SeparateChannels)
+        self.process.setProcessChannelMode(QProcess.MergedChannels)
         self.process.setWorkingDirectory(wdir)
-        self.process.readyReadStandardOutput.connect(self.read_output)
-        self.process.readyReadStandardError.connect(
-            lambda: self.read_output(error=True))
         self.process.finished.connect(self.finished)
 
         if pythonpath is not None:
@@ -123,9 +114,6 @@ class TestRunner(QObject):
                 envName, separator, envValue = envItem.partition('=')
                 processEnvironment.insert(envName, envValue)
             self.process.setProcessEnvironment(processEnvironment)
-
-        self.output = ''
-        self.error_output = ''
 
         if framework == 'nose':
             executable = "nosetests"
@@ -144,41 +132,17 @@ class TestRunner(QObject):
         if not running:
             raise RuntimeError
 
-    def read_output(self, error=False):
-        """
-        Read output of testing process.
-
-        Parameters
-        ----------
-        error : bool
-            If False, read standard output, else read standard error.
-        """
-        if error:
-            self.process.setReadChannel(QProcess.StandardError)
-        else:
-            self.process.setReadChannel(QProcess.StandardOutput)
-        qba = QByteArray()
-        while self.process.bytesAvailable():
-            if error:
-                qba += self.process.readAllStandardError()
-            else:
-                qba += self.process.readAllStandardOutput()
-        locale_codec = QTextCodec.codecForLocale()
-        text = to_text_string(locale_codec.toUnicode(qba.data()))
-        if error:
-            self.error_output += text
-        else:
-            self.output += text
-
     def finished(self):
         """
         Called when the unit test process has finished.
 
         This function reads the results and emits `sig_finished`.
         """
-        self.output = self.error_output + self.output
+        qbytearray = self.process.readAllStandardOutput()
+        locale_codec = QTextCodec.codecForLocale()
+        output = to_text_string(locale_codec.toUnicode(qbytearray.data()))
         testresults = self.load_data()
-        self.sig_finished.emit(testresults, self.output)
+        self.sig_finished.emit(testresults, output)
 
     def kill_if_running(self):
         """Kill testing process if it is running."""
