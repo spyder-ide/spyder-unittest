@@ -15,7 +15,6 @@ import os
 from lxml import etree
 from qtpy.QtCore import (QByteArray, QObject, QProcess, QProcessEnvironment,
                          QTextCodec, Signal)
-from qtpy.QtWidgets import QApplication
 from spyder.config.base import get_conf_path
 from spyder.py3compat import to_text_string
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH
@@ -184,20 +183,13 @@ class TestRunner(QObject):
         This function reads the results and show them in the unit test widget.
         """
         self.output = self.error_output + self.output
-        self.show_data(justanalyzed=True)
+        testresults = self.load_data()
+        self.sig_finished.emit(testresults, self.output)
 
     def kill_if_running(self):
         """Kill testing process if it is running."""
         if self.process and self.process.state() == QProcess.Running:
             self.process.kill()
-
-    def show_data(self, justanalyzed=False):
-        """Show test results."""
-        if not justanalyzed:
-            self.output = None
-        self.kill_if_running()
-        testresults = self.load_data()
-        self.sig_finished.emit(testresults, self.output)
 
     def load_data(self):
         """
