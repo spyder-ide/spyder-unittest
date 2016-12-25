@@ -13,8 +13,8 @@ import os
 
 # Third party imports
 from lxml import etree
-from qtpy.QtCore import (QByteArray, QObject, QProcess, QProcessEnvironment,
-                         QTextCodec, Signal)
+from qtpy.QtCore import (QObject, QProcess, QProcessEnvironment, QTextCodec,
+                         Signal)
 from spyder.config.base import get_conf_path
 from spyder.py3compat import to_text_string
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH
@@ -127,6 +127,11 @@ class TestRunner(QObject):
         if os.name == 'nt':
             executable += '.exe'
 
+        try:
+            os.remove(self.DATAPATH)
+        except OSError:
+            pass
+
         self.process.start(executable, p_args)
         running = self.process.waitForStarted()
         if not running:
@@ -161,7 +166,11 @@ class TestRunner(QObject):
         list of TestResult
             Unit test results.
         """
-        data = etree.parse(self.DATAPATH).getroot()
+        try:
+            data = etree.parse(self.DATAPATH).getroot()
+        except OSError:
+            data = []
+
         testresults = []
         for testcase in data:
             name = '{0}.{1}'.format(
