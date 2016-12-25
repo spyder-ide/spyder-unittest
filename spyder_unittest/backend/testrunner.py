@@ -144,8 +144,6 @@ class TestRunner(QObject):
         if not running:
             raise RuntimeError
 
-        self.datatree.clear()
-
     def read_output(self, error=False):
         """
         Read output of testing process.

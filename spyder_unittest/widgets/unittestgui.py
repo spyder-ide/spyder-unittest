@@ -209,6 +209,7 @@ class UnitTestWidget(QWidget):
         if config is None:
             config = self.config
         pythonpath = self.get_pythonpath()
+        self.datatree.clear()
         testrunner = TestRunner(self, self.datatree)
         try:
             testrunner.start(config, pythonpath)
