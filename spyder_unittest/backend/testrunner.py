@@ -188,10 +188,8 @@ class TestRunner(QObject):
 
     def kill_if_running(self):
         """Kill testing process if it is running."""
-        if self.process is not None:
-            if self.process.state() == QProcess.Running:
-                self.process.kill()
-                self.process.waitForFinished()
+        if self.process and self.process.state() == QProcess.Running:
+            self.process.kill()
 
     def show_data(self, justanalyzed=False):
         """Show test results."""

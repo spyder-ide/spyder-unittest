@@ -219,10 +219,10 @@ class UnitTestWidget(QWidget):
             QMessageBox.critical(self,
                                  _("Error"), _("Process failed to start"))
         else:
-            self.set_running_state(True)
+            self.set_running_state(True, testrunner.kill_if_running)
             self.status_label.setText(_('<b>Running tests ...<b>'))
 
-    def set_running_state(self, state):
+    def set_running_state(self, state, stop_function=None):
         """
         Change start/stop button according to whether tests are running.
 
@@ -233,6 +233,8 @@ class UnitTestWidget(QWidget):
         ----------
         state : bool
             Set to True if tests are running.
+        stop_function : callable or None
+            Function to call when stop button is clicked
         """
         button = self.start_button
         try:
@@ -243,7 +245,8 @@ class UnitTestWidget(QWidget):
             button.setIcon(ima.icon('stop'))
             button.setText(_('Stop'))
             button.setToolTip(_('Stop current test process'))
-            button.clicked.connect(lambda checked: self.kill_if_running())
+            if stop_function:
+                button.clicked.connect(lambda checked: stop_function())
         else:
             button.setIcon(ima.icon('run'))
             button.setText(_("Run tests"))
