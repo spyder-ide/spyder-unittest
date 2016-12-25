@@ -211,7 +211,7 @@ class UnitTestWidget(QWidget):
             config = self.config
         pythonpath = self.get_pythonpath()
         self.datatree.clear()
-        testrunner = TestRunner(self, self.datatree)
+        testrunner = TestRunner(self)
         testrunner.sig_finished.connect(self.process_finished)
         try:
             testrunner.start(config, pythonpath)

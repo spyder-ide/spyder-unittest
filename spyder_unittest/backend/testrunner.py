@@ -45,12 +45,10 @@ class TestRunner(QObject):
     """
     Class for running tests with py.test or nose.
 
+    All communication back to the caller is done via signals.
+
     Fields
     ------
-    widget : UnitTestWidget
-        Unit test widget which constructed the test runner.
-    datatree : UnitTestDataTree
-        Data tree widget which will report the results.
     output : str
         Standard output emitted by the unit test process.
     error_output : str
@@ -68,21 +66,17 @@ class TestRunner(QObject):
     DATAPATH = get_conf_path('unittest.results')
     sig_finished = Signal(object, str)
 
-    def __init__(self, widget, datatree):
+    def __init__(self, widget):
         """
         Construct test runner.
 
         Parameters
         ----------
         widget : UnitTestWidget
-            Unit test widget which constructed the test runner.
-        datatree : UnitTestDataTree
-            Data tree widget which will report the results.
+            Unit test widget which constructs the test runner.
         """
 
         QObject.__init__(self, widget)
-        self.widget = widget
-        self.datatree = datatree
         self.output = None
         self.error_output = None
         self.process = None
@@ -180,7 +174,7 @@ class TestRunner(QObject):
         """
         Called when the unit test process has finished.
 
-        This function reads the results and show them in the unit test widget.
+        This function reads the results and emits `sig_finished`.
         """
         self.output = self.error_output + self.output
         testresults = self.load_data()
