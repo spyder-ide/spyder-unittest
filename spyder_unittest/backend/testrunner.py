@@ -14,7 +14,7 @@ import os
 # Third party imports
 from lxml import etree
 from qtpy.QtCore import (QByteArray, QObject, QProcess, QProcessEnvironment,
-                         QTextCodec)
+                         QTextCodec, Signal)
 from qtpy.QtWidgets import QApplication
 from spyder.config.base import get_conf_path
 from spyder.py3compat import to_text_string
@@ -58,9 +58,16 @@ class TestRunner(QObject):
         Standard error emitted by the unit test process.
     process : QProcess or None
         Process running the unit test suite.
+
+    Signals
+    -------
+    sig_finished(list of TestResult, str)
+        Emitted when test process finishes. First argument contains the test
+        results, second argument contains the output of the test process.
     """
 
     DATAPATH = get_conf_path('unittest.results')
+    sig_finished = Signal(object, str)
 
     def __init__(self, widget, datatree):
         """
@@ -176,10 +183,8 @@ class TestRunner(QObject):
 
         This function reads the results and show them in the unit test widget.
         """
-        self.widget.set_running_state(False)
         self.output = self.error_output + self.output
         self.show_data(justanalyzed=True)
-        self.widget.sig_finished.emit()
 
     def kill_if_running(self):
         """Kill testing process if it is running."""
@@ -192,21 +197,21 @@ class TestRunner(QObject):
         """Show test results."""
         if not justanalyzed:
             self.output = None
-        self.widget.log_action.setEnabled(
-            self.output is not None and len(self.output) > 0)
         self.kill_if_running()
-
-        self.load_data()
-        QApplication.processEvents()
-        msg = self.datatree.show_tree()
-        self.widget.status_label.setText(msg)
+        testresults = self.load_data()
+        self.sig_finished.emit(testresults, self.output)
 
     def load_data(self):
         """
         Read and parse unit test results.
 
-        This function reads the unit test results from `self.DATAPATH`,
-        parses them, and sends the parsed results to the unit test data tree.
+        This function reads the unit test results from `self.DATAPATH`
+        and parses them.
+
+        Returns
+        -------
+        list of TestResult
+            Unit test results.
         """
         data = etree.parse(self.DATAPATH).getroot()
         testresults = []
@@ -230,4 +235,4 @@ class TestRunner(QObject):
             category = STATUS_TO_CATEGORY[status]
             testresults.append(
                 TestResult(category, status, name, message, time, extra_text))
-        self.datatree.testresults = testresults
+        return testresults

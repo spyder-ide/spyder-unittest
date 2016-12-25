@@ -77,6 +77,7 @@ class UnitTestWidget(QWidget):
         self.setWindowTitle("Unit testing")
 
         self.config = None
+        self.output = None
         self.datatree = UnitTestDataTree(self)
 
         self.start_button = create_toolbutton(self, text_beside_icon=True)
@@ -211,6 +212,7 @@ class UnitTestWidget(QWidget):
         pythonpath = self.get_pythonpath()
         self.datatree.clear()
         testrunner = TestRunner(self, self.datatree)
+        testrunner.sig_finished.connect(self.process_finished)
         try:
             testrunner.start(config, pythonpath)
         except RuntimeError:
@@ -248,6 +250,20 @@ class UnitTestWidget(QWidget):
             button.setToolTip(_('Run unit tests'))
             button.clicked.connect(
                 lambda checked: self.maybe_configure_and_start())
+
+    def process_finished(self, testresults, output):
+        """
+        Called when unit test process finished.
+
+        This function collects and shows the test results and output.
+        """
+        self.output = output
+        self.set_running_state(False)
+        self.log_action.setEnabled(bool(output))
+        self.datatree.testresults = testresults
+        msg = self.datatree.show_tree()
+        self.status_label.setText(msg)
+        self.sig_finished.emit()
 
 
 class UnitTestDataTree(QTreeWidget):
