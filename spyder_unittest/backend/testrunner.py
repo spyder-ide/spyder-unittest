@@ -10,12 +10,12 @@
 # Standard library imports
 from collections import namedtuple
 import os
+import tempfile
 
 # Third party imports
 from lxml import etree
 from qtpy.QtCore import (QObject, QProcess, QProcessEnvironment, QTextCodec,
                          Signal)
-from spyder.config.base import get_conf_path
 from spyder.py3compat import to_text_string
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH
 
@@ -51,6 +51,8 @@ class TestRunner(QObject):
     ------
     process : QProcess or None
         Process running the unit test suite.
+    resultfilename : str
+        Name of file in which test results are stored.
 
     Signals
     -------
@@ -59,10 +61,9 @@ class TestRunner(QObject):
         results, second argument contains the output of the test process.
     """
 
-    DATAPATH = get_conf_path('unittest.results')
     sig_finished = Signal(object, str)
 
-    def __init__(self, widget):
+    def __init__(self, widget, resultfilename=None):
         """
         Construct test runner.
 
@@ -70,16 +71,23 @@ class TestRunner(QObject):
         ----------
         widget : UnitTestWidget
             Unit test widget which constructs the test runner.
+        resultfilename : str or None
+            Name of file in which to store test results. If None, use default.
         """
 
         QObject.__init__(self, widget)
         self.process = None
+        if resultfilename is None:
+            self.resultfilename = os.path.join(tempfile.gettempdir(),
+                                               'unittest.results')
+        else:
+            self.resultfilename = resultfilename
 
     def start(self, config, pythonpath):
         """
         Start process which will run the unit test suite.
 
-        The test results are written to the file self.`DATAPATH`.
+        The test results are written to the file `self.resultfilename`.
         The standard output and standard error are also recorded.
 
         Parameters
@@ -117,10 +125,10 @@ class TestRunner(QObject):
 
         if framework == 'nose':
             executable = "nosetests"
-            p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
+            p_args = ['--with-xunit', "--xunit-file=%s" % self.resultfilename]
         elif framework == 'py.test':
             executable = "py.test"
-            p_args = ['--junit-xml', self.DATAPATH]
+            p_args = ['--junit-xml', self.resultfilename]
         else:
             raise ValueError('Unknown framework')
 
@@ -128,7 +136,7 @@ class TestRunner(QObject):
             executable += '.exe'
 
         try:
-            os.remove(self.DATAPATH)
+            os.remove(self.resultfilename)
         except OSError:
             pass
 
@@ -158,7 +166,7 @@ class TestRunner(QObject):
         """
         Read and parse unit test results.
 
-        This function reads the unit test results from `self.DATAPATH`
+        This function reads the unit test results from `self.resultfilename`
         and parses them.
 
         Returns
@@ -167,7 +175,7 @@ class TestRunner(QObject):
             Unit test results.
         """
         try:
-            data = etree.parse(self.DATAPATH).getroot()
+            data = etree.parse(self.resultfilename).getroot()
         except OSError:
             data = []
 

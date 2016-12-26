@@ -20,7 +20,7 @@ from qtpy.QtGui import QBrush, QColor, QFont
 from qtpy.QtWidgets import (QHBoxLayout, QLabel, QMenu, QMessageBox,
                             QToolButton, QTreeWidget, QTreeWidgetItem,
                             QVBoxLayout, QWidget)
-from spyder.config.base import get_translation
+from spyder.config.base import get_conf_path, get_translation
 from spyder.utils import icon_manager as ima
 from spyder.utils.qthelpers import create_action, create_toolbutton
 from spyder.widgets.variableexplorer.texteditor import TextEditor
@@ -211,7 +211,8 @@ class UnitTestWidget(QWidget):
             config = self.config
         pythonpath = self.get_pythonpath()
         self.datatree.clear()
-        testrunner = TestRunner(self)
+        tempfilename = get_conf_path('unittest.results')
+        testrunner = TestRunner(self, tempfilename)
         testrunner.sig_finished.connect(self.process_finished)
         try:
             testrunner.start(config, pythonpath)
