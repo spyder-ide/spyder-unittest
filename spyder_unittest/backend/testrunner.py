@@ -87,8 +87,11 @@ class TestRunner(QObject):
         """
         Start process which will run the unit test suite.
 
-        The test results are written to the file `self.resultfilename`.
-        The standard output and standard error are also recorded.
+        The process is run in the working directory specified in 'config',
+        with the directories in `pythonpath` added to the Python path for the
+        test process. The test results are written to the file
+        `self.resultfilename`. The standard output and error are also recorded.
+        Once the process is finished, `self.finished()` will be called.
 
         Parameters
         ----------
