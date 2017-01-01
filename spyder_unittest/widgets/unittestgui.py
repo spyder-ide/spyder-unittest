@@ -223,19 +223,19 @@ class UnitTestWidget(QWidget):
             self.set_running_state(True, testrunner.kill_if_running)
             self.status_label.setText(_('<b>Running tests ...<b>'))
 
-    def set_running_state(self, state, stop_function=None):
+    def set_running_state(self, state, kill_function=None):
         """
-        Change start/stop button according to whether tests are running.
+        Change start/kill button according to whether tests are running.
 
-        If tests are running, then display a stop button, otherwise display
+        If tests are running, then display a kill button, otherwise display
         a start button.
 
         Parameters
         ----------
         state : bool
             Set to True if tests are running.
-        stop_function : callable or None
-            Function to call when stop button is clicked
+        kill_function : callable or None
+            Function to call when kill button is clicked
         """
         button = self.start_button
         try:
@@ -244,10 +244,10 @@ class UnitTestWidget(QWidget):
             pass
         if state:
             button.setIcon(ima.icon('stop'))
-            button.setText(_('Stop'))
-            button.setToolTip(_('Stop current test process'))
-            if stop_function:
-                button.clicked.connect(lambda checked: stop_function())
+            button.setText(_('Kill'))
+            button.setToolTip(_('Kill current test process'))
+            if kill_function:
+                button.clicked.connect(lambda checked: kill_function())
         else:
             button.setIcon(ima.icon('run'))
             button.setText(_("Run tests"))
