@@ -47,8 +47,8 @@ class TestRunner(QObject):
 
     All communication back to the caller is done via signals.
 
-    Fields
-    ------
+    Attributes
+    ----------
     process : QProcess or None
         Process running the unit test suite.
     resultfilename : str
@@ -127,10 +127,12 @@ class TestRunner(QObject):
             self.process.setProcessEnvironment(processEnvironment)
 
         if framework == 'nose':
-            executable = "nosetests"
-            p_args = ['--with-xunit', "--xunit-file=%s" % self.resultfilename]
+            executable = 'nosetests'
+            p_args = [
+                '--with-xunit', '--xunit-file={}'.format(self.resultfilename)
+            ]
         elif framework == 'py.test':
-            executable = "py.test"
+            executable = 'py.test'
             p_args = ['--junit-xml', self.resultfilename]
         else:
             raise ValueError('Unknown framework')
@@ -169,8 +171,9 @@ class TestRunner(QObject):
         """
         Read and parse unit test results.
 
-        This function reads the unit test results from `self.resultfilename`
-        and parses them.
+        This function reads the unit test results from the file with name
+        `self.resultfilename` and parses them. The file should contain the
+        test results in JUnitXML format.
 
         Returns
         -------
