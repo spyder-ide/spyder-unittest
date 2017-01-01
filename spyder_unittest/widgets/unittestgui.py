@@ -56,10 +56,13 @@ class UnitTestWidget(QWidget):
     """
     Unit testing widget.
 
-    Fields
-    ------
+    Attributes
+    ----------
     config : Config
         Configuration for running tests.
+    testrunner : TestRunner or None
+        Object associated with the current test process, or `None` if no test
+        process is running at the moment.
 
     Signals
     -------
@@ -77,6 +80,7 @@ class UnitTestWidget(QWidget):
         self.setWindowTitle("Unit testing")
 
         self.config = None
+        self.testrunner = None
         self.output = None
         self.datatree = UnitTestDataTree(self)
 
@@ -212,18 +216,18 @@ class UnitTestWidget(QWidget):
         pythonpath = self.get_pythonpath()
         self.datatree.clear()
         tempfilename = get_conf_path('unittest.results')
-        testrunner = TestRunner(self, tempfilename)
-        testrunner.sig_finished.connect(self.process_finished)
+        self.testrunner = TestRunner(self, tempfilename)
+        self.testrunner.sig_finished.connect(self.process_finished)
         try:
-            testrunner.start(config, pythonpath)
+            self.testrunner.start(config, pythonpath)
         except RuntimeError:
             QMessageBox.critical(self,
                                  _("Error"), _("Process failed to start"))
         else:
-            self.set_running_state(True, testrunner.kill_if_running)
+            self.set_running_state(True)
             self.status_label.setText(_('<b>Running tests ...<b>'))
 
-    def set_running_state(self, state, kill_function=None):
+    def set_running_state(self, state):
         """
         Change start/kill button according to whether tests are running.
 
@@ -234,8 +238,6 @@ class UnitTestWidget(QWidget):
         ----------
         state : bool
             Set to True if tests are running.
-        kill_function : callable or None
-            Function to call when kill button is clicked
         """
         button = self.start_button
         try:
@@ -246,8 +248,8 @@ class UnitTestWidget(QWidget):
             button.setIcon(ima.icon('stop'))
             button.setText(_('Kill'))
             button.setToolTip(_('Kill current test process'))
-            if kill_function:
-                button.clicked.connect(lambda checked: kill_function())
+            if self.testrunner:
+                button.clicked.connect(self.testrunner.kill_if_running)
         else:
             button.setIcon(ima.icon('run'))
             button.setText(_("Run tests"))
@@ -263,6 +265,7 @@ class UnitTestWidget(QWidget):
         """
         self.output = output
         self.set_running_state(False)
+        self.testrunner = None
         self.log_action.setEnabled(bool(output))
         self.datatree.testresults = testresults
         msg = self.datatree.show_tree()
