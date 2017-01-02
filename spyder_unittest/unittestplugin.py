@@ -11,11 +11,13 @@
 import os.path
 
 # Third party imports
+from qtpy import PYQT5
 from qtpy.QtWidgets import QVBoxLayout
 from spyder.config.base import get_translation
 from spyder.plugins import SpyderPluginWidget
 from spyder.utils import icon_manager as ima
 from spyder.utils.qthelpers import create_action
+import spyder
 
 # Local imports
 from .widgets.configdialog import Config
@@ -75,7 +77,10 @@ class UnitTestPlugin(SpyderPluginWidget):
 
     def __init__(self, parent=None):
         """Initialize plugin and corresponding widget."""
-        SpyderPluginWidget.__init__(self, parent)
+        if spyder.version_info[0] < 4 and PYQT5:
+            SpyderPluginWidget.__init__(self, parent, main=parent)
+        else:
+            SpyderPluginWidget.__init__(self, parent)
 
         # Add unit test widget in dockwindow
         self.unittestwidget = UnitTestWidgetInSpyder(self.main)
