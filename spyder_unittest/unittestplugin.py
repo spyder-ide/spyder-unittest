@@ -11,7 +11,6 @@
 import os.path
 
 # Third party imports
-from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QVBoxLayout
 from spyder.config.base import get_translation
 from spyder.plugins import SpyderPluginWidget
@@ -73,7 +72,6 @@ class UnitTestPlugin(SpyderPluginWidget):
     """Spyder plugin for unit testing."""
 
     CONF_SECTION = 'unittest'
-    edit_goto = Signal(str, int, str)
 
     def __init__(self, parent=None):
         """Initialize plugin and corresponding widget."""
@@ -112,7 +110,6 @@ class UnitTestPlugin(SpyderPluginWidget):
 
     def register_plugin(self):
         """Register plugin in Spyder's main window."""
-        self.edit_goto.connect(self.main.editor.load)
         self.main.add_dockwidget(self)
 
         unittesting_act = create_action(
