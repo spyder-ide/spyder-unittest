@@ -12,8 +12,9 @@ import os.path
 
 # Third party imports
 from qtpy.QtCore import Signal
+from qtpy.QtWidgets import QVBoxLayout
 from spyder.config.base import get_translation
-from spyder.plugins import SpyderPluginMixin
+from spyder.plugins import SpyderPluginWidget
 from spyder.utils import icon_manager as ima
 from spyder.utils.qthelpers import create_action
 
@@ -32,9 +33,17 @@ class UnitTestWidgetInSpyder(UnitTestWidget):
     integration with Spyder.
     """
 
-    def __init__(self, parent=None):
-        """Constructor."""
-        UnitTestWidget.__init__(self, parent)
+    def __init__(self, main):
+        """
+        Constructor.
+
+        Parameters
+        ----------
+        main : MainWindow
+            Spyder main window
+        """
+        UnitTestWidget.__init__(self, parent=main)
+        self.main = main
 
     def get_pythonpath(self):
         """
@@ -60,16 +69,21 @@ class UnitTestWidgetInSpyder(UnitTestWidget):
         return Config(wdir=dirname)
 
 
-class UnitTestPlugin(UnitTestWidgetInSpyder, SpyderPluginMixin):
-    """Unit testing."""
+class UnitTestPlugin(SpyderPluginWidget):
+    """Spyder plugin for unit testing."""
 
     CONF_SECTION = 'unittest'
     edit_goto = Signal(str, int, str)
 
     def __init__(self, parent=None):
-        """Unit testing."""
-        UnitTestWidgetInSpyder.__init__(self, parent=parent)
-        SpyderPluginMixin.__init__(self, parent)
+        """Initialize plugin and corresponding widget."""
+        SpyderPluginWidget.__init__(self, parent)
+
+        # Add unit test widget in dockwindow
+        self.unittestwidget = UnitTestWidgetInSpyder(self.main)
+        layout = QVBoxLayout()
+        layout.addWidget(self.unittestwidget)
+        self.setLayout(layout)
 
         # Initialize plugin
         self.initialize_plugin()
@@ -85,7 +99,7 @@ class UnitTestPlugin(UnitTestWidgetInSpyder, SpyderPluginMixin):
 
     def get_focus_widget(self):
         """Return the widget to give focus to this dockwidget when raised."""
-        return self.datatree
+        return self.unittestwidget.datatree
 
     def get_plugin_actions(self):
         """Return a list of actions related to plugin."""
@@ -137,4 +151,4 @@ class UnitTestPlugin(UnitTestWidgetInSpyder, SpyderPluginMixin):
             self.dockwidget.setVisible(True)
             self.dockwidget.setFocus()
             self.dockwidget.raise_()
-        super(UnitTestPlugin, self).maybe_configure_and_start()
+        self.unittestwidget.maybe_configure_and_start()
