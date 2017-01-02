@@ -24,7 +24,43 @@ from .widgets.unittestgui import UnitTestWidget, is_unittesting_installed
 _ = get_translation("unittest", dirname="spyder_unittest")
 
 
-class UnitTestPlugin(UnitTestWidget, SpyderPluginMixin):
+class UnitTestWidgetInSpyder(UnitTestWidget):
+    """
+    Unit test widget for use inside Spyder.
+
+    This class overrides some functions in `UnitTestWidget` to provide better
+    integration with Spyder.
+    """
+
+    def __init__(self, parent=None):
+        """Constructor."""
+        UnitTestWidget.__init__(self, parent)
+
+    def get_pythonpath(self):
+        """
+        Return directories to be added to the Python path.
+
+        Use Python path from Spyder. Overrides function in base class.
+
+        Returns
+        -------
+        list of str
+        """
+        return self.main.get_spyder_pythonpath()
+
+    def get_default_config(self):
+        """
+        Return configuration which is proposed when current config is invalid.
+
+        Propose to use directory of current file as working directory for
+        testing.
+        """
+        filename = self.main.editor.get_current_filename()
+        dirname = os.path.dirname(filename)
+        return Config(wdir=dirname)
+
+
+class UnitTestPlugin(UnitTestWidgetInSpyder, SpyderPluginMixin):
     """Unit testing."""
 
     CONF_SECTION = 'unittest'
@@ -32,7 +68,7 @@ class UnitTestPlugin(UnitTestWidget, SpyderPluginMixin):
 
     def __init__(self, parent=None):
         """Unit testing."""
-        UnitTestWidget.__init__(self, parent=parent)
+        UnitTestWidgetInSpyder.__init__(self, parent=parent)
         SpyderPluginMixin.__init__(self, parent)
 
         # Initialize plugin
@@ -87,29 +123,6 @@ class UnitTestPlugin(UnitTestWidget, SpyderPluginMixin):
     def apply_plugin_settings(self, options):
         """Apply configuration file's plugin settings."""
         pass
-
-    def get_pythonpath(self):
-        """
-        Return directories to be added to the Python path.
-
-        Use Python path from Spyder. Overrides function in base class.
-
-        Returns
-        -------
-        list of str
-        """
-        return self.main.get_spyder_pythonpath()
-
-    def get_default_config(self):
-        """
-        Return configuration which is proposed when current config is invalid.
-
-        Propose to use directory of current file as working directory for
-        testing.
-        """
-        filename = self.main.editor.get_current_filename()
-        dirname = os.path.dirname(filename)
-        return Config(wdir=dirname)
 
     # ----- Public API --------------------------------------------------------
     def maybe_configure_and_start(self):
