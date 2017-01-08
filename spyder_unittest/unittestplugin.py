@@ -7,67 +7,20 @@
 # -----------------------------------------------------------------------------
 """Unit testing Plugin."""
 
-# Standard library imports
-import os.path
-
 # Third party imports
 from qtpy import PYQT5
 from qtpy.QtWidgets import QVBoxLayout
 from spyder.config.base import get_translation
 from spyder.plugins import SpyderPluginWidget
+from spyder.py3compat import getcwd
 from spyder.utils import icon_manager as ima
 from spyder.utils.qthelpers import create_action
 import spyder
 
 # Local imports
-from .widgets.configdialog import Config
 from .widgets.unittestgui import UnitTestWidget, is_unittesting_installed
 
 _ = get_translation("unittest", dirname="spyder_unittest")
-
-
-class UnitTestWidgetInSpyder(UnitTestWidget):
-    """
-    Unit test widget for use inside Spyder.
-
-    This class overrides some functions in `UnitTestWidget` to provide better
-    integration with Spyder.
-    """
-
-    def __init__(self, main):
-        """
-        Constructor.
-
-        Parameters
-        ----------
-        main : MainWindow
-            Spyder main window
-        """
-        UnitTestWidget.__init__(self, parent=main)
-        self.main = main
-
-    def get_pythonpath(self):
-        """
-        Return directories to be added to the Python path.
-
-        Use Python path from Spyder. Overrides function in base class.
-
-        Returns
-        -------
-        list of str
-        """
-        return self.main.get_spyder_pythonpath()
-
-    def get_default_config(self):
-        """
-        Return configuration which is proposed when current config is invalid.
-
-        Propose to use directory of current file as working directory for
-        testing.
-        """
-        filename = self.main.editor.get_current_filename()
-        dirname = os.path.dirname(filename)
-        return Config(wdir=dirname)
 
 
 class UnitTestPlugin(SpyderPluginWidget):
@@ -82,14 +35,51 @@ class UnitTestPlugin(SpyderPluginWidget):
         else:
             SpyderPluginWidget.__init__(self, parent)
 
+        # Create unit test widget
+        self.unittestwidget = UnitTestWidget(self.main)
+        self.update_pythonpath()
+        self.update_default_wdir()
+
+        # Connect to relevant signals
+        self.main.sig_pythonpath_changed.connect(self.update_pythonpath)
+        self.main.workingdirectory.set_explorer_cwd.connect(
+            self.update_default_wdir)
+        self.main.projects.sig_project_created.connect(
+            self.update_default_wdir)
+        self.main.projects.sig_project_loaded.connect(self.update_default_wdir)
+        self.main.projects.sig_project_closed.connect(self.update_default_wdir)
+
         # Add unit test widget in dockwindow
-        self.unittestwidget = UnitTestWidgetInSpyder(self.main)
         layout = QVBoxLayout()
         layout.addWidget(self.unittestwidget)
         self.setLayout(layout)
 
         # Initialize plugin
         self.initialize_plugin()
+
+    def update_pythonpath(self):
+        """
+        Update Python path used to run unit tests.
+
+        This function is called whenever the Python path set in Spyder changes.
+        It synchronizes the Python path in the unittest widget with the Python
+        path in Spyder.
+        """
+        self.unittestwidget.pythonpath = self.main.get_spyder_pythonpath()
+
+    def update_default_wdir(self):
+        """
+        Update default working dir for running unit tests.
+
+        The default working dir for running unit tests is set to the project
+        directory if a project is open, or the current working directory if no
+        project is opened. This function is called whenever this directory may
+        change.
+        """
+        wdir = self.main.projects.get_active_project_path()
+        if not wdir:  # if no project opened
+            wdir = getcwd()
+        self.unittestwidget.default_wdir = wdir
 
     # ----- SpyderPluginWidget API --------------------------------------------
     def get_plugin_title(self):

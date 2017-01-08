@@ -60,6 +60,10 @@ class UnitTestWidget(QWidget):
     ----------
     config : Config
         Configuration for running tests.
+    default_wdir : str
+        Default choice of working directory.
+    pythonpath : list of str
+        Directories to be added to the Python path when running tests.
     testrunner : TestRunner or None
         Object associated with the current test process, or `None` if no test
         process is running at the moment.
@@ -80,6 +84,8 @@ class UnitTestWidget(QWidget):
         self.setWindowTitle("Unit testing")
 
         self.config = None
+        self.pythonpath = None
+        self.default_wdir = None
         self.testrunner = None
         self.output = None
         self.datatree = UnitTestDataTree(self)
@@ -150,33 +156,12 @@ class UnitTestWidget(QWidget):
                 readonly=True,
                 size=(700, 500)).exec_()
 
-    def get_pythonpath(self):
-        """
-        Return directories to be added to the Python path.
-
-        This function returns an empty list but it can be overridden
-        in subclasses.
-
-        Returns
-        -------
-        list of str
-        """
-        return []
-
-    def get_default_config(self):
-        """
-        Return configuration which is proposed when current config is invalid.
-
-        This function can be overriden in subclasses.
-        """
-        return Config()
-
     def configure(self):
         """Configure tests."""
         if self.config:
             oldconfig = self.config
         else:
-            oldconfig = self.get_default_config()
+            oldconfig = Config(wdir=self.default_wdir)
         config = ask_for_config(oldconfig)
         if config:
             self.config = config
@@ -213,11 +198,12 @@ class UnitTestWidget(QWidget):
         """
         if config is None:
             config = self.config
-        pythonpath = self.get_pythonpath()
+        pythonpath = self.pythonpath
         self.datatree.clear()
         tempfilename = get_conf_path('unittest.results')
         self.testrunner = TestRunner(self, tempfilename)
         self.testrunner.sig_finished.connect(self.process_finished)
+
         try:
             self.testrunner.start(config, pythonpath)
         except RuntimeError:
@@ -356,11 +342,11 @@ def test():
 
     # set wdir to .../spyder_unittest
     wdir = osp.abspath(osp.join(osp.dirname(__file__), osp.pardir))
-    widget.get_default_config = lambda: Config('py.test', wdir)
+    widget.config = Config('py.test', wdir)
 
     # add wdir's parent to python path, so that `import spyder_unittest` works
     rootdir = osp.abspath(osp.join(wdir, osp.pardir))
-    widget.get_pythonpath = lambda: [rootdir]
+    widget.pythonpath = rootdir
 
     widget.resize(800, 600)
     widget.show()
