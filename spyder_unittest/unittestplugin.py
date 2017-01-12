@@ -8,14 +8,12 @@
 """Unit testing Plugin."""
 
 # Third party imports
-from qtpy import PYQT5
 from qtpy.QtWidgets import QVBoxLayout
 from spyder.config.base import get_translation
 from spyder.plugins import SpyderPluginWidget
 from spyder.py3compat import getcwd
 from spyder.utils import icon_manager as ima
 from spyder.utils.qthelpers import create_action
-import spyder
 
 # Local imports
 from .widgets.unittestgui import UnitTestWidget, is_unittesting_installed
@@ -30,10 +28,8 @@ class UnitTestPlugin(SpyderPluginWidget):
 
     def __init__(self, parent=None):
         """Initialize plugin and corresponding widget."""
-        if spyder.version_info[0] < 4 and PYQT5:
-            SpyderPluginWidget.__init__(self, parent, main=parent)
-        else:
-            SpyderPluginWidget.__init__(self, parent)
+        SpyderPluginWidget.__init__(self, parent)
+        self.main = parent  # Spyder 3 compatibility
 
         # Create unit test widget
         self.unittestwidget = UnitTestWidget(self.main)
