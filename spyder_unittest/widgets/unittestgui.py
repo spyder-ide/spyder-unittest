@@ -10,29 +10,24 @@
 from __future__ import with_statement
 
 # Standard library imports
-import os
+from collections import Counter
 import os.path as osp
 import sys
 
 # Third party imports
-from lxml import etree
-from qtpy.QtCore import (QByteArray, QProcess, QProcessEnvironment, Qt,
-                         QTextCodec, Signal)
+from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QBrush, QColor, QFont
-from qtpy.QtWidgets import (QApplication, QHBoxLayout, QLabel, QMenu,
-                            QMessageBox, QToolButton, QTreeWidget,
-                            QTreeWidgetItem, QVBoxLayout, QWidget)
+from qtpy.QtWidgets import (QHBoxLayout, QLabel, QMenu, QMessageBox,
+                            QToolButton, QTreeWidget, QTreeWidgetItem,
+                            QVBoxLayout, QWidget)
 from spyder.config.base import get_conf_path, get_translation
-from spyder.py3compat import to_text_string
 from spyder.utils import icon_manager as ima
-from spyder.utils.misc import add_pathlist_to_PYTHONPATH
 from spyder.utils.qthelpers import create_action, create_toolbutton
 from spyder.widgets.variableexplorer.texteditor import TextEditor
 
 # Local imports
+from spyder_unittest.backend.testrunner import Category, TestRunner
 from spyder_unittest.widgets.configdialog import Config, ask_for_config
-
-locale_codec = QTextCodec.codecForLocale()
 
 # This is needed for testing this module as a stand alone script
 try:
@@ -43,14 +38,10 @@ except KeyError as error:
 
 COL_POS = 0  # Position is not displayed but set as Qt.UserRole
 
-COLOR_OK = QBrush(QColor("#C1FFBA"))
-COLOR_SKIP = QBrush(QColor("#C5C5C5"))
-COLOR_FAIL = QBrush(QColor("#FF0000"))
 COLORS = {
-    "ok": COLOR_OK,
-    "failure": COLOR_FAIL,  # py.test
-    "error": COLOR_FAIL,  # nose
-    "skipped": COLOR_SKIP,  # py.test, nose
+    Category.OK: QBrush(QColor("#C1FFBA")),
+    Category.FAIL: QBrush(QColor("#FF0000")),
+    Category.SKIP: QBrush(QColor("#C5C5C5"))
 }
 
 
@@ -65,17 +56,19 @@ class UnitTestWidget(QWidget):
     """
     Unit testing widget.
 
-    Fields
-    ------
+    Attributes
+    ----------
     config : Config
         Configuration for running tests.
+    testrunner : TestRunner or None
+        Object associated with the current test process, or `None` if no test
+        process is running at the moment.
 
     Signals
     -------
     sig_finished: Emitted when plugin finishes processing tests.
     """
 
-    DATAPATH = get_conf_path('unittest.results')
     VERSION = '0.0.1'
 
     sig_finished = Signal()
@@ -86,11 +79,9 @@ class UnitTestWidget(QWidget):
 
         self.setWindowTitle("Unit testing")
 
-        self.output = None
-        self.error_output = None
-        self.process = None
         self.config = None
-
+        self.testrunner = None
+        self.output = None
         self.datatree = UnitTestDataTree(self)
 
         self.start_button = create_toolbutton(self, text_beside_icon=True)
@@ -222,62 +213,25 @@ class UnitTestWidget(QWidget):
         """
         if config is None:
             config = self.config
-        framework = config.framework
-        wdir = config.wdir
         pythonpath = self.get_pythonpath()
-
-        self.process = QProcess(self)
-        self.process.setProcessChannelMode(QProcess.SeparateChannels)
-        self.process.setWorkingDirectory(wdir)
-        self.process.readyReadStandardOutput.connect(self.read_output)
-        self.process.readyReadStandardError.connect(
-            lambda: self.read_output(error=True))
-        self.process.finished.connect(self.finished)
-
-        if pythonpath is not None:
-            env = [
-                to_text_string(_pth)
-                for _pth in self.process.systemEnvironment()
-            ]
-            add_pathlist_to_PYTHONPATH(env, pythonpath)
-            processEnvironment = QProcessEnvironment()
-            for envItem in env:
-                envName, separator, envValue = envItem.partition('=')
-                processEnvironment.insert(envName, envValue)
-            self.process.setProcessEnvironment(processEnvironment)
-
-        self.output = ''
-        self.error_output = ''
-
-        if framework == 'nose':
-            executable = "nosetests"
-            p_args = ['--with-xunit', "--xunit-file=%s" % self.DATAPATH]
-        elif framework == 'py.test':
-            executable = "py.test"
-            p_args = ['--junit-xml', self.DATAPATH]
-        else:
-            raise ValueError('Unknown framework')
-
-        if os.name == 'nt':
-            executable += '.exe'
-
-        self.process.start(executable, p_args)
-
-        running = self.process.waitForStarted()
-        self.set_running_state(running)
-
-        if not running:
+        self.datatree.clear()
+        tempfilename = get_conf_path('unittest.results')
+        self.testrunner = TestRunner(self, tempfilename)
+        self.testrunner.sig_finished.connect(self.process_finished)
+        try:
+            self.testrunner.start(config, pythonpath)
+        except RuntimeError:
             QMessageBox.critical(self,
                                  _("Error"), _("Process failed to start"))
         else:
-            self.datatree.clear()
+            self.set_running_state(True)
             self.status_label.setText(_('<b>Running tests ...<b>'))
 
     def set_running_state(self, state):
         """
-        Change start/stop button according to whether tests are running.
+        Change start/kill button according to whether tests are running.
 
-        If tests are running, then display a stop button, otherwise display
+        If tests are running, then display a kill button, otherwise display
         a start button.
 
         Parameters
@@ -292,9 +246,10 @@ class UnitTestWidget(QWidget):
             pass
         if state:
             button.setIcon(ima.icon('stop'))
-            button.setText(_('Stop'))
-            button.setToolTip(_('Stop current test process'))
-            button.clicked.connect(lambda checked: self.kill_if_running())
+            button.setText(_('Kill'))
+            button.setToolTip(_('Kill current test process'))
+            if self.testrunner:
+                button.clicked.connect(self.testrunner.kill_if_running)
         else:
             button.setIcon(ima.icon('run'))
             button.setText(_("Run tests"))
@@ -302,50 +257,20 @@ class UnitTestWidget(QWidget):
             button.clicked.connect(
                 lambda checked: self.maybe_configure_and_start())
 
-    def read_output(self, error=False):
-        """Read output of testing process."""
-        if error:
-            self.process.setReadChannel(QProcess.StandardError)
-        else:
-            self.process.setReadChannel(QProcess.StandardOutput)
-        qba = QByteArray()
-        while self.process.bytesAvailable():
-            if error:
-                qba += self.process.readAllStandardError()
-            else:
-                qba += self.process.readAllStandardOutput()
-        text = to_text_string(locale_codec.toUnicode(qba.data()))
-        if error:
-            self.error_output += text
-        else:
-            self.output += text
+    def process_finished(self, testresults, output):
+        """
+        Called when unit test process finished.
 
-    def finished(self):
-        """Testing has finished."""
+        This function collects and shows the test results and output.
+        """
+        self.output = output
         self.set_running_state(False)
-        self.output = self.error_output + self.output
-        self.show_data(justanalyzed=True)
-        self.sig_finished.emit()
-
-    def kill_if_running(self):
-        """Kill testing process if it is running."""
-        if self.process is not None:
-            if self.process.state() == QProcess.Running:
-                self.process.kill()
-                self.process.waitForFinished()
-
-    def show_data(self, justanalyzed=False):
-        """Show test results."""
-        if not justanalyzed:
-            self.output = None
-        self.log_action.setEnabled(
-            self.output is not None and len(self.output) > 0)
-        self.kill_if_running()
-
-        self.datatree.load_data(self.DATAPATH)
-        QApplication.processEvents()
+        self.testrunner = None
+        self.log_action.setEnabled(bool(output))
+        self.datatree.testresults = testresults
         msg = self.datatree.show_tree()
         self.status_label.setText(msg)
+        self.sig_finished.emit()
 
 
 class UnitTestDataTree(QTreeWidget):
@@ -357,16 +282,13 @@ class UnitTestDataTree(QTreeWidget):
         self.header_list = [
             _('Status'), _('Name'), _('Message'), _('Time (ms)')
         ]
-        self.data = None  # To be filled by self.load_data()
-        self.max_time = 0  # To be filled by self.load_data()
+        self.testresults = []
         self.header().setDefaultAlignment(Qt.AlignCenter)
         self.setColumnCount(len(self.header_list))
         self.setHeaderLabels(self.header_list)
         self.clear()
         self.setItemsExpandable(True)
         self.setSortingEnabled(False)
-        # self.connect(self, SIGNAL('itemActivated(QTreeWidgetItem*,int)'),
-        #              self.item_activated)
 
     def show_tree(self):
         """Populate the tree with unit testing data and display it."""
@@ -376,15 +298,10 @@ class UnitTestDataTree(QTreeWidget):
             self.resizeColumnToContents(col)
         return msg
 
-    def load_data(self, profdatafile):
-        """Load unit testing data."""
-        self.data = etree.parse(profdatafile).getroot()
-
     def populate_tree(self):
         """Create each item (and associated data) in the tree."""
-        if not len(self.data):
-            self.show_message(_('No results to show.'))
-            return
+        if not len(self.testresults):
+            return _('No results to show.')
 
         try:
             monospace_font = self.window().editor.get_plugin_font()
@@ -392,59 +309,31 @@ class UnitTestDataTree(QTreeWidget):
             monospace_font = QFont("Courier New")
             monospace_font.setPointSize(10)
 
-        num_passed_tests = 0
-        num_failed_tests = 0
-
-        for testcase in self.data:
+        for testresult in self.testresults:
             testcase_item = QTreeWidgetItem(self)
-            testcase_item.setData(1, Qt.DisplayRole, "{0}.{1}".format(
-                testcase.get("classname"), testcase.get("name")))
-            testcase_item.setData(3, Qt.DisplayRole,
-                                  float(testcase.get("time")) * 1e3)
+            testcase_item.setData(0, Qt.DisplayRole, testresult.status)
+            testcase_item.setData(1, Qt.DisplayRole, testresult.name)
+            testcase_item.setData(2, Qt.DisplayRole, testresult.message)
+            testcase_item.setData(3, Qt.DisplayRole, testresult.time * 1e3)
+            color = COLORS[testresult.category]
+            for col in range(self.columnCount()):
+                testcase_item.setBackground(col, color)
+            if testresult.extra_text:
+                for line in testresult.extra_text.rstrip().split("\n"):
+                    error_content_item = QTreeWidgetItem(testcase_item)
+                    error_content_item.setData(0, Qt.DisplayRole, line)
+                    error_content_item.setFirstColumnSpanned(True)
+                    error_content_item.setFont(0, monospace_font)
 
-            if len(testcase):
-                test_error = testcase[0]
-
-                status = test_error.tag
-                testcase_item.setData(0, Qt.DisplayRole, status)
-                color = COLORS[status]
-                for col in range(self.columnCount()):
-                    testcase_item.setBackground(col, color)
-
-                if color == COLOR_OK:
-                    num_passed_tests += 1
-                elif color == COLOR_FAIL:
-                    num_failed_tests += 1
-
-                type_ = test_error.get("type")
-                message = test_error.get("message")
-                if type_ and message:
-                    text = "{0}: {1}".format(type_, message)
-                elif type_:
-                    text = type_
-                else:
-                    text = message
-                testcase_item.setData(2, Qt.DisplayRole, text)
-
-                text = test_error.text
-                if text:
-                    for line in text.rstrip().split("\n"):
-                        error_content_item = QTreeWidgetItem(testcase_item)
-                        error_content_item.setData(0, Qt.DisplayRole, line)
-                        error_content_item.setFirstColumnSpanned(True)
-                        error_content_item.setFont(0, monospace_font)
-            else:
-                testcase_item.setData(0, Qt.DisplayRole, "ok")
-                num_passed_tests += 1
-
-        if num_failed_tests == 1:
+        counts = Counter(res.category for res in self.testresults)
+        if counts[Category.FAIL] == 1:
             test_or_tests = _('test')
         else:
             test_or_tests = _('tests')
-        failed_txt = '{} {} failed'.format(num_failed_tests, test_or_tests)
-        passed_txt = '{} passed'.format(num_passed_tests)
-        num_other_tests = len(self.data) - num_failed_tests - num_passed_tests
-        other_txt = '{} other'.format(num_other_tests)
+        failed_txt = '{} {} failed'.format(counts[Category.FAIL],
+                                           test_or_tests)
+        passed_txt = '{} passed'.format(counts[Category.OK])
+        other_txt = '{} other'.format(counts[Category.SKIP])
         msg = '<b>{}, {}, {}</b>'.format(failed_txt, passed_txt, other_txt)
         return msg
 
