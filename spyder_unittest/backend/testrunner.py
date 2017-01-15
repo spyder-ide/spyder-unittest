@@ -16,8 +16,15 @@ import tempfile
 from lxml import etree
 from qtpy.QtCore import (QObject, QProcess, QProcessEnvironment, QTextCodec,
                          Signal)
+from spyder.config.base import get_translation
 from spyder.py3compat import to_text_string
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH
+
+try:
+    _ = get_translation("unittest", dirname="spyder_unittest")
+except KeyError as error:
+    import gettext
+    _ = gettext.gettext
 
 # Class representing test results
 TestResult = namedtuple('TestResult', [
@@ -31,14 +38,6 @@ class Category:
     OK = 1
     FAIL = 2
     SKIP = 3
-
-
-STATUS_TO_CATEGORY = {
-    'ok': Category.OK,
-    'failure': Category.FAIL,  # py.test
-    'error': Category.FAIL,  # nose
-    'skipped': Category.SKIP,  # py.test, nose
-}
 
 
 class TestRunner(QObject):
@@ -187,23 +186,40 @@ class TestRunner(QObject):
 
         testresults = []
         for testcase in data:
+            category = Category.OK
+            status = 'ok'
             name = '{0}.{1}'.format(
                 testcase.get('classname'), testcase.get('name'))
+            message = ''
             time = float(testcase.get('time'))
-            if len(testcase):
-                test_error = testcase[0]
-                status = test_error.tag
-                type_ = test_error.get('type')
-                message = test_error.get('message', default='')
-                if type_ and message:
-                    message = '{0}: {1}'.format(type_, message)
-                elif type_:
-                    message = type_
-                extra_text = test_error.text or ''
-            else:
-                status = 'ok'
-                message = extra_text = ''
-            category = STATUS_TO_CATEGORY[status]
+            extras = []
+
+            for child in testcase:
+                if child.tag in ('error', 'failure', 'skipped'):
+                    if child.tag == 'skipped':
+                        category = Category.SKIP
+                    else:
+                        category = Category.FAIL
+                    status = child.tag
+                    type_ = child.get('type')
+                    message = child.get('message', default='')
+                    if type_ and message:
+                        message = '{0}: {1}'.format(type_, message)
+                    elif type_:
+                        message = type_
+                    if child.text:
+                        extras.append(child.text)
+                elif child.tag in ('system-out', 'system-err'):
+                    if child.tag == 'system-out':
+                        heading = _('Captured stdout')
+                    else:
+                        heading = _('Captured stderr')
+                    contents = child.text.rstrip('\n')
+                    extras.append('----- {} -----\n{}'.format(heading,
+                                                              contents))
+
+            extra_text = '\n\n'.join(extras)
             testresults.append(
                 TestResult(category, status, name, message, time, extra_text))
+
         return testresults

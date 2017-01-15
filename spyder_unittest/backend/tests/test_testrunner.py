@@ -91,3 +91,32 @@ def test_testrunner_load_data(tmpdir):
     assert results[2].message == 'skip message'
     assert results[2].time == 0.05
     assert results[2].extra_text == 'text2'
+
+
+def test_testrunner_load_data_failing_test_with_stdout(tmpdir):
+    result_file = tmpdir.join('results')
+    result_txt = """<?xml version="1.0" encoding="utf-8"?>
+<testsuite errors="0" failures="1" name="pytest" skips="0" tests="1" time="0.1">
+<testcase classname="test_foo" file="test_foo.py" line="2" name="test1" time="0.04">
+<failure message="failure message">text</failure>
+<system-out>stdout text
+</system-out></testcase></testsuite>"""
+    result_file.write(result_txt)
+    runner = TestRunner(None, result_file.strpath)
+    results = runner.load_data()
+    assert results[0].extra_text == (
+        'text\n\n' + '----- Captured stdout -----\n' + 'stdout text')
+
+
+def test_testrunner_load_data_passing_test_with_stdout(tmpdir):
+    result_file = tmpdir.join('results')
+    result_txt = """<?xml version="1.0" encoding="utf-8"?>
+<testsuite errors="0" failures="0" name="pytest" skips="0" tests="1" time="0.1">
+<testcase classname="test_foo" file="test_foo.py" line="2" name="test1" time="0.04">
+<system-out>stdout text
+</system-out></testcase></testsuite>"""
+    result_file.write(result_txt)
+    runner = TestRunner(None, result_file.strpath)
+    results = runner.load_data()
+    assert results[0].extra_text == (
+        '----- Captured stdout -----\n' + 'stdout text')
