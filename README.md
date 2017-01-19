@@ -36,6 +36,21 @@ pip install git+git://github.com/spyder-ide/spyder-unittest.git
 
 The plugin is not yet included in PyPI.
 
+## Dependencies
+
+You need to have the following installed in order to run the unittest
+plugin.
+
+* [Spyder](https://github.com/spyder-ide/spyder) (obviously), at least version 3.0
+* [exml](https://bitbucket.org/dpwiz/exml/src)
+* the testing framework that you will be using: [py.test](https://pytest.org)
+  and/or [nose](https://nose.readthedocs.io)
+
+In order to run the tests distributed with this plugin, you need
+[nose](https://nose.readthedocs.io), [py.test](https://pytest.org) 
+and [pytest-qt](https://github.com/pytest-dev/pytest-qt). If you use Python 2, 
+you also need [mock](https://github.com/testing-cabal/mock).
+
 ## Usage
 
 The plugin adds an item `Run unit tests` to the `Run` menu in Spyder.
