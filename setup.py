@@ -8,8 +8,15 @@ from setuptools import setup, find_packages
 import os
 import os.path as osp
 
-from spyder_unittest import __version__
 
+def get_version():
+    """Get version from source file"""
+    with open("spyder_unittest/__init__.py") as f:
+        lines = f.read().splitlines()
+        for l in lines:
+            if "__version__" in l:
+                version = l.split("=")[1].strip()
+                return version
 
 def get_package_data(name, extlist):
     """Return data files for package *name* with extensions in *extlist*"""
@@ -41,7 +48,7 @@ testing frameworks.
 
 setup(
     name=LIBNAME,
-    version=__version__,
+    version=get_version(),
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     package_data={LIBNAME: get_package_data(LIBNAME, EXTLIST)},
     keywords=["Qt PyQt4 PyQt5 spyder plugins testing"],
