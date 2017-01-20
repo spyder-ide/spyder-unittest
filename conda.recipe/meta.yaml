@@ -1,7 +1,7 @@
-{% set name = "spyder-unitest" %}
-{% set version = "0.1" %}
+{% set name = "spyder-unittest" %}
+{% set version = "0.1b1" %}
 {% set hash_type = "sha256" %}
-{% set hash = "" %}
+{% set hash = "329e8409da1e8549c05d307ecfeaf00b25653d73f8400a144d1f50db008a04d7" %}
 
 package:
   name: {{ name|lower }}
@@ -9,7 +9,7 @@ package:
 
 source:
   fn: {{ name }}-{{ version }}.tar.gz
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name.replace('-', '_') }}-{{ version }}.tar.gz
   {{ hash_type }}: {{ hash }}
 
 build:
@@ -22,10 +22,11 @@ requirements:
     - setuptools
 
   run:
+    - lxml
     - nose
+    - pytest
     - python
-    - pytest-qt
-    - spyder
+    - spyder >=3
 
 test:
   imports:
@@ -44,4 +45,5 @@ about:
 extra:
   recipe-maintainers:
     - ccordoba12
+    - jitseniesen
     - goanpeca
