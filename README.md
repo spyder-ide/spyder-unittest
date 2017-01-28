@@ -42,7 +42,7 @@ You need to have the following installed in order to run the unittest
 plugin.
 
 * [Spyder](https://github.com/spyder-ide/spyder) (obviously), at least version 3.0
-* [exml](https://bitbucket.org/dpwiz/exml/src)
+* [lxml](http://lxml.de/)
 * the testing framework that you will be using: [py.test](https://pytest.org)
   and/or [nose](https://nose.readthedocs.io)
 

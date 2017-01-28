@@ -1,7 +1,7 @@
 {% set name = "spyder-unittest" %}
-{% set version = "0.1b1" %}
+{% set version = "0.1b2" %}
 {% set hash_type = "sha256" %}
-{% set hash = "329e8409da1e8549c05d307ecfeaf00b25653d73f8400a144d1f50db008a04d7" %}
+{% set hash = "786d9d96fa39396f409845a558363c92ad30744173d1cd6dea0d147d71e773b6" %}
 
 package:
   name: {{ name|lower }}
