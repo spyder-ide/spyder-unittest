@@ -82,7 +82,7 @@ install:
   - if "%USE_QT_API%" == "PySide2" conda install qt=5.* pyside2
   - if "%USE_QT_API%" == "PyQt4" conda install qt=4.* pyqt=4.*
   - if "%USE_QT_API%" == "PySide" conda install qt=4.* pyside
-  - "conda install ciocheck -c conda-forge"
+  - "conda install ciocheck -c spyder-ide"
   - "python setup.py develop"
   - "spyder --reset"
   - "spyder"
