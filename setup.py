@@ -16,6 +16,7 @@ def get_version():
         for l in lines:
             if "__version__" in l:
                 version = l.split("=")[1].strip()
+                version = version.replace("'", '').replace('"', '')
                 return version
 
 def get_package_data(name, extlist):
