@@ -26,30 +26,14 @@ testing frameworks.
 
 ## Installation
 
-See https://github.com/spyder-ide/spyder/wiki/User-plugins but in
-short, the following command installs the development version of the
-unittest plugin:
+The unittest plugin is available in the `spyder-ide` channel in Anaconda and in PyPI,
+so it can be installed with the following commands:
 
-```python
-pip install git+git://github.com/spyder-ide/spyder-unittest.git
-```
+* Using Anaconda: `conda install -c spyder-ide spyder-unittest`
+* Using pip: `pip install spyder-unittest`
 
-The plugin is not yet included in PyPI.
-
-## Dependencies
-
-You need to have the following installed in order to run the unittest
-plugin.
-
-* [Spyder](https://github.com/spyder-ide/spyder) (obviously), at least version 3.0
-* [lxml](http://lxml.de/)
-* the testing framework that you will be using: [py.test](https://pytest.org)
-  and/or [nose](https://nose.readthedocs.io)
-
-In order to run the tests distributed with this plugin, you need
-[nose](https://nose.readthedocs.io), [py.test](https://pytest.org) 
-and [pytest-qt](https://github.com/pytest-dev/pytest-qt). If you use Python 2, 
-you also need [mock](https://github.com/testing-cabal/mock).
+All dependencies will be automatically installed. You have to restart Spyder before
+you can use the plugin.
 
 ## Usage
 
@@ -62,3 +46,21 @@ with the results.
 If you want to run tests in a different directory or switch testing
 frameworks, click `Configure` in the Options menu (cogwheel icon), 
 which is located in the upper right corner of the `Unit testing` pane.
+
+## Development
+
+Development of the plugin is done at https://github.com/spyder-ide/spyder-unittest .
+You can install the development version of the plugin by cloning the git repository
+and running `pip install .`, possibly with the `--editable` flag.
+
+The plugin has the following dependencies:
+
+* [spyder](https://github.com/spyder-ide/spyder) (obviously), at least version 3.0
+* [lxml](http://lxml.de/)
+* the testing framework that you will be using: [py.test](https://pytest.org)
+  and/or [nose](https://nose.readthedocs.io)
+
+In order to run the tests distributed with this plugin, you need
+[nose](https://nose.readthedocs.io), [py.test](https://pytest.org) 
+and [pytest-qt](https://github.com/pytest-dev/pytest-qt). If you use Python 2, 
+you also need [mock](https://github.com/testing-cabal/mock).
