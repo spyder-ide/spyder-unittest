@@ -1,5 +1,9 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# Copyright © 2013 Spyder Project Contributors
+# Licensed under the terms of the MIT License
+# (see LICENSE.txt for details)
+
 """
 Setup script for spyder_unittest
 """
@@ -32,7 +36,7 @@ def get_package_data(name, extlist):
 
 
 # Requirements
-REQUIREMENTS = ['lxml', 'spyder>=3']
+REQUIREMENTS = ['lxml', 'nose', 'pytest', 'spyder>=3']
 EXTLIST = ['.jpg', '.png', '.json', '.mo', '.ini']
 LIBNAME = 'spyder_unittest'
 
@@ -56,7 +60,7 @@ setup(
     install_requires=REQUIREMENTS,
     url='https://github.com/spyder-ide/spyder-unittest',
     license='MIT',
-    author="The Spyder Project Contributors",
+    author="Spyder Project Contributors",
     description='Plugin to run tests from within the Spyder IDE',
     long_description=LONG_DESCRIPTION,
     classifiers=[
