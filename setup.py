@@ -15,7 +15,8 @@ import os.path as osp
 
 def get_version():
     """Get version from source file"""
-    with open("spyder_unittest/__init__.py") as f:
+    import codecs
+    with codecs.open("spyder_unittest/__init__.py", encoding="utf-8") as f:
         lines = f.read().splitlines()
         for l in lines:
             if "__version__" in l:
