@@ -1,5 +1,16 @@
 # History of changes
 
+## Version 0.1.2 (2017/03/04)
+
+Thos version fixes a bug in the packaging code.
+
+### Pull Requests Merged
+
+* [PR 63](https://github.com/spyder-ide/spyder-unittest/pull/63) - Fix parsing of module version
+
+In this release 1 pull request was closed.
+
+
 ## Version 0.1.1 (2017/02/11)
 
 This version improves the packaging. The code itself was not changed. 
@@ -17,6 +28,7 @@ In this release 3 issues were closed.
 * [PR 59](https://github.com/spyder-ide/spyder-unittest/pull/59) - Improve distributed package
 
 In this release 1 pull request was closed.
+
 
 ## Version 0.1.0 (2017/02/05)
 
