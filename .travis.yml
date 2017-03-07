@@ -63,4 +63,4 @@ install:
 
 script:
   - ciocheck spyder_unittest
-  - py.test spyder_unittest --cov=spyder_unittest
+  - py.test --cov=spyder_unittest
