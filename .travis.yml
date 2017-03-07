@@ -62,5 +62,5 @@ install:
   - spyder
 
 script:
-  - ciocheck spyder_unittest --disable-tests
-  - py.test spyder_unittest --cov=spyder_unittest
+  - ciocheck spyder_unittest
+  - py.test --cov=spyder_unittest
