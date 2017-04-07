@@ -38,14 +38,20 @@ class Category:
     SKIP = 3
 
 
-class TestRunner(QObject):
+class RunnerBase(QObject):
     """
-    Class for running tests with py.test or nose.
+    Base class for running tests with a framework that uses JUnit XML.
+
+    This is an abstract class, meant to be subclassed before being used.
+    Concrete subclasses should define executable and create_argument_list(),
 
     All communication back to the caller is done via signals.
 
     Attributes
     ----------
+    executable : str
+        Name of executable for test framework. This needs to be defined before
+        the user can run tests.
     process : QProcess or None
         Process running the unit test suite.
     resultfilename : str
@@ -71,7 +77,6 @@ class TestRunner(QObject):
         resultfilename : str or None
             Name of file in which to store test results. If None, use default.
         """
-
         QObject.__init__(self, widget)
         self.process = None
         if resultfilename is None:
@@ -79,6 +84,14 @@ class TestRunner(QObject):
                                                'unittest.results')
         else:
             self.resultfilename = resultfilename
+
+    def create_argument_list(self):
+        """
+        Create argument list for testing process (dummy).
+
+        This function should be defined before calling self.start().
+        """
+        raise NotImplementedError
 
     def start(self, config, pythonpath):
         """
@@ -102,8 +115,6 @@ class TestRunner(QObject):
         RuntimeError
             If process failed to start.
         """
-
-        framework = config.framework
         wdir = config.wdir
 
         self.process = QProcess(self)
@@ -123,16 +134,8 @@ class TestRunner(QObject):
                 processEnvironment.insert(envName, envValue)
             self.process.setProcessEnvironment(processEnvironment)
 
-        if framework == 'nose':
-            executable = 'nosetests'
-            p_args = [
-                '--with-xunit', '--xunit-file={}'.format(self.resultfilename)
-            ]
-        elif framework == 'py.test':
-            executable = 'py.test'
-            p_args = ['--junit-xml', self.resultfilename]
-        else:
-            raise ValueError('Unknown framework')
+        executable = self.executable
+        p_args = self.create_argument_list()
 
         if os.name == 'nt':
             executable += '.exe'

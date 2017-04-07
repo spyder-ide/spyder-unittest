@@ -24,7 +24,9 @@ from spyder.utils.qthelpers import create_action, create_toolbutton
 from spyder.widgets.variableexplorer.texteditor import TextEditor
 
 # Local imports
-from spyder_unittest.backend.testrunner import Category, TestRunner
+from spyder_unittest.backend.noserunner import NoseRunner
+from spyder_unittest.backend.pytestrunner import PyTestRunner
+from spyder_unittest.backend.runnerbase import Category
 from spyder_unittest.widgets.configdialog import Config, ask_for_config
 
 # This is needed for testing this module as a stand alone script
@@ -199,7 +201,8 @@ class UnitTestWidget(QWidget):
         pythonpath = self.pythonpath
         self.datatree.clear()
         tempfilename = get_conf_path('unittest.results')
-        self.testrunner = TestRunner(self, tempfilename)
+        cls = PyTestRunner if config.framework == 'py.test' else NoseRunner
+        self.testrunner = cls(self, tempfilename)
         self.testrunner.sig_finished.connect(self.process_finished)
 
         try:
