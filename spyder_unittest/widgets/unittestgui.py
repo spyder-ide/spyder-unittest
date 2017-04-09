@@ -24,8 +24,7 @@ from spyder.utils.qthelpers import create_action, create_toolbutton
 from spyder.widgets.variableexplorer.texteditor import TextEditor
 
 # Local imports
-from spyder_unittest.backend.noserunner import NoseRunner
-from spyder_unittest.backend.pytestrunner import PyTestRunner
+from spyder_unittest.backend.frameworkregistry import FrameworkRegistry
 from spyder_unittest.backend.runnerbase import Category
 from spyder_unittest.widgets.configdialog import Config, ask_for_config
 
@@ -86,6 +85,7 @@ class UnitTestWidget(QWidget):
         self.config = None
         self.pythonpath = None
         self.default_wdir = None
+        self.framework_registry = FrameworkRegistry()
         self.testrunner = None
         self.output = None
         self.datatree = UnitTestDataTree(self)
@@ -201,8 +201,8 @@ class UnitTestWidget(QWidget):
         pythonpath = self.pythonpath
         self.datatree.clear()
         tempfilename = get_conf_path('unittest.results')
-        cls = PyTestRunner if config.framework == 'py.test' else NoseRunner
-        self.testrunner = cls(self, tempfilename)
+        self.testrunner = self.framework_registry.create_runner(
+            config.framework, self, tempfilename)
         self.testrunner.sig_finished.connect(self.process_finished)
 
         try:
