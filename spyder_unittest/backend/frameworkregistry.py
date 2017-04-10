@@ -5,13 +5,40 @@
 # (see LICENSE.txt for details)
 """Keep track of testing frameworks and create test runners when requested."""
 
-# Local imports
-from spyder_unittest.backend.noserunner import NoseRunner
-from spyder_unittest.backend.pytestrunner import PyTestRunner
-
 
 class FrameworkRegistry():
-    """Registry of testing frameworks and their associated runners."""
+    """
+    Registry of testing frameworks and their associated runners.
+
+    The test runner for a framework is responsible for running the tests and
+    parsing the results. It should implement the interface of RunnerBase.
+
+    Frameworks should first be registered using `.register()`. This registry
+    can then create the assoicated test runner when `.create_runner()` is
+    called.
+
+    Attributes
+    ----------
+    framework : dict of (str, type)
+        Dictionary mapping names of testing frameworks to the types of the
+        associated runners.
+    """
+
+    def __init__(self):
+        """Initialize self."""
+        self.frameworks = {}
+
+    def register(self, framework, runner_class):
+        """Register testing framework and its associated runner.
+
+        Parameters
+        ----------
+        framework : str
+            Name of testing framework.
+        runner_class : type
+            Class used for creating tests runners for the framework.
+        """
+        self.frameworks[framework] = runner_class
 
     def create_runner(self, framework, widget, tempfilename):
         """Create test runner associated to some testing framework.
@@ -29,6 +56,11 @@ class FrameworkRegistry():
         -------
         RunnerBase
             Newly created test runner
+
+        Exceptions
+        ----------
+        KeyError
+            Provided testing framework has not been registered.
         """
-        cls = PyTestRunner if framework == 'py.test' else NoseRunner
+        cls = self.frameworks[framework]
         return cls(widget, tempfilename)
