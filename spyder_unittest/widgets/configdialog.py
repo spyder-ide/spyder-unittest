@@ -15,9 +15,10 @@ import os.path as osp
 
 # Third party imports
 from qtpy.compat import getexistingdirectory
-from qtpy.QtWidgets import (QApplication, QDialog, QDialogButtonBox, QGroupBox,
+from qtpy.QtCore import Slot
+from qtpy.QtWidgets import (QApplication, QComboBox, QDialog, QDialogButtonBox,
                             QHBoxLayout, QLabel, QLineEdit, QPushButton,
-                            QRadioButton, QVBoxLayout)
+                            QVBoxLayout)
 from spyder.config.base import get_translation
 from spyder.py3compat import getcwd, to_text_string
 from spyder.utils import icon_manager as ima
@@ -58,13 +59,15 @@ class ConfigDialog(QDialog):
         self.setWindowTitle(_('Configure tests'))
         layout = QVBoxLayout(self)
 
-        framework_groupbox = QGroupBox(_('Test framework'), self)
-        framework_layout = QVBoxLayout(framework_groupbox)
-        self.pytest_button = QRadioButton('py.test', framework_groupbox)
-        framework_layout.addWidget(self.pytest_button)
-        self.nose_button = QRadioButton('nose', framework_groupbox)
-        framework_layout.addWidget(self.nose_button)
-        layout.addWidget(framework_groupbox)
+        framework_layout = QHBoxLayout()
+        framework_label = QLabel(_('Test framework'))
+        framework_layout.addWidget(framework_label)
+        frameworks = ['py.test', 'nose']
+        self.framework_combobox = QComboBox(self)
+        for framework in frameworks:
+            self.framework_combobox.addItem(framework)
+        framework_layout.addWidget(self.framework_combobox)
+        layout.addLayout(framework_layout)
 
         layout.addSpacing(10)
 
@@ -87,16 +90,21 @@ class ConfigDialog(QDialog):
         self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
 
-        ok_button = self.buttons.button(QDialogButtonBox.Ok)
-        ok_button.setEnabled(False)
-        self.pytest_button.toggled.connect(lambda: ok_button.setEnabled(True))
-        self.nose_button.toggled.connect(lambda: ok_button.setEnabled(True))
+        self.ok_button = self.buttons.button(QDialogButtonBox.Ok)
+        self.ok_button.setEnabled(False)
+        self.framework_combobox.currentIndexChanged.connect(
+            self.framework_changed)
 
-        if config.framework == 'py.test':
-            self.pytest_button.setChecked(True)
-        elif config.framework == 'nose':
-            self.nose_button.setChecked(True)
+        self.framework_combobox.setCurrentIndex(-1)
+        if config.framework:
+            self.framework_combobox.setCurrentText(config.framework)
         self.wdir_lineedit.setText(config.wdir)
+
+    @Slot(int)
+    def framework_changed(self, index):
+        """Called when selected framework changes."""
+        if index != -1:
+            self.ok_button.setEnabled(True)
 
     def select_directory(self):
         """Display dialog for user to select working directory."""
@@ -117,11 +125,8 @@ class ConfigDialog(QDialog):
         Config
             Test configuration
         """
-        if self.pytest_button.isChecked():
-            framework = 'py.test'
-        elif self.nose_button.isChecked():
-            framework = 'nose'
-        else:
+        framework = self.framework_combobox.currentText()
+        if framework == '':
             framework = None
         return Config(framework=framework, wdir=self.wdir_lineedit.text())
 

@@ -28,7 +28,7 @@ def test_configdialog_sets_initial_config(qtbot):
 def test_configdialog_click_pytest(qtbot):
     configdialog = ConfigDialog(default_config())
     qtbot.addWidget(configdialog)
-    configdialog.pytest_button.click()
+    configdialog.framework_combobox.setCurrentText('py.test')
     assert configdialog.get_config().framework == 'py.test'
 
 
@@ -48,7 +48,7 @@ def test_configdialog_ok_setting_framework_initially_enables_ok(qtbot):
 def test_configdialog_clicking_pytest_enables_ok(qtbot):
     configdialog = ConfigDialog(default_config())
     qtbot.addWidget(configdialog)
-    configdialog.pytest_button.click()
+    configdialog.framework_combobox.setCurrentText('py.test')
     assert configdialog.buttons.button(QDialogButtonBox.Ok).isEnabled()
 
 

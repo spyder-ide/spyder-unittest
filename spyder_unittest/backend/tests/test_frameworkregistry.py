@@ -22,6 +22,7 @@ def test_frameworkregistry_when_empty():
     with pytest.raises(KeyError):
         reg.create_runner('foo', None, 'temp.txt')
 
+
 def test_frameworkregistry_after_registering():
     reg = FrameworkRegistry()
     reg.register('foo', MockRunner)
