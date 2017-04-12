@@ -37,20 +37,21 @@ class ConfigDialog(QDialog):
     """
     Dialog window for specifying test configuration.
 
-    The window contains two radio buttons (for 'py,test' and 'nose'),
-    a line edit box for specifying the working directory, a button to
-    use a file browser for selecting the directory, and OK and Cancel
-    buttons. Initially, neither radio button is selected and the OK
-    button is disabled. Selecting a radio button enabled the OK
-    button.
+    The window contains a combobox with all the frameworks, a line edit box for
+    specifying the working directory, a button to use a file browser for
+    selecting the directory, and OK and Cancel buttons. Initially, no framework
+    is selected and the OK button is disabled. Selecting a framework enables
+    the OK button.
     """
 
-    def __init__(self, config, parent=None):
+    def __init__(self, frameworks, config, parent=None):
         """
         Construct a dialog window.
 
         Parameters
         ----------
+        frameworks : iterable of str
+            Names of all supported frameworks
         config : Config
             Initial configuration
         parent : QWidget
@@ -62,7 +63,6 @@ class ConfigDialog(QDialog):
         framework_layout = QHBoxLayout()
         framework_label = QLabel(_('Test framework'))
         framework_layout.addWidget(framework_label)
-        frameworks = ['py.test', 'nose']
         self.framework_combobox = QComboBox(self)
         for framework in frameworks:
             self.framework_combobox.addItem(framework)
@@ -131,14 +131,14 @@ class ConfigDialog(QDialog):
         return Config(framework=framework, wdir=self.wdir_lineedit.text())
 
 
-def ask_for_config(config, parent=None):
+def ask_for_config(frameworks, config, parent=None):
     """
     Ask user to specify a test configuration.
 
     This is a convenience function which displays a modal dialog window
     of type `ConfigDialog`.
     """
-    dialog = ConfigDialog(config, parent)
+    dialog = ConfigDialog(frameworks, config, parent)
     result = dialog.exec_()
     if result == QDialog.Accepted:
         return dialog.get_config()
@@ -146,5 +146,6 @@ def ask_for_config(config, parent=None):
 
 if __name__ == '__main__':
     app = QApplication([])
+    frameworks = ['nose', 'py.test', 'unittest']
     config = Config(framework=None, wdir=getcwd())
-    print(ask_for_config(config))
+    print(ask_for_config(frameworks, config))

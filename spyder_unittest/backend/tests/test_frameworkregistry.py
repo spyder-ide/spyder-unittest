@@ -29,3 +29,11 @@ def test_frameworkregistry_after_registering():
     runner = reg.create_runner('foo', None, 'temp.txt')
     assert isinstance(runner, MockRunner)
     assert runner.init_args == (None, 'temp.txt')
+
+
+def test_frameworkregistry_frameworks():
+    reg = FrameworkRegistry()
+    frameworks = {'spam', 'ham', 'eggs'}
+    for name in frameworks:
+        reg.register(name, object)
+    assert frameworks == reg.frameworks
