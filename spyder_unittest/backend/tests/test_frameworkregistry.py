@@ -36,4 +36,4 @@ def test_frameworkregistry_frameworks():
     frameworks = {'spam', 'ham', 'eggs'}
     for name in frameworks:
         reg.register(name, object)
-    assert frameworks == reg.frameworks
+    assert frameworks == set(reg.frameworks)

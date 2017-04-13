@@ -25,8 +25,8 @@ def test_configdialog_uses_frameworks(qtbot):
     frameworks = ['spam', 'ham', 'eggs']
     configdialog = ConfigDialog(frameworks, default_config())
     assert configdialog.framework_combobox.count() == len(frameworks)
-    for i in range(len(frameworks)):
-        assert configdialog.framework_combobox.itemText(i) == frameworks[i]
+    for i, framework in enumerate(frameworks):
+        assert configdialog.framework_combobox.itemText(i) == framework
 
 
 def test_configdialog_sets_initial_config(qtbot):
