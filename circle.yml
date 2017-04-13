@@ -7,6 +7,8 @@ machine:
     TEST_CI_APP: "True"
     # Python versions to tests (Maximum of 4 different versions)
     PY_VERSIONS: "3.5 3.4 2.7"
+    # For Coveralls
+    COVERALLS_REPO_TOKEN: c5Qt1n27dLFCAIESYVkuCmVpUU8doney1
     # Environment variables used by astropy helpers
     TRAVIS_OS_NAME: "linux"
     CONDA_DEPENDENCIES: "lxml mock nose pytest spyder"
@@ -20,6 +22,7 @@ dependencies:
       echo -e "PYTHON = $TRAVIS_PYTHON_VERSION \n============" &&
       git clone git://github.com/astropy/ci-helpers.git &&
       source ci-helpers/travis/setup_conda_$TRAVIS_OS_NAME.sh &&
+      ls $HOME/miniconda/bin &&
       export PATH="$HOME/miniconda/bin:$PATH" &&
       source activate test &&
       conda install ciocheck -c spyder-ide &&
@@ -42,3 +45,5 @@ test:
     # Check Pyside
     - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then export PATH="$HOME/miniconda/bin:$PATH" && source activate test && export PYTEST_QT_API="pyside" && conda install qt=4.* pyside && spyder --reset && spyder && py.test spyder_unittest --cov=spyder_unittest; fi: # note the colon
         parallel: true
+  post:
+    - ls $HOME/miniconda/bin && export PATH="$HOME/miniconda/bin:$PATH" && source activate test && echo $PATH && coveralls
