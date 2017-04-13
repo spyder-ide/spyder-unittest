@@ -97,7 +97,9 @@ class ConfigDialog(QDialog):
 
         self.framework_combobox.setCurrentIndex(-1)
         if config.framework:
-            self.framework_combobox.setCurrentText(config.framework)
+            index = self.framework_combobox.findText(config.framework)
+            if index != -1:
+                self.framework_combobox.setCurrentIndex(index)
         self.wdir_lineedit.setText(config.wdir)
 
     @Slot(int)
