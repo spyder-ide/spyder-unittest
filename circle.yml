@@ -6,12 +6,12 @@ machine:
     TEST_CI: "True"
     TEST_CI_APP: "True"
     # Python versions to tests (Maximum of 4 different versions)
-    PY_VERSIONS: "3.5 3.4 2.7"
+    PY_VERSIONS: "3.6 3.5 2.7"
     # For Coveralls
     COVERALLS_REPO_TOKEN: c5Qt1n27dLFCAIESYVkuCmVpUU8doney1
     # Environment variables used by astropy helpers
     TRAVIS_OS_NAME: "linux"
-    CONDA_DEPENDENCIES: "lxml mock nose pytest spyder"
+    CONDA_DEPENDENCIES: "lxml mock nose pytest"
     PIP_DEPENDENCIES: "coveralls pytest-qt"
 
 dependencies:
@@ -26,6 +26,7 @@ dependencies:
       export PATH="$HOME/miniconda/bin:$PATH" &&
       source activate test &&
       conda install ciocheck -c spyder-ide &&
+      conda install spyder &&
       python setup.py develop;
 
 test:
