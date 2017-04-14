@@ -40,11 +40,11 @@ test:
     # Check PySide2
 #    - export PATH="$HOME/miniconda/bin:$PATH" && source activate test && export PYTEST_QT_API="pyside2" && conda install qt=5.* pyside2 && py.test spyder_unittest --cov=spyder_unittest: # note the colon
 #        parallel: true
-    # Check PyQt4
-    - export PATH="$HOME/miniconda/bin:$PATH" && source activate test && export PYTEST_QT_API="pyqt4v2" && conda install qt=4.* pyqt=4.* && spyder --reset && spyder && py.test spyder_unittest --cov=spyder_unittest: # note the colon
+    # Check PyQt4 (but not on Python 3.6)
+    - if [ "$CIRCLE_NODE_INDEX" != "0" ]; then echo check && export PATH="$HOME/miniconda/bin:$PATH" && source activate test && export PYTEST_QT_API="pyqt4v2" && conda install qt=4.* pyqt=4.* && spyder --reset && spyder && py.test spyder_unittest --cov=spyder_unittest; fi: # note the colon
         parallel: true
-    # Check Pyside
-    - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then export PATH="$HOME/miniconda/bin:$PATH" && source activate test && export PYTEST_QT_API="pyside" && conda install qt=4.* pyside && spyder --reset && spyder && py.test spyder_unittest --cov=spyder_unittest; fi: # note the colon
+    # Check Pyside (but only on Python 2.7)
+    - if [ "$CIRCLE_NODE_INDEX" = "2" ]; then export PATH="$HOME/miniconda/bin:$PATH" && source activate test && export PYTEST_QT_API="pyside" && conda install qt=4.* pyside && spyder --reset && spyder && py.test spyder_unittest --cov=spyder_unittest; fi: # note the colon
         parallel: true
   post:
     - ls $HOME/miniconda/bin && export PATH="$HOME/miniconda/bin:$PATH" && source activate test && echo $PATH && coveralls
