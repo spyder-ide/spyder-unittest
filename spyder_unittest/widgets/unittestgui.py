@@ -24,7 +24,10 @@ from spyder.utils.qthelpers import create_action, create_toolbutton
 from spyder.widgets.variableexplorer.texteditor import TextEditor
 
 # Local imports
-from spyder_unittest.backend.testrunner import Category, TestRunner
+from spyder_unittest.backend.frameworkregistry import FrameworkRegistry
+from spyder_unittest.backend.noserunner import NoseRunner
+from spyder_unittest.backend.pytestrunner import PyTestRunner
+from spyder_unittest.backend.runnerbase import Category
 from spyder_unittest.widgets.configdialog import Config, ask_for_config
 
 # This is needed for testing this module as a stand alone script
@@ -41,6 +44,9 @@ COLORS = {
     Category.FAIL: QBrush(QColor("#FF0000")),
     Category.SKIP: QBrush(QColor("#C5C5C5"))
 }
+
+# Supported testing framework
+FRAMEWORKS = {'nose': NoseRunner, 'py.test': PyTestRunner}
 
 
 def is_unittesting_installed():
@@ -60,6 +66,8 @@ class UnitTestWidget(QWidget):
         Configuration for running tests.
     default_wdir : str
         Default choice of working directory.
+    framework_registry : FrameworkRegistry
+        Registry of supported testing frameworks.
     pythonpath : list of str
         Directories to be added to the Python path when running tests.
     testrunner : TestRunner or None
@@ -87,6 +95,10 @@ class UnitTestWidget(QWidget):
         self.testrunner = None
         self.output = None
         self.datatree = UnitTestDataTree(self)
+
+        self.framework_registry = FrameworkRegistry()
+        for (name, runner) in FRAMEWORKS.items():
+            self.framework_registry.register(name, runner)
 
         self.start_button = create_toolbutton(self, text_beside_icon=True)
         self.set_running_state(False)
@@ -160,7 +172,8 @@ class UnitTestWidget(QWidget):
             oldconfig = self.config
         else:
             oldconfig = Config(wdir=self.default_wdir)
-        config = ask_for_config(oldconfig)
+        frameworks = sorted(self.framework_registry.frameworks)
+        config = ask_for_config(frameworks, oldconfig)
         if config:
             self.config = config
 
@@ -199,7 +212,8 @@ class UnitTestWidget(QWidget):
         pythonpath = self.pythonpath
         self.datatree.clear()
         tempfilename = get_conf_path('unittest.results')
-        self.testrunner = TestRunner(self, tempfilename)
+        self.testrunner = self.framework_registry.create_runner(
+            config.framework, self, tempfilename)
         self.testrunner.sig_finished.connect(self.process_finished)
 
         try:

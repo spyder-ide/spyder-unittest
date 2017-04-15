@@ -3,57 +3,13 @@
 # Copyright © 2013 Spyder Project Contributors
 # Licensed under the terms of the MIT License
 # (see LICENSE.txt for details)
-"""Tests for testrunner.py"""
-
-# Standard library imports
-import os
+"""Tests for baserunner.py"""
 
 # Local imports
-from spyder_unittest.backend.testrunner import Category, TestRunner
-from spyder_unittest.widgets.configdialog import Config
-
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock  # Python 2
+from spyder_unittest.backend.runnerbase import Category, RunnerBase
 
 
-def test_testrunner_start(monkeypatch):
-    MockQProcess = Mock()
-    monkeypatch.setattr('spyder_unittest.backend.testrunner.QProcess',
-                        MockQProcess)
-    mock_process = MockQProcess()
-    mock_process.systemEnvironment = lambda: ['VAR=VALUE', 'PYTHONPATH=old']
-
-    MockEnvironment = Mock()
-    monkeypatch.setattr(
-        'spyder_unittest.backend.testrunner.QProcessEnvironment',
-        MockEnvironment)
-    mock_environment = MockEnvironment()
-
-    mock_remove = Mock(side_effect=OSError())
-    monkeypatch.setattr('spyder_unittest.backend.testrunner.os.remove',
-                        mock_remove)
-
-    runner = TestRunner(None, 'results')
-    config = Config('py.test', 'wdir')
-    runner.start(config, ['pythondir'])
-
-    mock_process.setWorkingDirectory.assert_called_once_with('wdir')
-    mock_process.finished.connect.assert_called_once_with(runner.finished)
-    mock_process.setProcessEnvironment.assert_called_once_with(
-        mock_environment)
-    executable_name = 'py.test.exe' if os.name == 'nt' else 'py.test'
-    mock_process.start.assert_called_once_with(executable_name,
-                                               ['--junit-xml', 'results'])
-
-    mock_environment.insert.assert_any_call('VAR', 'VALUE')
-    # mock_environment.insert.assert_any_call('PYTHONPATH', 'pythondir:old')
-    # TODO: Find out why above test fails
-    mock_remove.called_once_with('results')
-
-
-def test_testrunner_load_data(tmpdir):
+def test_baserunner_load_data(tmpdir):
     result_file = tmpdir.join('results')
     result_txt = """<?xml version="1.0" encoding="utf-8"?>
 <testsuite errors="0" failures="1" name="pytest" skips="1" tests="3" time="0.1">
@@ -65,7 +21,7 @@ def test_testrunner_load_data(tmpdir):
     <skipped message="skip message">text2</skipped>
 </testcase></testsuite>"""
     result_file.write(result_txt)
-    runner = TestRunner(None, result_file.strpath)
+    runner = RunnerBase(None, result_file.strpath)
     results = runner.load_data()
     assert len(results) == 3
 
@@ -91,7 +47,7 @@ def test_testrunner_load_data(tmpdir):
     assert results[2].extra_text == 'text2'
 
 
-def test_testrunner_load_data_failing_test_with_stdout(tmpdir):
+def test_baserunner_load_data_failing_test_with_stdout(tmpdir):
     result_file = tmpdir.join('results')
     result_txt = """<?xml version="1.0" encoding="utf-8"?>
 <testsuite errors="0" failures="1" name="pytest" skips="0" tests="1" time="0.1">
@@ -100,13 +56,13 @@ def test_testrunner_load_data_failing_test_with_stdout(tmpdir):
 <system-out>stdout text
 </system-out></testcase></testsuite>"""
     result_file.write(result_txt)
-    runner = TestRunner(None, result_file.strpath)
+    runner = RunnerBase(None, result_file.strpath)
     results = runner.load_data()
     assert results[0].extra_text == (
         'text\n\n' + '----- Captured stdout -----\n' + 'stdout text')
 
 
-def test_testrunner_load_data_passing_test_with_stdout(tmpdir):
+def test_baserunner_load_data_passing_test_with_stdout(tmpdir):
     result_file = tmpdir.join('results')
     result_txt = """<?xml version="1.0" encoding="utf-8"?>
 <testsuite errors="0" failures="0" name="pytest" skips="0" tests="1" time="0.1">
@@ -114,7 +70,7 @@ def test_testrunner_load_data_passing_test_with_stdout(tmpdir):
 <system-out>stdout text
 </system-out></testcase></testsuite>"""
     result_file.write(result_txt)
-    runner = TestRunner(None, result_file.strpath)
+    runner = RunnerBase(None, result_file.strpath)
     results = runner.load_data()
     assert results[0].extra_text == (
         '----- Captured stdout -----\n' + 'stdout text')
