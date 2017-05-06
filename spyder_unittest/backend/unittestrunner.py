@@ -5,6 +5,9 @@
 # (see LICENSE.txt for details)
 """Support for unittest framework."""
 
+# Standard library imports
+import re
+
 # Third party imports
 from qtpy.QtCore import QTextCodec
 from spyder.py3compat import to_text_string
@@ -36,11 +39,48 @@ class UnittestRunner(RunnerBase):
 
     def load_data(self, output):
         """
-        Read and parse unit test results.
+        Read and parse output from unittest module.
 
         Returns
         -------
         list of TestResult
             Unit test results.
         """
-        return [TestResult(Category.OK, '', 'all', '', 0, output)]
+        res = []
+        olddata = None
+        text = ""
+        for line in output.splitlines():
+            data = self.try_parse_result(line)
+            if data:
+                if olddata:
+                    name = olddata[1] + '.' + olddata[0]
+                    tr = TestResult(Category.OK, olddata[2], name, '', 0, text)
+                    res.append(tr)
+                olddata = data
+                text = ""
+            else:
+                text += line + '\n'
+        if olddata:
+            name = olddata[1] + '.' + olddata[0]
+            tr = TestResult(Category.OK, olddata[2], name, '', 0, text)
+            res.append(tr)
+        return res
+
+    def try_parse_result(self, line):
+        """
+        Try to parse a line of text as a test result.
+
+        Returns
+        -------
+        tuple of str or None
+            If line represents a test result, then return a tuple with three
+            strings: the name of the test function, the name of the test class,
+            and the test result. Otherwise, return None.
+        """
+        regexp = r'([^\d\W]\w*) \(([^\d\W][\w.]*)\) \.\.\. (ok)'
+        match = re.fullmatch(regexp, line)
+        print(repr(line), match)
+        if match:
+            return match.groups()
+        else:
+            return None
