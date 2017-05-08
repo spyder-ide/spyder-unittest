@@ -47,25 +47,22 @@ class UnittestRunner(RunnerBase):
             Unit test results.
         """
         res = []
-        olddata = None
-        text = ""
-        for line in output.splitlines():
-            data = self.try_parse_result(line)
+        lines = output.splitlines()
+        line_index = 0
+        while line_index < len(lines):
+            data = self.try_parse_result(lines[line_index])
             if data:
-                if olddata:
-                    name = olddata[1] + '.' + olddata[0]
-                    cat = Category.OK if olddata[2] == 'ok' else Category.FAIL
-                    tr = TestResult(cat, olddata[2], name, '', 0, text)
-                    res.append(tr)
-                olddata = data
-                text = ""
-            else:
-                text += line + '\n'
-        if olddata:
-            name = olddata[1] + '.' + olddata[0]
-            cat = Category.OK if olddata[2] == 'ok' else Category.FAIL
-            tr = TestResult(cat, olddata[2], name, '', 0, text)
-            res.append(tr)
+                name = data[1] + '.' + data[0]
+                cat = Category.OK if data[2] == 'ok' else Category.FAIL
+                tr = TestResult(cat, data[2], name, '', 0, '')
+                res.append(tr)
+            elif self.try_parse_footer(lines, line_index):
+                line_index += 5
+                continue
+            elif res:
+                text = res[-1].extra_text + lines[line_index] + '\n'
+                res[-1] = res[-1]._replace(extra_text=text)
+            line_index += 1
         return res
 
     def try_parse_result(self, line):
@@ -85,3 +82,22 @@ class UnittestRunner(RunnerBase):
             return match.groups()
         else:
             return None
+
+    def try_parse_footer(self, lines, line_index):
+        """
+        Try to parse footer of unittest output.
+
+        Returns
+        -------
+        bool
+            True if footer is parsed successfully, False otherwise
+        """
+        if lines[line_index] != '':
+            return False
+        if not all(char == '-' for char in lines[line_index + 1]):
+            return False
+        if not re.match(r'^Ran [\d]+ tests? in', lines[line_index + 2]):
+            return False
+        if lines[line_index + 3] != '':
+            return False
+        return True

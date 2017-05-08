@@ -31,6 +31,24 @@ extra text\n"""
     assert res[1].extra_text == 'extra text\n'
 
 
+def test_unittestrunner_removes_footer():
+    output = """test1 (test_foo.Bar) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK
+"""
+    runner = UnittestRunner(None)
+    res = runner.load_data(output)
+    assert len(res) == 1
+    assert res[0].category == Category.OK
+    assert res[0].status == 'ok'
+    assert res[0].name == 'test_foo.Bar.test1'
+    assert res[0].message == ''
+    assert res[0].extra_text == ''
+
+
 def test_try_parse_header_with_ok():
     runner = UnittestRunner(None)
     text = 'test_isupper (testfoo.TestStringMethods) ... ok'
