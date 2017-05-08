@@ -54,7 +54,8 @@ class UnittestRunner(RunnerBase):
             if data:
                 if olddata:
                     name = olddata[1] + '.' + olddata[0]
-                    tr = TestResult(Category.OK, olddata[2], name, '', 0, text)
+                    cat = Category.OK if olddata[2] == 'ok' else Category.FAIL
+                    tr = TestResult(cat, olddata[2], name, '', 0, text)
                     res.append(tr)
                 olddata = data
                 text = ""
@@ -62,7 +63,8 @@ class UnittestRunner(RunnerBase):
                 text += line + '\n'
         if olddata:
             name = olddata[1] + '.' + olddata[0]
-            tr = TestResult(Category.OK, olddata[2], name, '', 0, text)
+            cat = Category.OK if olddata[2] == 'ok' else Category.FAIL
+            tr = TestResult(cat, olddata[2], name, '', 0, text)
             res.append(tr)
         return res
 
@@ -77,9 +79,8 @@ class UnittestRunner(RunnerBase):
             strings: the name of the test function, the name of the test class,
             and the test result. Otherwise, return None.
         """
-        regexp = r'([^\d\W]\w*) \(([^\d\W][\w.]*)\) \.\.\. (ok)'
+        regexp = r'([^\d\W]\w*) \(([^\d\W][\w.]*)\) \.\.\. (ok|FAIL|ERROR)'
         match = re.fullmatch(regexp, line)
-        print(repr(line), match)
         if match:
             return match.groups()
         else:

@@ -29,3 +29,17 @@ extra text\n"""
     assert res[1].name == 'teststringmethods.TestStringMethods.test_split'
     assert res[1].message == ''
     assert res[1].extra_text == 'extra text\n'
+
+
+def test_try_parse_header_with_ok():
+    runner = UnittestRunner(None)
+    text = 'test_isupper (testfoo.TestStringMethods) ... ok'
+    res = runner.try_parse_result(text)
+    assert res == ('test_isupper', 'testfoo.TestStringMethods', 'ok')
+
+
+def test_try_parse_header_starting_with_digit():
+    runner = UnittestRunner(None)
+    text = '0est_isupper (testfoo.TestStringMethods) ... ok'
+    res = runner.try_parse_result(text)
+    assert res is None
