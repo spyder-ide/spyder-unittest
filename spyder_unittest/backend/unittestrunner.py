@@ -49,6 +49,8 @@ class UnittestRunner(RunnerBase):
         res = []
         lines = output.splitlines()
         line_index = 0
+        test_index = None
+
         while line_index < len(lines):
             data = self.try_parse_result(lines[line_index])
             if data:
@@ -56,13 +58,28 @@ class UnittestRunner(RunnerBase):
                 cat = Category.OK if data[2] == 'ok' else Category.FAIL
                 tr = TestResult(cat, data[2], name, '', 0, '')
                 res.append(tr)
-            elif self.try_parse_footer(lines, line_index):
-                line_index += 5
+                line_index += 1
+                test_index = -1
                 continue
-            elif res:
-                text = res[-1].extra_text + lines[line_index] + '\n'
-                res[-1] = res[-1]._replace(extra_text=text)
-            line_index += 1
+
+            data = self.try_parse_exception_header(lines, line_index)
+            if data:
+                line_index = data[0]
+                name = data[2] + '.' + data[1]
+                test_index = next(i for i, tr in enumerate(res)
+                                  if tr.name == name)
+
+            data = self.try_parse_footer(lines, line_index)
+            if data:
+                line_index = data
+                test_index = -1
+                continue
+
+            if test_index is not None:
+                text = res[test_index].extra_text + lines[line_index] + '\n'
+                res[test_index] = res[test_index]._replace(extra_text=text)
+                line_index += 1
+
         return res
 
     def try_parse_result(self, line):
@@ -83,21 +100,44 @@ class UnittestRunner(RunnerBase):
         else:
             return None
 
+    def try_parse_exception_header(self, lines, line_index):
+        """
+        Try to parse the header of an exception in unittest output.
+
+        Returns
+        -------
+        (int, str, str) or None
+            If an exception header is parsed successfully, then return a tuple
+            with the new line index, the name of the test function, and the
+            name of the test class. Otherwise, return None.
+        """
+        if lines[line_index] != '':
+            return None
+        if not all(char == '=' for char in lines[line_index + 1]):
+            return None
+        regexp = r'\w+: ([^\d\W]\w*) \(([^\d\W][\w.]*)\)'
+        match = re.fullmatch(regexp, lines[line_index + 2])
+        if not match:
+            return None
+        if not all(char == '-' for char in lines[line_index + 3]):
+            return None
+        return (line_index + 4, ) + match.groups()
+
     def try_parse_footer(self, lines, line_index):
         """
         Try to parse footer of unittest output.
 
         Returns
         -------
-        bool
-            True if footer is parsed successfully, False otherwise
+        int or None
+            New line index if footer is parsed successfully, None otherwise
         """
         if lines[line_index] != '':
-            return False
+            return None
         if not all(char == '-' for char in lines[line_index + 1]):
-            return False
+            return None
         if not re.match(r'^Ran [\d]+ tests? in', lines[line_index + 2]):
-            return False
+            return None
         if lines[line_index + 3] != '':
-            return False
-        return True
+            return None
+        return line_index + 5

@@ -31,7 +31,7 @@ extra text\n"""
     assert res[1].extra_text == 'extra text\n'
 
 
-def test_unittestrunner_removes_footer():
+def test_unittestrunner_load_data_removes_footer():
     output = """test1 (test_foo.Bar) ... ok
 
 ----------------------------------------------------------------------
@@ -45,8 +45,35 @@ OK
     assert res[0].category == Category.OK
     assert res[0].status == 'ok'
     assert res[0].name == 'test_foo.Bar.test1'
-    assert res[0].message == ''
     assert res[0].extra_text == ''
+
+
+def test_unittestrunner_load_data_with_exception():
+    output = """test1 (test_foo.Bar) ... FAIL
+test2 (test_foo.Bar) ... ok
+
+======================================================================
+FAIL: test1 (test_foo.Bar)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/somepath/test_foo.py", line 5, in test1
+    self.assertEqual(1, 2)
+AssertionError: 1 != 2
+"""
+    runner = UnittestRunner(None)
+    res = runner.load_data(output)
+    assert len(res) == 2
+
+    assert res[0].category == Category.FAIL
+    assert res[0].status == 'FAIL'
+    assert res[0].name == 'test_foo.Bar.test1'
+    assert res[0].extra_text.startswith('Traceback')
+    assert res[0].extra_text.endswith('AssertionError: 1 != 2\n')
+
+    assert res[1].category == Category.OK
+    assert res[1].status == 'ok'
+    assert res[1].name == 'test_foo.Bar.test2'
+    assert res[1].extra_text == ''
 
 
 def test_try_parse_header_with_ok():
