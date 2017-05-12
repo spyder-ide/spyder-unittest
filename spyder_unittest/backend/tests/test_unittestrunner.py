@@ -80,7 +80,22 @@ def test_try_parse_header_with_ok():
     runner = UnittestRunner(None)
     text = 'test_isupper (testfoo.TestStringMethods) ... ok'
     res = runner.try_parse_result(text)
-    assert res == ('test_isupper', 'testfoo.TestStringMethods', 'ok')
+    assert res == ('test_isupper', 'testfoo.TestStringMethods', 'ok', '')
+
+
+def test_try_parse_header_with_xfail():
+    runner = UnittestRunner(None)
+    text = 'test_isupper (testfoo.TestStringMethods) ... expected failure'
+    res = runner.try_parse_result(text)
+    assert res == ('test_isupper', 'testfoo.TestStringMethods',
+                   'expected failure', '')
+
+
+def test_try_parse_header_with_message():
+    runner = UnittestRunner(None)
+    text = "test_nothing (testfoo.Tests) ... skipped 'msg'"
+    res = runner.try_parse_result(text)
+    assert res == ('test_nothing', 'testfoo.Tests', 'skipped', 'msg')
 
 
 def test_try_parse_header_starting_with_digit():

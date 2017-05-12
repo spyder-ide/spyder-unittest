@@ -55,8 +55,13 @@ class UnittestRunner(RunnerBase):
             data = self.try_parse_result(lines[line_index])
             if data:
                 name = data[1] + '.' + data[0]
-                cat = Category.OK if data[2] == 'ok' else Category.FAIL
-                tr = TestResult(cat, data[2], name, '', 0, '')
+                if data[2] == 'ok':
+                    cat = Category.OK
+                elif data[2] == 'FAIL' or data[2] == 'ERROR':
+                    cat = Category.FAIL
+                else:
+                    cat = Category.SKIP
+                tr = TestResult(cat, data[2], name, data[3], 0, '')
                 res.append(tr)
                 line_index += 1
                 test_index = -1
@@ -89,14 +94,18 @@ class UnittestRunner(RunnerBase):
         Returns
         -------
         tuple of str or None
-            If line represents a test result, then return a tuple with three
+            If line represents a test result, then return a tuple with four
             strings: the name of the test function, the name of the test class,
-            and the test result. Otherwise, return None.
+            the test result, and the reason (if no reason is given, the fourth
+            string is empty). Otherwise, return None.
         """
-        regexp = r'([^\d\W]\w*) \(([^\d\W][\w.]*)\) \.\.\. (ok|FAIL|ERROR)'
+        regexp = (r'([^\d\W]\w*) \(([^\d\W][\w.]*)\) \.\.\. '
+                  '(ok|FAIL|ERROR|skipped|expected failure|unexpected success)'
+                  "( '([^']*)')?")
         match = re.fullmatch(regexp, line)
         if match:
-            return match.groups()
+            msg = match.groups()[4] or ''
+            return match.groups()[:3] + (msg, )
         else:
             return None
 
