@@ -23,7 +23,7 @@ class UnittestRunner(RunnerBase):
 
     def create_argument_list(self):
         """Create argument list for testing process."""
-        return ['-m', 'unittest', '-v']
+        return ['-m', 'unittest', 'discover', '-v']
 
     def finished(self):
         """
@@ -34,6 +34,7 @@ class UnittestRunner(RunnerBase):
         qbytearray = self.process.readAllStandardOutput()
         locale_codec = QTextCodec.codecForLocale()
         output = to_text_string(locale_codec.toUnicode(qbytearray.data()))
+        print(repr(output))
         testresults = self.load_data(output)  # overrides base class method
         self.sig_finished.emit(testresults, output)
 
@@ -101,8 +102,8 @@ class UnittestRunner(RunnerBase):
         """
         regexp = (r'([^\d\W]\w*) \(([^\d\W][\w.]*)\) \.\.\. '
                   '(ok|FAIL|ERROR|skipped|expected failure|unexpected success)'
-                  "( '([^']*)')?")
-        match = re.fullmatch(regexp, line)
+                  "( '([^']*)')?\Z")
+        match = re.match(regexp, line)
         if match:
             msg = match.groups()[4] or ''
             return match.groups()[:3] + (msg, )
@@ -124,8 +125,8 @@ class UnittestRunner(RunnerBase):
             return None
         if not all(char == '=' for char in lines[line_index + 1]):
             return None
-        regexp = r'\w+: ([^\d\W]\w*) \(([^\d\W][\w.]*)\)'
-        match = re.fullmatch(regexp, lines[line_index + 2])
+        regexp = r'\w+: ([^\d\W]\w*) \(([^\d\W][\w.]*)\)\Z'
+        match = re.match(regexp, lines[line_index + 2])
         if not match:
             return None
         if not all(char == '-' for char in lines[line_index + 3]):
