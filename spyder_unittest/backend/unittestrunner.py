@@ -34,7 +34,6 @@ class UnittestRunner(RunnerBase):
         qbytearray = self.process.readAllStandardOutput()
         locale_codec = QTextCodec.codecForLocale()
         output = to_text_string(locale_codec.toUnicode(qbytearray.data()))
-        print(repr(output))
         testresults = self.load_data(output)  # overrides base class method
         self.sig_finished.emit(testresults, output)
 
