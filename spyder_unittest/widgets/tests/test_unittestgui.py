@@ -14,13 +14,23 @@ from qtpy.QtCore import Qt
 import pytest
 
 # Local imports
+from spyder_unittest.backend.runnerbase import Category, TestResult
 from spyder_unittest.widgets.configdialog import Config
-from spyder_unittest.widgets.unittestgui import UnitTestWidget
+from spyder_unittest.widgets.unittestgui import (UnitTestDataTree,
+                                                 UnitTestWidget)
 
 try:
     from unittest.mock import Mock
 except ImportError:
     from mock import Mock  # Python 2
+
+
+def test_unittestdatatree_shows_full_name_in_tooltip(qtbot):
+    datatree = UnitTestDataTree()
+    res = TestResult(Category.OK, 'status', 'foo.bar', '', 0, '')
+    datatree.testresults = [res]
+    datatree.populate_tree()
+    assert datatree.topLevelItem(0).data(1, Qt.ToolTipRole) == 'foo.bar'
 
 
 @pytest.mark.parametrize('framework', ['py.test', 'nose'])
