@@ -26,7 +26,7 @@ except KeyError as error:
 
 # Class representing test results
 TestResult = namedtuple('TestResult', [
-    'category', 'status', 'name', 'message', 'time', 'extra_text'
+    'category', 'status', 'name', 'module', 'message', 'time', 'extra_text'
 ])
 
 
@@ -189,8 +189,8 @@ class RunnerBase(QObject):
         for testcase in data:
             category = Category.OK
             status = 'ok'
-            name = '{0}.{1}'.format(
-                testcase.get('classname'), testcase.get('name'))
+            module = testcase.get('classname')
+            name = testcase.get('name')
             message = ''
             time = float(testcase.get('time'))
             extras = []
@@ -221,6 +221,7 @@ class RunnerBase(QObject):
 
             extra_text = '\n\n'.join(extras)
             testresults.append(
-                TestResult(category, status, name, message, time, extra_text))
+                TestResult(category, status, name, module, message, time,
+                           extra_text))
 
         return testresults
