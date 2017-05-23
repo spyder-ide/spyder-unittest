@@ -52,3 +52,37 @@ def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
     assert dt.topLevelItem(0).data(2, Qt.DisplayRole) == ''
     assert dt.topLevelItem(1).data(0, Qt.DisplayRole) == 'failure'
     assert dt.topLevelItem(1).data(1, Qt.DisplayRole) == 'test_foo.test_fail'
+
+
+def test_run_tests_using_unittest_and_display_results(qtbot, tmpdir,
+                                                      monkeypatch):
+    """Basic check."""
+    os.chdir(tmpdir.strpath)
+    testfilename = tmpdir.join('test_foo.py').strpath
+
+    with open(testfilename, 'w') as f:
+        f.write("import unittest\n"
+                "class MyTest(unittest.TestCase):\n"
+                "   def test_ok(self): self.assertEqual(1+1, 2)\n"
+                "   def test_fail(self): self.assertEqual(1+1, 3)\n")
+
+    MockQMessageBox = Mock()
+    monkeypatch.setattr('spyder_unittest.widgets.unittestgui.QMessageBox',
+                        MockQMessageBox)
+
+    widget = UnitTestWidget(None)
+    qtbot.addWidget(widget)
+    config = Config(wdir=tmpdir.strpath, framework='unittest')
+    with qtbot.waitSignal(widget.sig_finished, timeout=10000, raising=True):
+        widget.run_tests(config)
+
+    MockQMessageBox.assert_not_called()
+    itemcount = widget.datatree.topLevelItemCount()
+    assert itemcount == 2
+    data = lambda i, j: widget.datatree.topLevelItem(i).data(j, Qt.DisplayRole)
+    assert data(0, 0) == 'FAIL'
+    assert data(0, 1) == 'test_foo.MyTest.test_fail'
+    assert data(0, 2) == ''
+    assert data(1, 0) == 'ok'
+    assert data(1, 1) == 'test_foo.MyTest.test_ok'
+    assert data(1, 2) == ''

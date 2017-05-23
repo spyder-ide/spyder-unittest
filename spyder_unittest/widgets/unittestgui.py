@@ -28,6 +28,7 @@ from spyder_unittest.backend.frameworkregistry import FrameworkRegistry
 from spyder_unittest.backend.noserunner import NoseRunner
 from spyder_unittest.backend.pytestrunner import PyTestRunner
 from spyder_unittest.backend.runnerbase import Category
+from spyder_unittest.backend.unittestrunner import UnittestRunner
 from spyder_unittest.widgets.configdialog import Config, ask_for_config
 
 # This is needed for testing this module as a stand alone script
@@ -46,7 +47,11 @@ COLORS = {
 }
 
 # Supported testing framework
-FRAMEWORKS = {'nose': NoseRunner, 'py.test': PyTestRunner}
+FRAMEWORKS = {
+    'nose': NoseRunner,
+    'py.test': PyTestRunner,
+    'unittest': UnittestRunner
+}
 
 
 def is_unittesting_installed():
