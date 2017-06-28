@@ -54,14 +54,20 @@ class UnittestRunner(RunnerBase):
         while line_index < len(lines):
             data = self.try_parse_result(lines[line_index])
             if data:
-                name = data[1] + '.' + data[0]
                 if data[2] == 'ok':
                     cat = Category.OK
                 elif data[2] == 'FAIL' or data[2] == 'ERROR':
                     cat = Category.FAIL
                 else:
                     cat = Category.SKIP
-                tr = TestResult(cat, data[2], name, data[3], 0, '')
+                tr = TestResult(
+                    category=cat,
+                    status=data[2],
+                    name=data[0],
+                    module=data[1],
+                    message=data[3],
+                    time=0,
+                    extra_text='')
                 res.append(tr)
                 line_index += 1
                 test_index = -1
@@ -70,9 +76,9 @@ class UnittestRunner(RunnerBase):
             data = self.try_parse_exception_header(lines, line_index)
             if data:
                 line_index = data[0]
-                name = data[2] + '.' + data[1]
-                test_index = next(i for i, tr in enumerate(res)
-                                  if tr.name == name)
+                test_index = next(
+                    i for i, tr in enumerate(res)
+                    if tr.name == data[1] and tr.module == data[2])
 
             data = self.try_parse_footer(lines, line_index)
             if data:

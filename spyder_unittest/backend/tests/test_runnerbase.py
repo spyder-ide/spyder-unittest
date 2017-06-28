@@ -27,21 +27,24 @@ def test_baserunner_load_data(tmpdir):
 
     assert results[0].category == Category.OK
     assert results[0].status == 'ok'
-    assert results[0].name == 'test_foo.test1'
+    assert results[0].name == 'test1'
+    assert results[0].module == 'test_foo'
     assert results[0].message == ''
     assert results[0].time == 0.04
     assert results[0].extra_text == ''
 
     assert results[1].category == Category.FAIL
     assert results[1].status == 'failure'
-    assert results[1].name == 'test_foo.test2'
+    assert results[1].name == 'test2'
+    assert results[1].module == 'test_foo'
     assert results[1].message == 'failure message'
     assert results[1].time == 0.01
     assert results[1].extra_text == 'text'
 
     assert results[2].category == Category.SKIP
     assert results[2].status == 'skipped'
-    assert results[2].name == 'test_foo.test3'
+    assert results[2].name == 'test3'
+    assert results[2].module == 'test_foo'
     assert results[2].message == 'skip message'
     assert results[2].time == 0.05
     assert results[2].extra_text == 'text2'

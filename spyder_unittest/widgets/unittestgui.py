@@ -316,6 +316,8 @@ class UnitTestDataTree(QTreeWidget):
             testcase_item = QTreeWidgetItem(self)
             testcase_item.setData(0, Qt.DisplayRole, testresult.status)
             testcase_item.setData(1, Qt.DisplayRole, testresult.name)
+            fullname = '{0}.{1}'.format(testresult.module, testresult.name)
+            testcase_item.setToolTip(1, fullname)
             testcase_item.setData(2, Qt.DisplayRole, testresult.message)
             testcase_item.setData(3, Qt.DisplayRole, testresult.time * 1e3)
             color = COLORS[testresult.category]

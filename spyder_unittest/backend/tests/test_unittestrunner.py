@@ -20,13 +20,15 @@ extra text\n"""
 
     assert res[0].category == Category.OK
     assert res[0].status == 'ok'
-    assert res[0].name == 'teststringmethods.TestStringMethods.test_isupper'
+    assert res[0].name == 'test_isupper'
+    assert res[0].module == 'teststringmethods.TestStringMethods'
     assert res[0].message == ''
     assert res[0].extra_text == ''
 
     assert res[1].category == Category.OK
     assert res[1].status == 'ok'
-    assert res[1].name == 'teststringmethods.TestStringMethods.test_split'
+    assert res[1].name == 'test_split'
+    assert res[1].module == 'teststringmethods.TestStringMethods'
     assert res[1].message == ''
     assert res[1].extra_text == 'extra text\n'
 
@@ -44,7 +46,8 @@ OK
     assert len(res) == 1
     assert res[0].category == Category.OK
     assert res[0].status == 'ok'
-    assert res[0].name == 'test_foo.Bar.test1'
+    assert res[0].name == 'test1'
+    assert res[0].module == 'test_foo.Bar'
     assert res[0].extra_text == ''
 
 
@@ -66,13 +69,15 @@ AssertionError: 1 != 2
 
     assert res[0].category == Category.FAIL
     assert res[0].status == 'FAIL'
-    assert res[0].name == 'test_foo.Bar.test1'
+    assert res[0].name == 'test1'
+    assert res[0].module == 'test_foo.Bar'
     assert res[0].extra_text.startswith('Traceback')
     assert res[0].extra_text.endswith('AssertionError: 1 != 2\n')
 
     assert res[1].category == Category.OK
     assert res[1].status == 'ok'
-    assert res[1].name == 'test_foo.Bar.test2'
+    assert res[1].name == 'test2'
+    assert res[1].module == 'test_foo.Bar'
     assert res[1].extra_text == ''
 
 
