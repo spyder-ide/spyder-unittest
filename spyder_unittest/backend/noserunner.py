@@ -12,7 +12,7 @@ from spyder_unittest.backend.runnerbase import RunnerBase
 class NoseRunner(RunnerBase):
     """Class for running tests within Nose framework."""
 
-    executable = 'nosetests'
+    module = 'nose'
 
     def create_argument_list(self):
         """Create argument list for testing process."""
