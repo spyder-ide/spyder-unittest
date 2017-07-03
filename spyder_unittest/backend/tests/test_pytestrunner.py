@@ -18,6 +18,10 @@ except ImportError:
     from mock import Mock  # Python 2
 
 
+def test_pytestrunner_is_installed():
+    assert PyTestRunner(None).is_installed()
+
+
 def test_pytestrunner_start(monkeypatch):
     MockQProcess = Mock()
     monkeypatch.setattr('spyder_unittest.backend.runnerbase.QProcess',

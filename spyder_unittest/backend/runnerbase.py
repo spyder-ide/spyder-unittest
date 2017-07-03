@@ -19,6 +19,11 @@ from spyder.py3compat import to_text_string
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH, get_python_executable
 
 try:
+    from importlib.util import find_spec as find_spec_or_loader
+except ImportError:  # Python 2
+    from importlib import find_loader as find_spec_or_loader
+
+try:
     _ = get_translation("unittest", dirname="spyder_unittest")
 except KeyError as error:
     import gettext
@@ -84,6 +89,20 @@ class RunnerBase(QObject):
                                                'unittest.results')
         else:
             self.resultfilename = resultfilename
+
+    def is_installed(self):
+        """
+        Check whether test framework is installed.
+
+        This function tests whether self.module is installed, but it does not
+        import it.
+
+        Returns
+        -------
+        bool
+            True if framework is installed, False otherwise.
+        """
+        return find_spec_or_loader(self.module) is not None
 
     def create_argument_list(self):
         """
