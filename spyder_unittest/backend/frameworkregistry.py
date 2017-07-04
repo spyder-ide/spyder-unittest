@@ -19,14 +19,14 @@ class FrameworkRegistry():
 
     Attributes
     ----------
-    framework : dict of (str, type)
+    frameworks : dict of (str, type)
         Dictionary mapping names of testing frameworks to the types of the
         associated runners.
     """
 
     def __init__(self):
         """Initialize self."""
-        self.frameworks_dict = {}
+        self.frameworks = {}
 
     def register(self, framework, runner_class):
         """Register testing framework and its associated runner.
@@ -38,7 +38,7 @@ class FrameworkRegistry():
         runner_class : type
             Class used for creating tests runners for the framework.
         """
-        self.frameworks_dict[framework] = runner_class
+        self.frameworks[framework] = runner_class
 
     def create_runner(self, framework, widget, tempfilename):
         """Create test runner associated to some testing framework.
@@ -62,10 +62,5 @@ class FrameworkRegistry():
         KeyError
             Provided testing framework has not been registered.
         """
-        cls = self.frameworks_dict[framework]
+        cls = self.frameworks[framework]
         return cls(widget, tempfilename)
-
-    @property
-    def frameworks(self):
-        """Iterable with names of all frameworks."""
-        return self.frameworks_dict.keys()

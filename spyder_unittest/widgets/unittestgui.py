@@ -177,7 +177,7 @@ class UnitTestWidget(QWidget):
             oldconfig = self.config
         else:
             oldconfig = Config(wdir=self.default_wdir)
-        frameworks = sorted(self.framework_registry.frameworks)
+        frameworks = self.framework_registry.frameworks
         config = ask_for_config(frameworks, oldconfig)
         if config:
             self.config = config

@@ -14,7 +14,7 @@ from qtpy.QtWidgets import QDialogButtonBox
 # Local imports
 from spyder_unittest.widgets.configdialog import Config, ConfigDialog
 
-frameworks = ['nose', 'py.test']
+frameworks = {'nose': object, 'py.test': object}
 
 
 def default_config():
@@ -22,10 +22,11 @@ def default_config():
 
 
 def test_configdialog_uses_frameworks(qtbot):
-    frameworks = ['spam', 'ham', 'eggs']
+    frameworks = {'spam': object, 'ham': object, 'eggs': object}
+    framework_names = sorted(frameworks)
     configdialog = ConfigDialog(frameworks, default_config())
     assert configdialog.framework_combobox.count() == len(frameworks)
-    for i, framework in enumerate(frameworks):
+    for i, framework in enumerate(framework_names):
         assert configdialog.framework_combobox.itemText(i) == framework
 
 

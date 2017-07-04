@@ -64,7 +64,7 @@ class ConfigDialog(QDialog):
         framework_label = QLabel(_('Test framework'))
         framework_layout.addWidget(framework_label)
         self.framework_combobox = QComboBox(self)
-        for framework in frameworks:
+        for framework in sorted(frameworks):
             self.framework_combobox.addItem(framework)
         framework_layout.addWidget(self.framework_combobox)
         layout.addLayout(framework_layout)
