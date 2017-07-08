@@ -57,6 +57,8 @@ class RunnerBase(QObject):
     module : str
         Name of Python module for test framework. This needs to be defined
         before the user can run tests.
+    name : str
+        Name of test framework, as presented to user.
     process : QProcess or None
         Process running the unit test suite.
     resultfilename : str

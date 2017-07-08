@@ -13,6 +13,7 @@ class NoseRunner(RunnerBase):
     """Class for running tests within Nose framework."""
 
     module = 'nose'
+    name = 'nose'
 
     def create_argument_list(self):
         """Create argument list for testing process."""

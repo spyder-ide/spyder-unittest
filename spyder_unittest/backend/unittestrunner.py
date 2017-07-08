@@ -20,6 +20,7 @@ class UnittestRunner(RunnerBase):
     """Class for running tests with unittest module in standard library."""
 
     module = 'unittest'
+    name = 'unittest'
 
     def create_argument_list(self):
         """Create argument list for testing process."""

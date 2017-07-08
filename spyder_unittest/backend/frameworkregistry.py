@@ -28,20 +28,21 @@ class FrameworkRegistry():
         """Initialize self."""
         self.frameworks = {}
 
-    def register(self, framework, runner_class):
-        """Register testing framework and its associated runner.
+    def register(self, runner_class):
+        """Register runner class for a testing framework.
 
         Parameters
         ----------
-        framework : str
-            Name of testing framework.
         runner_class : type
             Class used for creating tests runners for the framework.
         """
-        self.frameworks[framework] = runner_class
+        self.frameworks[runner_class.name] = runner_class
 
     def create_runner(self, framework, widget, tempfilename):
         """Create test runner associated to some testing framework.
+
+        This creates an instance of the runner class whose `name` attribute
+        equals `framework`.
 
         Parameters
         ----------
