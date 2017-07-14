@@ -14,7 +14,20 @@ from qtpy.QtWidgets import QDialogButtonBox
 # Local imports
 from spyder_unittest.widgets.configdialog import Config, ConfigDialog
 
-frameworks = {'nose': object, 'py.test': object}
+
+class SpamRunner:
+    name = 'spam'
+
+
+class HamRunner:
+    name = 'ham'
+
+
+class EggsRunner:
+    name = 'eggs'
+
+
+frameworks = {r.name: r for r in [SpamRunner, HamRunner, EggsRunner]}
 
 
 def default_config():
@@ -22,7 +35,6 @@ def default_config():
 
 
 def test_configdialog_uses_frameworks(qtbot):
-    frameworks = {'spam': object, 'ham': object, 'eggs': object}
     framework_names = sorted(frameworks)
     configdialog = ConfigDialog(frameworks, default_config())
     assert configdialog.framework_combobox.count() == len(frameworks)
@@ -36,11 +48,11 @@ def test_configdialog_sets_initial_config(qtbot):
     assert configdialog.get_config() == config
 
 
-def test_configdialog_click_pytest(qtbot):
+def test_configdialog_click_ham(qtbot):
     configdialog = ConfigDialog(frameworks, default_config())
     qtbot.addWidget(configdialog)
     configdialog.framework_combobox.setCurrentIndex(1)
-    assert configdialog.get_config().framework == 'py.test'
+    assert configdialog.get_config().framework == 'ham'
 
 
 def test_configdialog_ok_initially_disabled(qtbot):
@@ -50,7 +62,7 @@ def test_configdialog_ok_initially_disabled(qtbot):
 
 
 def test_configdialog_ok_setting_framework_initially_enables_ok(qtbot):
-    config = Config(framework='py.test', wdir=os.getcwd())
+    config = Config(framework='eggs', wdir=os.getcwd())
     configdialog = ConfigDialog(frameworks, config)
     qtbot.addWidget(configdialog)
     assert configdialog.buttons.button(QDialogButtonBox.Ok).isEnabled()

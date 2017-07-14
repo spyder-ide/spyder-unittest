@@ -50,8 +50,9 @@ class ConfigDialog(QDialog):
 
         Parameters
         ----------
-        frameworks : iterable of str
-            Names of all supported frameworks
+        frameworks : dict of (str, type)
+            Names of all supported frameworks with their associated class
+            (assumed to be a subclass of RunnerBase)
         config : Config
             Initial configuration
         parent : QWidget
