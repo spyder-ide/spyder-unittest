@@ -21,7 +21,7 @@ from spyder.utils.misc import add_pathlist_to_PYTHONPATH, get_python_executable
 try:
     from importlib.util import find_spec as find_spec_or_loader
 except ImportError:  # Python 2
-    from importlib import find_loader as find_spec_or_loader
+    from pkgutil import find_loader as find_spec_or_loader
 
 try:
     _ = get_translation("unittest", dirname="spyder_unittest")

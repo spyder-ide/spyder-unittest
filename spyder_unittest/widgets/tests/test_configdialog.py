@@ -18,21 +18,24 @@ from spyder_unittest.widgets.configdialog import Config, ConfigDialog
 class SpamRunner:
     name = 'spam'
 
-    def is_installed():
+    @classmethod
+    def is_installed(cls):
         return False
 
 
 class HamRunner:
     name = 'ham'
 
-    def is_installed():
+    @classmethod
+    def is_installed(cls):
         return True
 
 
 class EggsRunner:
     name = 'eggs'
 
-    def is_installed():
+    @classmethod
+    def is_installed(cls):
         return True
 
 
