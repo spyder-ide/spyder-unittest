@@ -18,13 +18,22 @@ from spyder_unittest.widgets.configdialog import Config, ConfigDialog
 class SpamRunner:
     name = 'spam'
 
+    def is_installed():
+        return False
+
 
 class HamRunner:
     name = 'ham'
 
+    def is_installed():
+        return True
+
 
 class EggsRunner:
     name = 'eggs'
+
+    def is_installed():
+        return True
 
 
 frameworks = {r.name: r for r in [SpamRunner, HamRunner, EggsRunner]}
@@ -35,11 +44,16 @@ def default_config():
 
 
 def test_configdialog_uses_frameworks(qtbot):
-    framework_names = sorted(frameworks)
-    configdialog = ConfigDialog(frameworks, default_config())
-    assert configdialog.framework_combobox.count() == len(frameworks)
-    for i, framework in enumerate(framework_names):
-        assert configdialog.framework_combobox.itemText(i) == framework
+    configdialog = ConfigDialog({'eggs': EggsRunner}, default_config())
+    assert configdialog.framework_combobox.count() == 1
+    assert configdialog.framework_combobox.itemText(0) == 'eggs'
+
+
+def test_configdialog_indicates_unvailable_frameworks(qtbot):
+    configdialog = ConfigDialog({'spam': SpamRunner}, default_config())
+    assert configdialog.framework_combobox.count() == 1
+    assert configdialog.framework_combobox.itemText(
+        0) == 'spam (not available)'
 
 
 def test_configdialog_sets_initial_config(qtbot):

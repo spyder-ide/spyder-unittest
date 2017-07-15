@@ -65,8 +65,12 @@ class ConfigDialog(QDialog):
         framework_label = QLabel(_('Test framework'))
         framework_layout.addWidget(framework_label)
         self.framework_combobox = QComboBox(self)
-        for framework in sorted(frameworks):
-            self.framework_combobox.addItem(framework)
+        for name, runner in sorted(frameworks.items()):
+            if runner.is_installed():
+                label = name
+            else:
+                label = '{} ({})'.format(name, _('not available'))
+            self.framework_combobox.addItem(label)
         framework_layout.addWidget(self.framework_combobox)
         layout.addLayout(framework_layout)
 
