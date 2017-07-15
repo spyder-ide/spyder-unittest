@@ -56,6 +56,14 @@ def test_configdialog_indicates_unvailable_frameworks(qtbot):
         0) == 'spam (not available)'
 
 
+def test_configdialog_disables_unavailable_frameworks(qtbot):
+    configdialog = ConfigDialog(frameworks, default_config())
+    model = configdialog.framework_combobox.model()
+    assert model.item(0).isEnabled()  # eggs
+    assert model.item(1).isEnabled()  # ham
+    assert not model.item(2).isEnabled()  # spam
+
+
 def test_configdialog_sets_initial_config(qtbot):
     config = default_config()
     configdialog = ConfigDialog(frameworks, config)
