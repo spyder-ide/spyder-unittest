@@ -37,7 +37,7 @@ def get_package_data(name, extlist):
 
 
 # Requirements
-REQUIREMENTS = ['lxml', 'nose', 'pytest', 'spyder>=3']
+REQUIREMENTS = ['lxml', 'spyder>=3']
 EXTLIST = ['.jpg', '.png', '.json', '.mo', '.ini']
 LIBNAME = 'spyder_unittest'
 
