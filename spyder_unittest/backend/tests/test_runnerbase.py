@@ -10,9 +10,10 @@ from spyder_unittest.backend.runnerbase import Category, RunnerBase
 
 
 def test_runnerbase_with_nonexisting_module():
-    runner = RunnerBase(None)
-    runner.module = 'nonexisiting'
-    assert not runner.is_installed()
+    class FooRunner(RunnerBase):
+        module = 'nonexisiting'
+
+    assert not FooRunner.is_installed()
 
 
 def test_runnerbase_load_data(tmpdir):

@@ -92,7 +92,8 @@ class RunnerBase(QObject):
         else:
             self.resultfilename = resultfilename
 
-    def is_installed(self):
+    @classmethod
+    def is_installed(cls):
         """
         Check whether test framework is installed.
 
@@ -104,7 +105,7 @@ class RunnerBase(QObject):
         bool
             True if framework is installed, False otherwise.
         """
-        return find_spec_or_loader(self.module) is not None
+        return find_spec_or_loader(cls.module) is not None
 
     def create_argument_list(self):
         """
