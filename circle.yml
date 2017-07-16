@@ -1,5 +1,7 @@
 # https://circleci.com/gh/spyder-ide/spyder-unittest
 
+# This script installs spyder from the current 3.x branch on github
+
 machine:
   environment:
     # Used by qthelpers to close widgets after a defined time
@@ -26,7 +28,8 @@ dependencies:
       export PATH="$HOME/miniconda/bin:$PATH" &&
       source activate test &&
       conda install ciocheck -c spyder-ide &&
-      conda install spyder &&
+      conda uninstall spyder &&
+      pip install git+https://github.com/spyder-ide/spyder@3.x &&
       python setup.py develop;
 
 test:
