@@ -28,7 +28,13 @@ dependencies:
       export PATH="$HOME/miniconda/bin:$PATH" &&
       source activate test &&
       conda install ciocheck -c spyder-ide &&
-      pip install git+https://github.com/spyder-ide/spyder@3.x &&
+      mkdir spyder-source &&
+      cd spyder-source &&
+      wget -q https://github.com/spyder-ide/spyder/archive/3.x.zip &&
+      unzip -q 3.x.zip &&
+      cd spyder-3.x &&
+      python setup.py install > /dev/null &&
+      cd ../.. &&
       python setup.py develop;
 
 test:
