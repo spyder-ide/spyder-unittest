@@ -27,29 +27,31 @@ dependencies:
       ls $HOME/miniconda/bin &&
       export PATH="$HOME/miniconda/bin:$PATH" &&
       source activate test &&
-      conda install -c spyder-ide pytest-cov &&
+      conda install -q -c spyder-ide pytest-cov &&
+      conda install -q spyder &&
+      conda remove -y spyder &&
       mkdir spyder-source &&
       cd spyder-source &&
       wget -q https://github.com/spyder-ide/spyder/archive/3.x.zip &&
       unzip -q 3.x.zip &&
       cd spyder-3.x &&
-      python setup.py install > /dev/null &&
+      python setup.py install &&
       cd ../.. &&
       python setup.py develop;
 
 test:
   override:
     # Check PyQt5
-    - export PATH="$HOME/miniconda/bin:$PATH" && source activate test && export PYTEST_QT_API="pyqt5" && conda install qt=5.* pyqt=5.* && py.test spyder_unittest --cov=spyder_unittest: # note the colon
+    - export PATH="$HOME/miniconda/bin:$PATH" && source activate test && export PYTEST_QT_API="pyqt5" && conda install -q qt=5.* pyqt=5.* && py.test spyder_unittest --cov=spyder_unittest: # note the colon
         parallel: true
     # Check PySide2
-#    - export PATH="$HOME/miniconda/bin:$PATH" && source activate test && export PYTEST_QT_API="pyside2" && conda install qt=5.* pyside2 && py.test spyder_unittest --cov=spyder_unittest: # note the colon
+#    - export PATH="$HOME/miniconda/bin:$PATH" && source activate test && export PYTEST_QT_API="pyside2" && conda install -q qt=5.* pyside2 && py.test spyder_unittest --cov=spyder_unittest: # note the colon
 #        parallel: true
     # Check PyQt4 (but not on Python 3.6)
-    - if [ "$CIRCLE_NODE_INDEX" != "0" ]; then echo check && export PATH="$HOME/miniconda/bin:$PATH" && source activate test && export PYTEST_QT_API="pyqt4v2" && conda install qt=4.* pyqt=4.* && py.test spyder_unittest --cov=spyder_unittest; fi: # note the colon
+    - if [ "$CIRCLE_NODE_INDEX" != "0" ]; then echo check && export PATH="$HOME/miniconda/bin:$PATH" && source activate test && export PYTEST_QT_API="pyqt4v2" && conda install -q qt=4.* pyqt=4.* && py.test spyder_unittest --cov=spyder_unittest; fi: # note the colon
         parallel: true
     # Check Pyside (but only on Python 2.7)
-    - if [ "$CIRCLE_NODE_INDEX" = "2" ]; then export PATH="$HOME/miniconda/bin:$PATH" && source activate test && export PYTEST_QT_API="pyside" && conda install qt=4.* pyside && py.test spyder_unittest --cov=spyder_unittest; fi: # note the colon
+    - if [ "$CIRCLE_NODE_INDEX" = "2" ]; then export PATH="$HOME/miniconda/bin:$PATH" && source activate test && export PYTEST_QT_API="pyside" && conda install -q qt=4.* pyside && py.test spyder_unittest --cov=spyder_unittest; fi: # note the colon
         parallel: true
   post:
     - ls $HOME/miniconda/bin && export PATH="$HOME/miniconda/bin:$PATH" && source activate test && echo $PATH && coveralls
