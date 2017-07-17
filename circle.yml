@@ -27,6 +27,7 @@ dependencies:
       ls $HOME/miniconda/bin &&
       export PATH="$HOME/miniconda/bin:$PATH" &&
       source activate test &&
+      conda install -c spyder-ide pytest-cov &&
       mkdir spyder-source &&
       cd spyder-source &&
       wget -q https://github.com/spyder-ide/spyder/archive/3.x.zip &&
