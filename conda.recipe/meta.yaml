@@ -23,8 +23,6 @@ requirements:
 
   run:
     - lxml
-    - nose
-    - pytest
     - python
     - spyder >=3
 

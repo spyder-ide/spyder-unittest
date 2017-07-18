@@ -5,8 +5,8 @@
 # (see LICENSE.txt for details)
 """Tests for pytestrunner.py"""
 
-# Standard library imports
-import os
+# Third party imports
+from spyder.utils.misc import get_python_executable
 
 # Local imports
 from spyder_unittest.backend.pytestrunner import PyTestRunner
@@ -16,6 +16,10 @@ try:
     from unittest.mock import Mock
 except ImportError:
     from mock import Mock  # Python 2
+
+
+def test_pytestrunner_is_installed():
+    assert PyTestRunner(None).is_installed()
 
 
 def test_pytestrunner_start(monkeypatch):
@@ -43,9 +47,8 @@ def test_pytestrunner_start(monkeypatch):
     mock_process.finished.connect.assert_called_once_with(runner.finished)
     mock_process.setProcessEnvironment.assert_called_once_with(
         mock_environment)
-    executable_name = 'py.test.exe' if os.name == 'nt' else 'py.test'
-    mock_process.start.assert_called_once_with(executable_name,
-                                               ['--junit-xml', 'results'])
+    mock_process.start.assert_called_once_with(
+        get_python_executable(), ['-m', 'pytest', '--junit-xml', 'results'])
 
     mock_environment.insert.assert_any_call('VAR', 'VALUE')
     # mock_environment.insert.assert_any_call('PYTHONPATH', 'pythondir:old')

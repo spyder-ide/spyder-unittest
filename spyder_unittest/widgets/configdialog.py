@@ -50,8 +50,9 @@ class ConfigDialog(QDialog):
 
         Parameters
         ----------
-        frameworks : iterable of str
-            Names of all supported frameworks
+        frameworks : dict of (str, type)
+            Names of all supported frameworks with their associated class
+            (assumed to be a subclass of RunnerBase)
         config : Config
             Initial configuration
         parent : QWidget
@@ -63,9 +64,17 @@ class ConfigDialog(QDialog):
         framework_layout = QHBoxLayout()
         framework_label = QLabel(_('Test framework'))
         framework_layout.addWidget(framework_label)
+
         self.framework_combobox = QComboBox(self)
-        for framework in frameworks:
-            self.framework_combobox.addItem(framework)
+        for ix, (name, runner) in enumerate(sorted(frameworks.items())):
+            installed = runner.is_installed()
+            if installed:
+                label = name
+            else:
+                label = '{} ({})'.format(name, _('not available'))
+            self.framework_combobox.addItem(label)
+            self.framework_combobox.model().item(ix).setEnabled(installed)
+
         framework_layout.addWidget(self.framework_combobox)
         layout.addLayout(framework_layout)
 

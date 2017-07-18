@@ -16,7 +16,12 @@ from qtpy.QtCore import (QObject, QProcess, QProcessEnvironment, QTextCodec,
                          Signal)
 from spyder.config.base import get_translation
 from spyder.py3compat import to_text_string
-from spyder.utils.misc import add_pathlist_to_PYTHONPATH
+from spyder.utils.misc import add_pathlist_to_PYTHONPATH, get_python_executable
+
+try:
+    from importlib.util import find_spec as find_spec_or_loader
+except ImportError:  # Python 2
+    from pkgutil import find_loader as find_spec_or_loader
 
 try:
     _ = get_translation("unittest", dirname="spyder_unittest")
@@ -49,9 +54,11 @@ class RunnerBase(QObject):
 
     Attributes
     ----------
-    executable : str
-        Name of executable for test framework. This needs to be defined before
-        the user can run tests.
+    module : str
+        Name of Python module for test framework. This needs to be defined
+        before the user can run tests.
+    name : str
+        Name of test framework, as presented to user.
     process : QProcess or None
         Process running the unit test suite.
     resultfilename : str
@@ -84,6 +91,21 @@ class RunnerBase(QObject):
                                                'unittest.results')
         else:
             self.resultfilename = resultfilename
+
+    @classmethod
+    def is_installed(cls):
+        """
+        Check whether test framework is installed.
+
+        This function tests whether self.module is installed, but it does not
+        import it.
+
+        Returns
+        -------
+        bool
+            True if framework is installed, False otherwise.
+        """
+        return find_spec_or_loader(cls.module) is not None
 
     def create_argument_list(self):
         """
@@ -134,11 +156,8 @@ class RunnerBase(QObject):
                 processEnvironment.insert(envName, envValue)
             self.process.setProcessEnvironment(processEnvironment)
 
-        executable = self.executable
-        p_args = self.create_argument_list()
-
-        if os.name == 'nt':
-            executable += '.exe'
+        executable = get_python_executable()
+        p_args = ['-m', self.module] + self.create_argument_list()
 
         try:
             os.remove(self.resultfilename)

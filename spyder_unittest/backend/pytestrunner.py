@@ -12,7 +12,8 @@ from spyder_unittest.backend.runnerbase import RunnerBase
 class PyTestRunner(RunnerBase):
     """Class for running tests within py.test framework."""
 
-    executable = 'py.test'
+    module = 'pytest'
+    name = 'py.test'
 
     def create_argument_list(self):
         """Create argument list for testing process (dummy)."""

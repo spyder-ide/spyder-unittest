@@ -13,6 +13,8 @@ from spyder_unittest.backend.frameworkregistry import FrameworkRegistry
 
 
 class MockRunner:
+    name = 'foo'
+
     def __init__(self, *args):
         self.init_args = args
 
@@ -25,15 +27,7 @@ def test_frameworkregistry_when_empty():
 
 def test_frameworkregistry_after_registering():
     reg = FrameworkRegistry()
-    reg.register('foo', MockRunner)
+    reg.register(MockRunner)
     runner = reg.create_runner('foo', None, 'temp.txt')
     assert isinstance(runner, MockRunner)
     assert runner.init_args == (None, 'temp.txt')
-
-
-def test_frameworkregistry_frameworks():
-    reg = FrameworkRegistry()
-    frameworks = {'spam', 'ham', 'eggs'}
-    for name in frameworks:
-        reg.register(name, object)
-    assert frameworks == set(reg.frameworks)

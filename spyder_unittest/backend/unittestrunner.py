@@ -19,11 +19,12 @@ from spyder_unittest.backend.runnerbase import Category, RunnerBase, TestResult
 class UnittestRunner(RunnerBase):
     """Class for running tests with unittest module in standard library."""
 
-    executable = 'python'
+    module = 'unittest'
+    name = 'unittest'
 
     def create_argument_list(self):
         """Create argument list for testing process."""
-        return ['-m', 'unittest', 'discover', '-v']
+        return ['discover', '-v']
 
     def finished(self):
         """

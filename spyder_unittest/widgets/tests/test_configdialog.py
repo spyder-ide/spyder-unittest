@@ -14,7 +14,32 @@ from qtpy.QtWidgets import QDialogButtonBox
 # Local imports
 from spyder_unittest.widgets.configdialog import Config, ConfigDialog
 
-frameworks = ['nose', 'py.test']
+
+class SpamRunner:
+    name = 'spam'
+
+    @classmethod
+    def is_installed(cls):
+        return False
+
+
+class HamRunner:
+    name = 'ham'
+
+    @classmethod
+    def is_installed(cls):
+        return True
+
+
+class EggsRunner:
+    name = 'eggs'
+
+    @classmethod
+    def is_installed(cls):
+        return True
+
+
+frameworks = {r.name: r for r in [SpamRunner, HamRunner, EggsRunner]}
 
 
 def default_config():
@@ -22,11 +47,24 @@ def default_config():
 
 
 def test_configdialog_uses_frameworks(qtbot):
-    frameworks = ['spam', 'ham', 'eggs']
+    configdialog = ConfigDialog({'eggs': EggsRunner}, default_config())
+    assert configdialog.framework_combobox.count() == 1
+    assert configdialog.framework_combobox.itemText(0) == 'eggs'
+
+
+def test_configdialog_indicates_unvailable_frameworks(qtbot):
+    configdialog = ConfigDialog({'spam': SpamRunner}, default_config())
+    assert configdialog.framework_combobox.count() == 1
+    assert configdialog.framework_combobox.itemText(
+        0) == 'spam (not available)'
+
+
+def test_configdialog_disables_unavailable_frameworks(qtbot):
     configdialog = ConfigDialog(frameworks, default_config())
-    assert configdialog.framework_combobox.count() == len(frameworks)
-    for i, framework in enumerate(frameworks):
-        assert configdialog.framework_combobox.itemText(i) == framework
+    model = configdialog.framework_combobox.model()
+    assert model.item(0).isEnabled()  # eggs
+    assert model.item(1).isEnabled()  # ham
+    assert not model.item(2).isEnabled()  # spam
 
 
 def test_configdialog_sets_initial_config(qtbot):
@@ -35,11 +73,11 @@ def test_configdialog_sets_initial_config(qtbot):
     assert configdialog.get_config() == config
 
 
-def test_configdialog_click_pytest(qtbot):
+def test_configdialog_click_ham(qtbot):
     configdialog = ConfigDialog(frameworks, default_config())
     qtbot.addWidget(configdialog)
     configdialog.framework_combobox.setCurrentIndex(1)
-    assert configdialog.get_config().framework == 'py.test'
+    assert configdialog.get_config().framework == 'ham'
 
 
 def test_configdialog_ok_initially_disabled(qtbot):
@@ -49,7 +87,7 @@ def test_configdialog_ok_initially_disabled(qtbot):
 
 
 def test_configdialog_ok_setting_framework_initially_enables_ok(qtbot):
-    config = Config(framework='py.test', wdir=os.getcwd())
+    config = Config(framework='eggs', wdir=os.getcwd())
     configdialog = ConfigDialog(frameworks, config)
     qtbot.addWidget(configdialog)
     assert configdialog.buttons.button(QDialogButtonBox.Ok).isEnabled()

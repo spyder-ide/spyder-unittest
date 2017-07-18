@@ -47,11 +47,7 @@ COLORS = {
 }
 
 # Supported testing framework
-FRAMEWORKS = {
-    'nose': NoseRunner,
-    'py.test': PyTestRunner,
-    'unittest': UnittestRunner
-}
+FRAMEWORKS = {NoseRunner, PyTestRunner, UnittestRunner}
 
 
 def is_unittesting_installed():
@@ -102,8 +98,8 @@ class UnitTestWidget(QWidget):
         self.datatree = UnitTestDataTree(self)
 
         self.framework_registry = FrameworkRegistry()
-        for (name, runner) in FRAMEWORKS.items():
-            self.framework_registry.register(name, runner)
+        for runner in FRAMEWORKS:
+            self.framework_registry.register(runner)
 
         self.start_button = create_toolbutton(self, text_beside_icon=True)
         self.set_running_state(False)
@@ -177,7 +173,7 @@ class UnitTestWidget(QWidget):
             oldconfig = self.config
         else:
             oldconfig = Config(wdir=self.default_wdir)
-        frameworks = sorted(self.framework_registry.frameworks)
+        frameworks = self.framework_registry.frameworks
         config = ask_for_config(frameworks, oldconfig)
         if config:
             self.config = config

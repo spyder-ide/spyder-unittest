@@ -9,7 +9,14 @@
 from spyder_unittest.backend.runnerbase import Category, RunnerBase
 
 
-def test_baserunner_load_data(tmpdir):
+def test_runnerbase_with_nonexisting_module():
+    class FooRunner(RunnerBase):
+        module = 'nonexisiting'
+
+    assert not FooRunner.is_installed()
+
+
+def test_runnerbase_load_data(tmpdir):
     result_file = tmpdir.join('results')
     result_txt = """<?xml version="1.0" encoding="utf-8"?>
 <testsuite errors="0" failures="1" name="pytest" skips="1" tests="3" time="0.1">
@@ -50,7 +57,7 @@ def test_baserunner_load_data(tmpdir):
     assert results[2].extra_text == 'text2'
 
 
-def test_baserunner_load_data_failing_test_with_stdout(tmpdir):
+def test_runnerbase_load_data_failing_test_with_stdout(tmpdir):
     result_file = tmpdir.join('results')
     result_txt = """<?xml version="1.0" encoding="utf-8"?>
 <testsuite errors="0" failures="1" name="pytest" skips="0" tests="1" time="0.1">
@@ -65,7 +72,7 @@ def test_baserunner_load_data_failing_test_with_stdout(tmpdir):
         'text\n\n' + '----- Captured stdout -----\n' + 'stdout text')
 
 
-def test_baserunner_load_data_passing_test_with_stdout(tmpdir):
+def test_runnerbase_load_data_passing_test_with_stdout(tmpdir):
     result_file = tmpdir.join('results')
     result_txt = """<?xml version="1.0" encoding="utf-8"?>
 <testsuite errors="0" failures="0" name="pytest" skips="0" tests="1" time="0.1">
