@@ -21,7 +21,7 @@ frameworks. It allows you to run tests and view the results.
 
 ## Status
 
-This is a work in progress. It is quite useable, but there is obviously room
+This is a work in progress. It is quite useable, but there is obvious room
 for improvement. The plugin supports the `unittest` framework in the Python
 standard library and the `py.test` and `nose` testing frameworks.
 
@@ -77,6 +77,6 @@ requests to the
 [issue tracker](https://github.com/spyder-ide/spyder-unittest/issues).
 GitHub is configured to run pull requests automatically against the test suite
 and against several automatic style checkers using
-[ciocheck](https://github.com/spyder-ide/ciocheck).
+[ciocheck](https://github.com/ContinuumIO/ciocheck).
 The style checkers can be rather finicky so you may want to install ciocheck
 locally and run them before submitting the code.
