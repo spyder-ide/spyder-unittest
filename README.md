@@ -10,7 +10,6 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/d9wa6whp1fpq4uii?svg=true)](https://ci.appveyor.com/project/spyder-ide/spyder-unittest)
 [![CircleCI](https://circleci.com/gh/spyder-ide/spyder-unittest/tree/master.svg?style=shield)](https://circleci.com/gh/spyder-ide/spyder-unittest/tree/master)
 [![Coverage Status](https://coveralls.io/repos/github/spyder-ide/spyder-unittest/badge.svg?branch=master)](https://coveralls.io/github/spyder-ide/spyder-unittest?branch=master)
-[![Code Issues](https://www.quantifiedcode.com/api/v1/project/cce1ea0d121246ff876d2822e9e3d2a1/badge.svg)](https://www.quantifiedcode.com/app/project/cce1ea0d121246ff876d2822e9e3d2a1)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/spyder-ide/spyder-unittest/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/spyder-ide/spyder-unittest/?branch=master)
 
 ## Description
@@ -22,9 +21,9 @@ frameworks. It allows you to run tests and view the results.
 
 ## Status
 
-This is a work in progress. It is useable, but only the basic functionality 
-is implemented at the moment. The plugin supports the py.test and nose 
-testing frameworks.
+This is a work in progress. It is quite useable, but there is obviously room
+for improvement. The plugin supports the `unittest` framework in the Python
+standard library and the `py.test` and `nose` testing frameworks.
 
 ## Installation
 
@@ -49,6 +48,12 @@ If you want to run tests in a different directory or switch testing
 frameworks, click `Configure` in the Options menu (cogwheel icon), 
 which is located in the upper right corner of the `Unit testing` pane.
 
+## Feedback
+
+Bug reports, feature requests and other ideas are more than welcome on the
+[issue tracker](https://github.com/spyder-ide/spyder-unittest/issues).
+You may use <http://groups.google.com/group/spyderlib> for general discussion.
+
 ## Development
 
 Development of the plugin is done at https://github.com/spyder-ide/spyder-unittest .
@@ -66,3 +71,12 @@ In order to run the tests distributed with this plugin, you need
 [nose](https://nose.readthedocs.io), [py.test](https://pytest.org) 
 and [pytest-qt](https://github.com/pytest-dev/pytest-qt). If you use Python 2, 
 you also need [mock](https://github.com/testing-cabal/mock).
+
+You are very welcome to submit code contributations in the form of pull
+requests to the
+[issue tracker](https://github.com/spyder-ide/spyder-unittest/issues).
+GitHub is configured to run pull requests automatically against the test suite
+and against several automatic style checkers using
+[ciocheck](https://github.com/spyder-ide/ciocheck).
+The style checkers can be rather finicky so you may want to install ciocheck
+locally and run them before submitting the code.
