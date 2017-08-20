@@ -1,7 +1,5 @@
 checks:
-    python:
-        code_rating: true
-        duplicate_code: true
+    python: true
         
 filter:
     excluded_paths:
