@@ -24,7 +24,7 @@ class UnittestRunner(RunnerBase):
 
     def create_argument_list(self):
         """Create argument list for testing process."""
-        return ['discover', '-v']
+        return ['-m', self.module, 'discover', '-v']
 
     def finished(self):
         """

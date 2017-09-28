@@ -17,4 +17,7 @@ class NoseRunner(RunnerBase):
 
     def create_argument_list(self):
         """Create argument list for testing process."""
-        return ['--with-xunit', '--xunit-file={}'.format(self.resultfilename)]
+        return [
+            '-m', self.module, '--with-xunit',
+            '--xunit-file={}'.format(self.resultfilename)
+        ]

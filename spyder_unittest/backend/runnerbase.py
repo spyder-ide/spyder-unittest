@@ -157,7 +157,7 @@ class RunnerBase(QObject):
             self.process.setProcessEnvironment(processEnvironment)
 
         executable = get_python_executable()
-        p_args = ['-m', self.module] + self.create_argument_list()
+        p_args = self.create_argument_list()
 
         try:
             os.remove(self.resultfilename)
