@@ -5,6 +5,9 @@
 # (see LICENSE.txt for details)
 """Support for py.test framework."""
 
+# Standard library imports
+import os
+
 # Local imports
 from spyder_unittest.backend.runnerbase import RunnerBase
 
@@ -17,4 +20,5 @@ class PyTestRunner(RunnerBase):
 
     def create_argument_list(self):
         """Create argument list for testing process."""
-        return ['-m', self.module, '--junit-xml', self.resultfilename]
+        pyfile = os.path.join(os.path.dirname(__file__), 'pytestworker.py')
+        return [pyfile, '--junit-xml', self.resultfilename]

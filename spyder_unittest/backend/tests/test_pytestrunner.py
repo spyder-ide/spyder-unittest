@@ -5,6 +5,9 @@
 # (see LICENSE.txt for details)
 """Tests for pytestrunner.py"""
 
+# Standard library imports
+import os
+
 # Third party imports
 from spyder.utils.misc import get_python_executable
 
@@ -47,8 +50,11 @@ def test_pytestrunner_start(monkeypatch):
     mock_process.finished.connect.assert_called_once_with(runner.finished)
     mock_process.setProcessEnvironment.assert_called_once_with(
         mock_environment)
+
+    workerfile = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), os.pardir, 'pytestworker.py'))
     mock_process.start.assert_called_once_with(
-        get_python_executable(), ['-m', 'pytest', '--junit-xml', 'results'])
+        get_python_executable(), [workerfile, '--junit-xml', 'results'])
 
     mock_environment.insert.assert_any_call('VAR', 'VALUE')
     # mock_environment.insert.assert_any_call('PYTHONPATH', 'pythondir:old')
