@@ -17,4 +17,18 @@ import sys
 # Third party imports
 import pytest
 
-pytest.main(sys.argv[1:])
+
+class SpyderPlugin():
+    """Pytest plugin which reports in format suitable for Spyder."""
+
+    def pytest_itemcollected(self, item):
+        """Called by py.test when a test item is collected."""
+        name = item.name
+        module = item.parent.name
+        module = module.replace('/', '.')  # convert path to dotted path
+        if module.endswith('.py'):
+            module = module[:-3]
+        print('pytest_item_collected(name={}, module={})'.format(name, module))
+
+
+pytest.main(sys.argv[1:], plugins=[SpyderPlugin()])
