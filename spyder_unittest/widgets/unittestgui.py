@@ -84,7 +84,7 @@ class UnitTestWidget(QWidget):
 
     sig_finished = Signal()
 
-    def __init__(self, parent):
+    def __init__(self, parent, options_button=None, options_menu=None):
         """Unit testing widget."""
         QWidget.__init__(self, parent)
 
@@ -106,37 +106,18 @@ class UnitTestWidget(QWidget):
 
         self.status_label = QLabel('', self)
 
-        self.config_action = create_action(
-            self,
-            text=_("Configure ..."),
-            icon=ima.icon('configure'),
-            triggered=self.configure)
-        self.log_action = create_action(
-            self,
-            text=_('Show output'),
-            icon=ima.icon('log'),
-            triggered=self.show_log)
-        self.collapse_action = create_action(
-            self,
-            text=_('Collapse all'),
-            icon=ima.icon('collapse'),
-            triggered=self.datatree.collapseAll())
-        self.expand_action = create_action(
-            self,
-            text=_('Expand all'),
-            icon=ima.icon('expand'),
-            triggered=self.datatree.expandAll())
+        self.create_actions()
 
-        options_menu = QMenu()
-        options_menu.addAction(self.config_action)
-        options_menu.addAction(self.log_action)
-        options_menu.addAction(self.collapse_action)
-        options_menu.addAction(self.expand_action)
+        self.options_menu = options_menu or QMenu()
+        self.options_menu.addAction(self.config_action)
+        self.options_menu.addAction(self.log_action)
+        self.options_menu.addAction(self.collapse_action)
+        self.options_menu.addAction(self.expand_action)
 
-        self.options_button = QToolButton(self)
+        self.options_button = options_button or QToolButton(self)
         self.options_button.setIcon(ima.icon('tooloptions'))
         self.options_button.setPopupMode(QToolButton.InstantPopup)
-        self.options_button.setMenu(options_menu)
+        self.options_button.setMenu(self.options_menu)
         self.options_button.setAutoRaise(True)
 
         hlayout = QHBoxLayout()
@@ -157,6 +138,31 @@ class UnitTestWidget(QWidget):
                 widget.setDisabled(True)
         else:
             pass  # self.show_data()
+
+    def create_actions(self):
+        """Create the actions for the unittest widget."""
+        self.config_action = create_action(
+            self,
+            text=_("Configure ..."),
+            icon=ima.icon('configure'),
+            triggered=self.configure)
+        self.log_action = create_action(
+            self,
+            text=_('Show output'),
+            icon=ima.icon('log'),
+            triggered=self.show_log)
+        self.collapse_action = create_action(
+            self,
+            text=_('Collapse all'),
+            icon=ima.icon('collapse'),
+            triggered=self.datatree.collapseAll())
+        self.expand_action = create_action(
+            self,
+            text=_('Expand all'),
+            icon=ima.icon('expand'),
+            triggered=self.datatree.expandAll())
+        return [self.config_action, self.log_action, self.collapse_action,
+                self.expand_action]
 
     def show_log(self):
         """Show output of testing process."""
