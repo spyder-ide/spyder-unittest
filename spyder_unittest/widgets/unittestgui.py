@@ -161,8 +161,10 @@ class UnitTestWidget(QWidget):
             text=_('Expand all'),
             icon=ima.icon('expand'),
             triggered=self.datatree.expandAll())
-        return [self.config_action, self.log_action, self.collapse_action,
-                self.expand_action]
+        return [
+            self.config_action, self.log_action, self.collapse_action,
+            self.expand_action
+        ]
 
     def show_log(self):
         """Show output of testing process."""

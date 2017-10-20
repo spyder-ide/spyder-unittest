@@ -35,9 +35,9 @@ class UnitTestPlugin(SpyderPluginWidget):
         if hasattr(self, 'options_button') and hasattr(self, 'options_menu'):
             # Works with Spyder 4.x
             self.unittestwidget = UnitTestWidget(
-                                            self.main,
-                                            options_button=self.options_button,
-                                            options_menu=self.options_menu)
+                self.main,
+                options_button=self.options_button,
+                options_menu=self.options_menu)
         else:
             # Works with Spyder 3.x
             self.unittestwidget = UnitTestWidget(self.main)
