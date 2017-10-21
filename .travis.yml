@@ -33,12 +33,8 @@ before_install:
   # Test environments for different Qt bindings
   - if [[ "$USE_QT_API" == "PyQt5" ]]; then
       export CONDA_DEPENDENCIES='qt=5.* pyqt=5.* '$CONDA_DEPENDENCIES;
-    elif [[ "$USE_QT_API" == "PySide2" ]]; then
-      export CONDA_DEPENDENCIES='qt=5.* pyside2 '$CONDA_DEPENDENCIES;
     elif [[ "$USE_QT_API" == "PyQt4" ]]; then
       export CONDA_DEPENDENCIES='qt=4.* pyqt=4.* '$CONDA_DEPENDENCIES;
-    elif [[ "$USE_QT_API" == "PySide" ]]; then
-      export CONDA_DEPENDENCIES='qt=4.* pyside '$CONDA_DEPENDENCIES;
     fi
   # Use xvfb (X Virtual Framebuffer) to imitate a display
   # See https://docs.travis-ci.com/user/gui-and-headless-browsers/
