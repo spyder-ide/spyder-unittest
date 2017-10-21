@@ -29,8 +29,19 @@ class UnitTestPlugin(SpyderPluginWidget):
         SpyderPluginWidget.__init__(self, parent)
         self.main = parent  # Spyder 3 compatibility
 
-        # Create unit test widget
-        self.unittestwidget = UnitTestWidget(self.main)
+        # Create unit test widget. For compatibility with Spyder 3.x
+        # here we check if the plugin has the attributes
+        # 'options_button' and 'options_menu'. See issue 83
+        if hasattr(self, 'options_button') and hasattr(self, 'options_menu'):
+            # Works with Spyder 4.x
+            self.unittestwidget = UnitTestWidget(
+                self.main,
+                options_button=self.options_button,
+                options_menu=self.options_menu)
+        else:
+            # Works with Spyder 3.x
+            self.unittestwidget = UnitTestWidget(self.main)
+
         self.update_pythonpath()
         self.update_default_wdir()
 
@@ -90,7 +101,7 @@ class UnitTestPlugin(SpyderPluginWidget):
 
     def get_plugin_actions(self):
         """Return a list of actions related to plugin."""
-        return []
+        return self.unittestwidget.create_actions()
 
     def on_first_registration(self):
         """Action to be performed on first plugin registration."""
@@ -114,7 +125,11 @@ class UnitTestPlugin(SpyderPluginWidget):
 
     def refresh_plugin(self):
         """Refresh unit testing widget."""
-        pass
+        # For compatibility with Spyder 3.x here we check if the plugin
+        # has the attributes 'options_button' and 'options_menu'. See issue 83
+        if hasattr(self, 'options_button') and hasattr(self, 'options_menu'):
+            self.options_menu.clear()
+            self.get_plugin_actions()
 
     def closing_plugin(self, cancelable=False):
         """Perform actions before parent main window is closed."""
