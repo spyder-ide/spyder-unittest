@@ -1,6 +1,0 @@
-checks:
-    python: true
-        
-filter:
-    excluded_paths:
-        - "*/tests/*"
