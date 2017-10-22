@@ -12,23 +12,41 @@ PyTestRunner can read them.
 """
 
 # Standard library imports
+import io
 import sys
 
 # Third party imports
 import pytest
 
+# Local imports
+from spyder_unittest.backend.jsonstream import JSONStreamWriter
+
 
 class SpyderPlugin():
     """Pytest plugin which reports in format suitable for Spyder."""
 
+    def __init__(self, writer):
+        """Constructor."""
+        self.writer = writer
+
     def pytest_itemcollected(self, item):
         """Called by py.test when a test item is collected."""
-        name = item.name
-        module = item.parent.name
-        module = module.replace('/', '.')  # convert path to dotted path
-        if module.endswith('.py'):
-            module = module[:-3]
-        print('pytest_item_collected(name={}, module={})'.format(name, module))
+        self.writer.write({
+            'event': 'collected',
+            'name': item.name,
+            'module': item.parent.name
+        })
 
 
-pytest.main(sys.argv[1:], plugins=[SpyderPlugin()])
+def main(args):
+    """Run py.test with the Spyder plugin."""
+    old_stdout = sys.stdout
+    stdout_buffer = io.StringIO()
+    sys.stdout = stdout_buffer
+    writer = JSONStreamWriter(old_stdout)
+    pytest.main(args, plugins=[SpyderPlugin(writer)])
+    # TODO Recover contents of stdout buffer and restore old stdout
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
