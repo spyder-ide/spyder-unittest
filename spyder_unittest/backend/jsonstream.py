@@ -40,7 +40,7 @@ class JSONStreamWriter:
 
     def write(self, obj):
         """
-        Write Python object to the stream.
+        Write Python object to the stream and flush.
 
         Arguments
         ---------
@@ -51,6 +51,7 @@ class JSONStreamWriter:
         txt = json.dumps(obj)
         self.stream.write(str(len(txt)) + '\n')
         self.stream.write(txt + '\n')
+        self.stream.flush()
 
 
 class JSONStreamReader:

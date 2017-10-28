@@ -6,7 +6,8 @@
 """Tests for jsonstream.py"""
 
 # Standard library imports
-from io import StringIO
+from io import StringIO, TextIOBase
+from unittest.mock import create_autospec
 
 # Local imports
 from spyder_unittest.backend.jsonstream import (JSONStreamReader,
@@ -25,6 +26,13 @@ def test_jsonstreamwriter_with_unicode():
     writer = JSONStreamWriter(stream)
     writer.write('三')
     assert stream.getvalue() == '8\n"\\u4e09"\n'
+
+
+def test_json_streamwriter_flushes():
+    stream = create_autospec(TextIOBase)
+    writer = JSONStreamWriter(stream)
+    writer.write(1)
+    stream.flush.assert_called_once()
 
 
 def test_jsonstreamreader_with_list():
