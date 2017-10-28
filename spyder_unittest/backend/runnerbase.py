@@ -29,6 +29,9 @@ except KeyError as error:
     import gettext
     _ = gettext.gettext
 
+# Class with details of the tests
+TestDetails = namedtuple('TestDetails', ['name', 'module'])
+
 # Class representing test results
 TestResult = namedtuple('TestResult', [
     'category', 'status', 'name', 'module', 'message', 'time', 'extra_text'
@@ -66,11 +69,14 @@ class RunnerBase(QObject):
 
     Signals
     -------
+    sig_rcollected(list of TestDetails)
+        Emitted when tests are collected.
     sig_finished(list of TestResult, str)
         Emitted when test process finishes. First argument contains the test
         results, second argument contains the output of the test process.
     """
 
+    sig_collected = Signal(object)
     sig_finished = Signal(object, str)
 
     def __init__(self, widget, resultfilename=None):

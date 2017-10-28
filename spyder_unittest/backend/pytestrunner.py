@@ -10,13 +10,12 @@ import os
 
 # Third party imports
 from qtpy.QtCore import QProcess, QProcessEnvironment, QTextCodec
-from spyder.config.base import debug_print
 from spyder.py3compat import to_text_string
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH, get_python_executable
 
 # Local imports
 from spyder_unittest.backend.jsonstream import JSONStreamReader
-from spyder_unittest.backend.runnerbase import RunnerBase
+from spyder_unittest.backend.runnerbase import RunnerBase, TestDetails
 
 
 class PyTestRunner(RunnerBase):
@@ -83,7 +82,6 @@ class PyTestRunner(RunnerBase):
         except OSError:
             pass
 
-        debug_print('Starting py.test process')
         self.process.start(executable, p_args)
         running = self.process.waitForStarted()
         if not running:
@@ -95,4 +93,10 @@ class PyTestRunner(RunnerBase):
         locale_codec = QTextCodec.codecForLocale()
         output = to_text_string(locale_codec.toUnicode(qbytearray.data()))
         result = self.reader.consume(output)
-        debug_print('read_output received', result)
+        details_list = []
+        for result_item in result:
+            assert result_item['event'] == 'collected'
+            details = TestDetails(result_item['name'], result_item['module'])
+            details_list.append(details)
+        if details_list:
+            self.sig_collected.emit(details_list)

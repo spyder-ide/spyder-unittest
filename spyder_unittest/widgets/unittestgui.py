@@ -247,10 +247,12 @@ class UnitTestWidget(QWidget):
             config = self.config
         pythonpath = self.pythonpath
         self.datatree.clear()
+        self.testdetails = []
         tempfilename = get_conf_path('unittest.results')
         self.testrunner = self.framework_registry.create_runner(
             config.framework, self, tempfilename)
         self.testrunner.sig_finished.connect(self.process_finished)
+        self.testrunner.sig_collected.connect(self.tests_collected)
 
         try:
             self.testrunner.start(config, pythonpath)
@@ -305,6 +307,17 @@ class UnitTestWidget(QWidget):
         msg = self.datatree.show_tree()
         self.status_label.setText(msg)
         self.sig_finished.emit()
+
+    def tests_collected(self, testdetails):
+        """
+        Called when tests are collected.
+
+        This function stores the tests and displays the total number of tests
+        that have been collected.
+        """
+        self.testdetails += testdetails
+        self.status_label.setText(
+            _('Collected {} tests').format(len(self.testdetails)))
 
 
 class UnitTestDataTree(QTreeWidget):
