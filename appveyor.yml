@@ -52,9 +52,7 @@ install:
   - "pip install %PIP_DEPENDENCIES_2%"
   # Install the selected Qt version
   - if "%USE_QT_API%" == "PyQt5" conda install qt=5.* pyqt=5.*
-  - if "%USE_QT_API%" == "PySide2" conda install qt=5.* pyside2
   - if "%USE_QT_API%" == "PyQt4" conda install qt=4.* pyqt=4.*
-  - if "%USE_QT_API%" == "PySide" conda install qt=4.* pyside
   - "conda install ciocheck -c spyder-ide"
   - "python setup.py develop"
   - "spyder --reset"
