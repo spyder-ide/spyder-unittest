@@ -9,10 +9,12 @@
 import os
 
 # Third party imports
+from qtpy.QtCore import QByteArray
 from spyder.utils.misc import get_python_executable
 
 # Local imports
 from spyder_unittest.backend.pytestrunner import PyTestRunner
+from spyder_unittest.backend.runnerbase import TestDetails
 from spyder_unittest.widgets.configdialog import Config
 
 try:
@@ -42,6 +44,12 @@ def test_pytestrunner_start(monkeypatch):
     monkeypatch.setattr('spyder_unittest.backend.pytestrunner.os.remove',
                         mock_remove)
 
+    MockJSONStreamReader = Mock()
+    monkeypatch.setattr(
+        'spyder_unittest.backend.pytestrunner.JSONStreamReader',
+        MockJSONStreamReader)
+    mock_reader = MockJSONStreamReader()
+
     runner = PyTestRunner(None, 'results')
     config = Config('py.test', 'wdir')
     runner.start(config, ['pythondir'])
@@ -60,3 +68,39 @@ def test_pytestrunner_start(monkeypatch):
     # mock_environment.insert.assert_any_call('PYTHONPATH', 'pythondir:old')
     # TODO: Find out why above test fails
     mock_remove.called_once_with('results')
+
+    assert runner.reader is mock_reader
+
+
+def test_pytestrunner_read_output(monkeypatch):
+    runner = PyTestRunner(None)
+    runner.process = Mock()
+    qbytearray = QByteArray(b'encoded')
+    runner.process.readAllStandardOutput = Mock(return_value=qbytearray)
+    runner.reader = Mock()
+    runner.reader.consume = Mock(return_value='decoded')
+    runner.process_output = Mock()
+
+    runner.read_output()
+    assert runner.reader.consume.called_once_with('encoded')
+    assert runner.process_output.called_once_with('decoded')
+
+
+def test_pytestrunner_process_output(qtbot):
+    runner = PyTestRunner(None)
+    output = [{
+        'event': 'collected',
+        'module': 'spam',
+        'name': 'ham'
+    }, {
+        'event': 'collected',
+        'module': 'eggs',
+        'name': 'bacon'
+    }]
+    with qtbot.waitSignal(runner.sig_collected) as blocker:
+        runner.process_output(output)
+    expected = [
+        TestDetails(name='ham', module='spam'), 
+        TestDetails(name='bacon', module='eggs')
+    ]
+    assert blocker.args == [expected]

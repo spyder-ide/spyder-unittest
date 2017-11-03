@@ -28,7 +28,7 @@ def test_jsonstreamwriter_with_unicode():
     assert stream.getvalue() == '8\n"\\u4e09"\n'
 
 
-def test_json_streamwriter_flushes():
+def test_jsonstreamwriter_flushes():
     stream = create_autospec(TextIOBase)
     writer = JSONStreamWriter(stream)
     writer.write(1)

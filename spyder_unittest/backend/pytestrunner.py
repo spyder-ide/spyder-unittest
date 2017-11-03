@@ -93,8 +93,19 @@ class PyTestRunner(RunnerBase):
         locale_codec = QTextCodec.codecForLocale()
         output = to_text_string(locale_codec.toUnicode(qbytearray.data()))
         result = self.reader.consume(output)
+        self.process_output(result)
+
+    def process_output(self, output):
+        """
+        Process output of test process.
+
+        Parameters
+        ----------
+        output : list
+            list of decoded Python object sent by test process.
+        """
         details_list = []
-        for result_item in result:
+        for result_item in output:
             assert result_item['event'] == 'collected'
             details = TestDetails(result_item['name'], result_item['module'])
             details_list.append(details)

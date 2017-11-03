@@ -74,6 +74,7 @@ sections = FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER
 based_on_style = pep8
 column_limit = 79
 spaces_before_comment = 2
+split_before_named_assigned = False
 
 # -----------------------------------------------------------------------------
 # autopep8
