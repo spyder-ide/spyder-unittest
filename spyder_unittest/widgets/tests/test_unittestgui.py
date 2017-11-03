@@ -14,10 +14,8 @@ from qtpy.QtCore import Qt
 import pytest
 
 # Local imports
-from spyder_unittest.backend.runnerbase import Category, TestResult
 from spyder_unittest.widgets.configdialog import Config
-from spyder_unittest.widgets.unittestgui import (UnitTestDataTree,
-                                                 UnitTestWidget)
+from spyder_unittest.widgets.unittestgui import UnitTestWidget
 
 try:
     from unittest.mock import Mock
@@ -42,22 +40,6 @@ def test_unittestgui_set_config_does_not_emit_when_invalid(qtbot):
     with qtbot.assertNotEmitted(widget.sig_newconfig):
         widget.config = config
     assert widget.config == config
-
-
-def test_unittestdatatree_shows_short_name_in_table(qtbot):
-    datatree = UnitTestDataTree()
-    res = TestResult(Category.OK, 'status', 'bar', 'foo', '', 0, '')
-    datatree.testresults = [res]
-    datatree.populate_tree()
-    assert datatree.topLevelItem(0).data(1, Qt.DisplayRole) == 'bar'
-
-
-def test_unittestdatatree_shows_full_name_in_tooltip(qtbot):
-    datatree = UnitTestDataTree()
-    res = TestResult(Category.OK, 'status', 'bar', 'foo', '', 0, '')
-    datatree.testresults = [res]
-    datatree.populate_tree()
-    assert datatree.topLevelItem(0).data(1, Qt.ToolTipRole) == 'foo.bar'
 
 
 @pytest.mark.parametrize('framework', ['py.test', 'nose'])
