@@ -88,8 +88,7 @@ class UnittestRunner(RunnerBase):
                 continue
 
             if test_index is not None:
-                text = res[test_index].extra_text + lines[line_index] + '\n'
-                res[test_index] = res[test_index]._replace(extra_text=text)
+                res[test_index].extra_text.append(lines[line_index] + '\n')
                 line_index += 1
 
         return res

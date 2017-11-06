@@ -32,11 +32,6 @@ except KeyError as error:
 # Class with details of the tests
 TestDetails = namedtuple('TestDetails', ['name', 'module'])
 
-# Class representing test results
-TestResult = namedtuple('TestResult', [
-    'category', 'status', 'name', 'module', 'message', 'time', 'extra_text'
-])
-
 
 class Category:
     """Enum type representing category of test result."""
@@ -44,6 +39,37 @@ class Category:
     OK = 1
     FAIL = 2
     SKIP = 3
+
+
+class TestResult:
+    """Class representing the result of running a single test."""
+
+    def __init__(self, category, status, name, module, message='', time=None,
+                 extra_text=''):
+        """
+        Construct a test result.
+
+        Parameters
+        ----------
+        category : Category
+        status : str
+        name : str
+        module : str
+        message : str
+        time : float or None
+        extra_text : str
+        """
+        self.category = category
+        self.status = status
+        self.name = name
+        self.module = module
+        self.message = message
+        self.time = time
+        extra_test = extra_text.rstrip()
+        if extra_test:
+            self.extra_text = extra_text.split("\n")
+        else:
+            self.extra_text = []
 
 
 class RunnerBase(QObject):

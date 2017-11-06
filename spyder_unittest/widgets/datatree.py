@@ -80,7 +80,7 @@ class DataTree(QTreeWidget):
             for col in range(self.columnCount()):
                 testcase_item.setBackground(col, color)
             if testresult.extra_text:
-                for line in testresult.extra_text.rstrip().split("\n"):
+                for line in testresult.extra_text:
                     error_content_item = QTreeWidgetItem(testcase_item)
                     error_content_item.setData(0, Qt.DisplayRole, line)
                     error_content_item.setFirstColumnSpanned(True)
