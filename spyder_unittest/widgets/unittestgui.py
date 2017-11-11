@@ -39,13 +39,6 @@ except KeyError as error:
 FRAMEWORKS = {NoseRunner, PyTestRunner, UnittestRunner}
 
 
-def is_unittesting_installed():
-    """Check if the program and the library for line_profiler is installed."""
-    # return (programs.is_module_installed('line_profiler')
-    # and programs.find_program('kernprof.py') is not None)
-    return True
-
-
 class UnitTestWidget(QWidget):
     """
     Unit testing widget.
@@ -125,14 +118,6 @@ class UnitTestWidget(QWidget):
         layout.addLayout(hlayout)
         layout.addWidget(self.testdataview)
         self.setLayout(layout)
-
-        if not is_unittesting_installed():
-            for widget in (self.testdataview, self.log_action,
-                           self.start_button, self.collapse_action,
-                           self.expand_action):
-                widget.setDisabled(True)
-        else:
-            pass  # self.show_data()
 
     @property
     def config(self):
