@@ -63,7 +63,7 @@ def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
         widget.run_tests(config)
 
     MockQMessageBox.assert_not_called()
-    model = widget.datatree.model()
+    model = widget.testdatamodel
     assert model.rowCount() == 2
     assert model.index(0, 0).data(Qt.DisplayRole) == 'ok'
     assert model.index(0, 1).data(Qt.DisplayRole) == 'test_ok'
@@ -97,7 +97,7 @@ def test_run_tests_using_unittest_and_display_results(qtbot, tmpdir,
         widget.run_tests(config)
 
     MockQMessageBox.assert_not_called()
-    model = widget.datatree.model()
+    model = widget.testdatamodel
     assert model.rowCount() == 2
     assert model.index(0, 0).data(Qt.DisplayRole) == 'FAIL'
     assert model.index(0, 1).data(Qt.DisplayRole) == 'test_fail'

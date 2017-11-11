@@ -45,24 +45,9 @@ class TestDataView(QTreeView):
     def __init__(self, parent=None):
         """Constructor."""
         QTreeView.__init__(self, parent)
-        model = TestDataModel(self)
-        self.setModel(model)
         self.header().setDefaultAlignment(Qt.AlignCenter)
         self.setItemsExpandable(True)
         self.setSortingEnabled(False)
-
-    def clear(self):
-        """Remove all test results."""
-        self.model().testresults = []
-
-    def show_tree(self):
-        """Populate the tree with unit testing data and display it."""
-        self.model().testresults = self.testresults
-        return self.populate_tree()
-
-    def populate_tree(self):
-        """Create each item (and associated data) in the tree."""
-        return self.model().populate_tree()
 
     def reset(self):
         """
@@ -207,8 +192,8 @@ class TestDataModel(QAbstractItemModel):
         else:
             return 1
 
-    def populate_tree(self):
-        """Return message for current results."""
+    def summary(self):
+        """Return summary for current results."""
         if not len(self.testresults):
             return _('No results to show.')
         counts = Counter(res.category for res in self.testresults)

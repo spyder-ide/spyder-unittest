@@ -6,17 +6,11 @@
 """Tests for unittestgui.py."""
 
 # Third party imports
-from pytestqt import qtbot
 from qtpy.QtCore import Qt
 
 # Local imports
 from spyder_unittest.backend.runnerbase import Category, TestResult
 from spyder_unittest.widgets.datatree import TestDataModel
-
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock  # Python 2
 
 
 def test_testdatamodel_using_qtmodeltester(qtmodeltester):

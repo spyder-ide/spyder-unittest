@@ -26,7 +26,7 @@ from spyder_unittest.backend.noserunner import NoseRunner
 from spyder_unittest.backend.pytestrunner import PyTestRunner
 from spyder_unittest.backend.unittestrunner import UnittestRunner
 from spyder_unittest.widgets.configdialog import Config, ask_for_config
-from spyder_unittest.widgets.datatree import TestDataView
+from spyder_unittest.widgets.datatree import TestDataModel, TestDataView
 
 # This is needed for testing this module as a stand alone script
 try:
@@ -87,7 +87,9 @@ class UnitTestWidget(QWidget):
         self.default_wdir = None
         self.testrunner = None
         self.output = None
-        self.datatree = TestDataView(self)
+        self.testdataview = TestDataView(self)
+        self.testdatamodel = TestDataModel(self)
+        self.testdataview.setModel(self.testdatamodel)
 
         self.framework_registry = FrameworkRegistry()
         for runner in FRAMEWORKS:
@@ -121,12 +123,13 @@ class UnitTestWidget(QWidget):
 
         layout = QVBoxLayout()
         layout.addLayout(hlayout)
-        layout.addWidget(self.datatree)
+        layout.addWidget(self.testdataview)
         self.setLayout(layout)
 
         if not is_unittesting_installed():
-            for widget in (self.datatree, self.log_action, self.start_button,
-                           self.collapse_action, self.expand_action):
+            for widget in (self.testdataview, self.log_action,
+                           self.start_button, self.collapse_action,
+                           self.expand_action):
                 widget.setDisabled(True)
         else:
             pass  # self.show_data()
@@ -163,12 +166,12 @@ class UnitTestWidget(QWidget):
             self,
             text=_('Collapse all'),
             icon=ima.icon('collapse'),
-            triggered=self.datatree.collapseAll())
+            triggered=self.testdataview.collapseAll)
         self.expand_action = create_action(
             self,
             text=_('Expand all'),
             icon=ima.icon('expand'),
-            triggered=self.datatree.expandAll())
+            triggered=self.testdataview.expandAll)
         return [
             self.config_action, self.log_action, self.collapse_action,
             self.expand_action
@@ -235,7 +238,7 @@ class UnitTestWidget(QWidget):
         if config is None:
             config = self.config
         pythonpath = self.pythonpath
-        self.datatree.clear()
+        self.testdatamodel.testresults = []
         self.testdetails = []
         tempfilename = get_conf_path('unittest.results')
         self.testrunner = self.framework_registry.create_runner(
@@ -292,8 +295,8 @@ class UnitTestWidget(QWidget):
         self.set_running_state(False)
         self.testrunner = None
         self.log_action.setEnabled(bool(output))
-        self.datatree.testresults = testresults
-        msg = self.datatree.show_tree()
+        self.testdatamodel.testresults = testresults
+        msg = self.testdatamodel.summary()
         self.status_label.setText(msg)
         self.sig_finished.emit()
 
