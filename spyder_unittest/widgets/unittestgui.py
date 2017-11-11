@@ -26,7 +26,7 @@ from spyder_unittest.backend.noserunner import NoseRunner
 from spyder_unittest.backend.pytestrunner import PyTestRunner
 from spyder_unittest.backend.unittestrunner import UnittestRunner
 from spyder_unittest.widgets.configdialog import Config, ask_for_config
-from spyder_unittest.widgets.datatree import DataTree
+from spyder_unittest.widgets.datatree import TestDataView
 
 # This is needed for testing this module as a stand alone script
 try:
@@ -87,7 +87,7 @@ class UnitTestWidget(QWidget):
         self.default_wdir = None
         self.testrunner = None
         self.output = None
-        self.datatree = DataTree(self)
+        self.datatree = TestDataView(self)
 
         self.framework_registry = FrameworkRegistry()
         for runner in FRAMEWORKS:

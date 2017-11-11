@@ -63,16 +63,15 @@ def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
         widget.run_tests(config)
 
     MockQMessageBox.assert_not_called()
-    dt = widget.datatree
-    itemcount = dt.topLevelItemCount()
-    assert itemcount == 2
-    assert dt.topLevelItem(0).data(0, Qt.DisplayRole) == 'ok'
-    assert dt.topLevelItem(0).data(1, Qt.DisplayRole) == 'test_ok'
-    assert dt.topLevelItem(0).data(1, Qt.ToolTipRole) == 'test_foo.test_ok'
-    assert dt.topLevelItem(0).data(2, Qt.DisplayRole) == ''
-    assert dt.topLevelItem(1).data(0, Qt.DisplayRole) == 'failure'
-    assert dt.topLevelItem(1).data(1, Qt.DisplayRole) == 'test_fail'
-    assert dt.topLevelItem(1).data(1, Qt.ToolTipRole) == 'test_foo.test_fail'
+    model = widget.datatree.model()
+    assert model.rowCount() == 2
+    assert model.index(0, 0).data(Qt.DisplayRole) == 'ok'
+    assert model.index(0, 1).data(Qt.DisplayRole) == 'test_ok'
+    assert model.index(0, 1).data(Qt.ToolTipRole) == 'test_foo.test_ok'
+    assert model.index(0, 2).data(Qt.DisplayRole) == ''
+    assert model.index(1, 0).data(Qt.DisplayRole) == 'failure'
+    assert model.index(1, 1).data(Qt.DisplayRole) == 'test_fail'
+    assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.test_fail'
 
 
 def test_run_tests_using_unittest_and_display_results(qtbot, tmpdir,
@@ -98,15 +97,13 @@ def test_run_tests_using_unittest_and_display_results(qtbot, tmpdir,
         widget.run_tests(config)
 
     MockQMessageBox.assert_not_called()
-    dt = widget.datatree
-    assert dt.topLevelItemCount() == 2
-    assert dt.topLevelItem(0).data(0, Qt.DisplayRole) == 'FAIL'
-    assert dt.topLevelItem(0).data(1, Qt.DisplayRole) == 'test_fail'
-    assert (dt.topLevelItem(0).data(1, Qt.ToolTipRole) ==
-            'test_foo.MyTest.test_fail')
-    assert dt.topLevelItem(0).data(2, Qt.DisplayRole) == ''
-    assert dt.topLevelItem(1).data(0, Qt.DisplayRole) == 'ok'
-    assert dt.topLevelItem(1).data(1, Qt.DisplayRole) == 'test_ok'
-    assert (dt.topLevelItem(1).data(1, Qt.ToolTipRole) ==
-            'test_foo.MyTest.test_ok')
-    assert dt.topLevelItem(1).data(2, Qt.DisplayRole) == ''
+    model = widget.datatree.model()
+    assert model.rowCount() == 2
+    assert model.index(0, 0).data(Qt.DisplayRole) == 'FAIL'
+    assert model.index(0, 1).data(Qt.DisplayRole) == 'test_fail'
+    assert model.index(0, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_fail'
+    assert model.index(0, 2).data(Qt.DisplayRole) == ''
+    assert model.index(1, 0).data(Qt.DisplayRole) == 'ok'
+    assert model.index(1, 1).data(Qt.DisplayRole) == 'test_ok'
+    assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_ok'
+    assert model.index(1, 2).data(Qt.DisplayRole) == ''
