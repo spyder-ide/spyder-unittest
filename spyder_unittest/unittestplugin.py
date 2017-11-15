@@ -161,7 +161,7 @@ class UnitTestPlugin(SpyderPluginWidget):
 
     def get_focus_widget(self):
         """Return the widget to give focus to this dockwidget when raised."""
-        return self.unittestwidget.datatree
+        return self.unittestwidget.testdataview
 
     def get_plugin_actions(self):
         """Return a list of actions related to plugin."""
