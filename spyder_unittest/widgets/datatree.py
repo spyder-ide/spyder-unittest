@@ -26,7 +26,8 @@ except KeyError as error:
 COLORS = {
     Category.OK: QBrush(QColor("#C1FFBA")),
     Category.FAIL: QBrush(QColor("#FF0000")),
-    Category.SKIP: QBrush(QColor("#C5C5C5"))
+    Category.SKIP: QBrush(QColor("#C5C5C5")),
+    Category.PENDING: QBrush(QColor("#C5C5C5"))
 }
 
 STATUS_COLUMN = 0
@@ -167,6 +168,10 @@ class TestDataModel(QAbstractItemModel):
         elif role == Qt.FontRole:
             if id != TOPLEVEL_ID:
                 return self.monospace_font
+        elif role == Qt.BackgroundRole:
+            if id == TOPLEVEL_ID:
+                testresult = self.testresults[row]
+                return COLORS[testresult.category]
         else:
             return None
 

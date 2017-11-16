@@ -10,7 +10,7 @@ from qtpy.QtCore import Qt
 
 # Local imports
 from spyder_unittest.backend.runnerbase import Category, TestResult
-from spyder_unittest.widgets.datatree import TestDataModel
+from spyder_unittest.widgets.datatree import COLORS, TestDataModel
 
 
 def test_testdatamodel_using_qtmodeltester(qtmodeltester):
@@ -36,6 +36,17 @@ def test_testdatamodel_shows_full_name_in_tooltip(qtbot):
     model.testresults = [res]
     index = model.index(0, 1)
     assert model.data(index, Qt.ToolTipRole) == 'foo.bar'
+
+
+def test_testdatamodel_data_background():
+    model = TestDataModel()
+    res = [TestResult(Category.OK, 'status', 'bar', 'foo'),
+           TestResult(Category.FAIL, 'error', 'bar', 'foo', 'kadoom')]
+    model.testresults = res
+    index = model.index(0, 0)
+    assert model.data(index, Qt.BackgroundRole) == COLORS[Category.OK]
+    index = model.index(1, 2)
+    assert model.data(index, Qt.BackgroundRole) == COLORS[Category.FAIL]
 
 
 def test_testdatamodel_add_tests():
