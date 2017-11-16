@@ -111,6 +111,16 @@ class TestDataModel(QAbstractItemModel):
         self._testresults = new_value
         self.endResetModel()
 
+    def add_testresults(self, new_tests):
+        """
+        Add new test results to the model.
+
+        Arguments
+        ---------
+        new_tests : list of TestResult
+        """
+        self.testresults += new_tests
+
     def index(self, row, column, parent=QModelIndex()):
         """
         Construct index to given item of data.

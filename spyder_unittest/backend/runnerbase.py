@@ -39,6 +39,7 @@ class Category:
     OK = 1
     FAIL = 2
     SKIP = 3
+    PENDING = 4
 
 
 class TestResult:
@@ -70,6 +71,10 @@ class TestResult:
             self.extra_text = extra_text.split("\n")
         else:
             self.extra_text = []
+
+    def __eq__(self, other):
+        """Test for equality."""
+        return self.__dict__ == other.__dict__
 
 
 class RunnerBase(QObject):

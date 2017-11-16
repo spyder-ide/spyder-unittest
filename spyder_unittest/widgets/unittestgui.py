@@ -24,6 +24,7 @@ from spyder.widgets.variableexplorer.texteditor import TextEditor
 from spyder_unittest.backend.frameworkregistry import FrameworkRegistry
 from spyder_unittest.backend.noserunner import NoseRunner
 from spyder_unittest.backend.pytestrunner import PyTestRunner
+from spyder_unittest.backend.runnerbase import Category, TestResult
 from spyder_unittest.backend.unittestrunner import UnittestRunner
 from spyder_unittest.widgets.configdialog import Config, ask_for_config
 from spyder_unittest.widgets.datatree import TestDataModel, TestDataView
@@ -292,9 +293,10 @@ class UnitTestWidget(QWidget):
         This function stores the tests and displays the total number of tests
         that have been collected.
         """
-        self.testdetails += testdetails
-        self.status_label.setText(
-            _('Collected {} tests').format(len(self.testdetails)))
+        testresults = [TestResult(Category.PENDING, _('pending'), detail.name,
+                                  detail.module)
+                       for detail in testdetails]
+        self.testdatamodel.add_testresults(testresults)
 
 
 def test():

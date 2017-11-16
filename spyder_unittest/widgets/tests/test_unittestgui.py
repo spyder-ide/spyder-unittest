@@ -14,6 +14,8 @@ from qtpy.QtCore import Qt
 import pytest
 
 # Local imports
+from spyder_unittest.backend.runnerbase import (Category, TestDetails,
+                                                TestResult)
 from spyder_unittest.widgets.configdialog import Config
 from spyder_unittest.widgets.unittestgui import UnitTestWidget
 
@@ -32,7 +34,6 @@ def test_unittestgui_set_config_emits_newconfig(qtbot):
     assert blocker.args == [config]
     assert widget.config == config
 
-
 def test_unittestgui_set_config_does_not_emit_when_invalid(qtbot):
     widget = UnitTestWidget(None)
     qtbot.addWidget(widget)
@@ -41,6 +42,15 @@ def test_unittestgui_set_config_does_not_emit_when_invalid(qtbot):
         widget.config = config
     assert widget.config == config
 
+def test_unittestwidget_tests_collected(qtbot):
+    widget = UnitTestWidget(None)
+    widget.testdatamodel = Mock()
+    details = [TestDetails('spam', 'hammodule'),
+               TestDetails('eggs', 'hammodule') ]
+    widget.tests_collected(details)
+    results = [TestResult(Category.PENDING, 'pending', 'spam', 'hammodule'),
+               TestResult(Category.PENDING, 'pending', 'eggs', 'hammodule')]
+    widget.testdatamodel.add_testresults.assert_called_once_with(results)
 
 @pytest.mark.parametrize('framework', ['py.test', 'nose'])
 def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):

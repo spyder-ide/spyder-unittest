@@ -36,3 +36,14 @@ def test_testdatamodel_shows_full_name_in_tooltip(qtbot):
     model.testresults = [res]
     index = model.index(0, 1)
     assert model.data(index, Qt.ToolTipRole) == 'foo.bar'
+
+
+def test_testdatamodel_add_tests():
+    model = TestDataModel()
+    assert model.testresults == []
+    result1 = TestResult(Category.OK, 'status', 'bar', 'foo')
+    model.add_testresults([result1])
+    assert model.testresults == [result1]
+    result2 = TestResult(Category.FAIL, 'error', 'bar', 'foo', 'kadoom')
+    model.add_testresults([result2])
+    assert model.testresults == [result1, result2]
