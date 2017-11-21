@@ -78,11 +78,14 @@ class UnitTestWidget(QWidget):
     Signals
     -------
     sig_finished: Emitted when plugin finishes processing tests.
+    sig_newconfig(Config): Emitted when test config is changed.
+        Argument is new config, which is always valid.
     """
 
     VERSION = '0.0.1'
 
     sig_finished = Signal()
+    sig_newconfig = Signal(Config)
 
     def __init__(self, parent, options_button=None, options_menu=None):
         """Unit testing widget."""
@@ -138,6 +141,18 @@ class UnitTestWidget(QWidget):
                 widget.setDisabled(True)
         else:
             pass  # self.show_data()
+
+    @property
+    def config(self):
+        """Return current test configuration."""
+        return self._config
+
+    @config.setter
+    def config(self, new_config):
+        """Set test configuration and emit sig_newconfig if valid."""
+        self._config = new_config
+        if self.config_is_valid():
+            self.sig_newconfig.emit(new_config)
 
     def create_actions(self):
         """Create the actions for the unittest widget."""
