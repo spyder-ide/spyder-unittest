@@ -14,7 +14,8 @@ from spyder.utils.misc import get_python_executable
 
 # Local imports
 from spyder_unittest.backend.pytestrunner import PyTestRunner
-from spyder_unittest.backend.runnerbase import TestDetails
+from spyder_unittest.backend.runnerbase import (Category, TestDetails,
+                                                TestResult)
 from spyder_unittest.widgets.configdialog import Config
 
 try:
@@ -86,7 +87,7 @@ def test_pytestrunner_read_output(monkeypatch):
     assert runner.process_output.called_once_with('decoded')
 
 
-def test_pytestrunner_process_output(qtbot):
+def test_pytestrunner_process_output_with_collected(qtbot):
     runner = PyTestRunner(None)
     output = [{
         'event': 'collected',
@@ -100,7 +101,21 @@ def test_pytestrunner_process_output(qtbot):
     with qtbot.waitSignal(runner.sig_collected) as blocker:
         runner.process_output(output)
     expected = [
-        TestDetails(name='ham', module='spam'), 
+        TestDetails(name='ham', module='spam'),
         TestDetails(name='bacon', module='eggs')
     ]
+    assert blocker.args == [expected]
+
+
+def test_pytestrunner_process_output_with_logreport_passed(qtbot):
+    runner = PyTestRunner(None)
+    output = [{
+        'event': 'logreport',
+        'when': 'call',
+        'outcome': 'passed',
+        'nodeid': 'foo::bar'
+    }]
+    with qtbot.waitSignal(runner.sig_testresult) as blocker:
+        runner.process_output(output)
+    expected = [TestResult(Category.OK, 'ok', 'bar', 'foo')]
     assert blocker.args == [expected]

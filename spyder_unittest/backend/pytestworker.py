@@ -37,6 +37,16 @@ class SpyderPlugin():
             'module': item.parent.name
         })
 
+    def pytest_runtest_logreport(self, report):
+        """Called by py.test when a (phase of a) test is completed."""
+        if report.when in ['setup', 'teardown'] and report.outcome == 'passed':
+            return
+        self.writer.write({
+            'event': 'logreport',
+            'when': report.when,
+            'outcome': report.outcome,
+            'nodeid': report.nodeid})
+
 
 def main(args):
     """Run py.test with the Spyder plugin."""

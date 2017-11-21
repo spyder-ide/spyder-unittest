@@ -15,7 +15,8 @@ from spyder.utils.misc import add_pathlist_to_PYTHONPATH, get_python_executable
 
 # Local imports
 from spyder_unittest.backend.jsonstream import JSONStreamReader
-from spyder_unittest.backend.runnerbase import RunnerBase, TestDetails
+from spyder_unittest.backend.runnerbase import (Category, RunnerBase,
+                                                TestDetails, TestResult)
 
 
 class PyTestRunner(RunnerBase):
@@ -105,9 +106,23 @@ class PyTestRunner(RunnerBase):
             list of decoded Python object sent by test process.
         """
         details_list = []
+        result_list = []
         for result_item in output:
-            assert result_item['event'] == 'collected'
-            details = TestDetails(result_item['name'], result_item['module'])
-            details_list.append(details)
+            if result_item['event'] == 'collected':
+                details = TestDetails(result_item['name'],
+                                      result_item['module'])
+                details_list.append(details)
+            elif result_item['event'] == 'logreport':
+                if result_item['outcome'] == 'passed':
+                    cat = Category.OK
+                    status = 'ok'
+                else:
+                    cat = Category.FAIL
+                    status = result_item['outcome']
+                module, name = result_item['nodeid'].split('::', maxsplit=1)
+                result = TestResult(cat, status, name, module)
+                result_list.append(result)
         if details_list:
             self.sig_collected.emit(details_list)
+        if result_list:
+            self.sig_testresult.emit(result_list)

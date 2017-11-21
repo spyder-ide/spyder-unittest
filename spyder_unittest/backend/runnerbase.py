@@ -100,14 +100,17 @@ class RunnerBase(QObject):
 
     Signals
     -------
-    sig_rcollected(list of TestDetails)
+    sig_collected(list of TestDetails)
         Emitted when tests are collected.
+    sig_testresult(list of TestResult)
+        Emitted when tests are finished.
     sig_finished(list of TestResult, str)
         Emitted when test process finishes. First argument contains the test
         results, second argument contains the output of the test process.
     """
 
     sig_collected = Signal(object)
+    sig_testresult = Signal(object)
     sig_finished = Signal(object, str)
 
     def __init__(self, widget, resultfilename=None):

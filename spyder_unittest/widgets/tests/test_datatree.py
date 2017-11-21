@@ -58,3 +58,20 @@ def test_testdatamodel_add_tests():
     result2 = TestResult(Category.FAIL, 'error', 'bar', 'foo', 'kadoom')
     model.add_testresults([result2])
     assert model.testresults == [result1, result2]
+
+
+def test_testdatamodel_replace_tests(qtbot):
+    model = TestDataModel()
+    result1 = TestResult(Category.OK, 'status', 'bar', 'foo')
+    model.testresults = [result1]
+    result2 = TestResult(Category.FAIL, 'error', 'bar', 'foo', 'kadoom')
+    with qtbot.waitSignal(model.dataChanged) as blocker:
+        model.update_testresults([result2])
+    assert blocker.args[0].row() == 0
+    assert blocker.args[0].column() == 0
+    assert not blocker.args[0].parent().isValid()
+    assert blocker.args[1].row() == 0
+    assert blocker.args[1].column() == 3
+    assert not blocker.args[1].parent().isValid()
+    assert blocker.args[2] == [Qt.DisplayRole]
+    assert model.testresults == [result2]

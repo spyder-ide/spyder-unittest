@@ -122,6 +122,37 @@ class TestDataModel(QAbstractItemModel):
         """
         self.testresults += new_tests
 
+    def update_testresults(self, new_results):
+        """
+        Update some test results by new results.
+
+        The tests in `new_results` should already be included in
+        `self.testresults` (otherwise a `KeyError` is raised). This function
+        replaces the existing results by `new_results`.
+
+        Arguments
+        ---------
+        new_results: list of TestResult
+        """
+        idx_min = idx_max = None
+        for new_result in new_results:
+            for (idx, old_result) in enumerate(self.testresults):
+                if (old_result.name == new_result.name
+                        and old_result.module == new_result.module):
+                    self.testresults[idx] = new_result
+                    if idx_min is None:
+                        idx_min = idx_max = idx
+                    else:
+                        idx_min = min(idx_min, idx)
+                        idx_max = max(idx_max, idx)
+                    break
+            else:
+                raise KeyError('test not found')
+        if idx_min is not None:
+            self.dataChanged.emit(self.index(idx_min, 0),
+                                  self.index(idx_max, len(HEADERS) - 1),
+                                  [Qt.DisplayRole])
+
     def index(self, row, column, parent=QModelIndex()):
         """
         Construct index to given item of data.

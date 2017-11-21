@@ -52,6 +52,13 @@ def test_unittestwidget_tests_collected(qtbot):
                TestResult(Category.PENDING, 'pending', 'eggs', 'hammodule')]
     widget.testdatamodel.add_testresults.assert_called_once_with(results)
 
+def test_unittestwidget_tests_yield_results(qtbot):
+    widget = UnitTestWidget(None)
+    widget.testdatamodel = Mock()
+    results = [TestResult(Category.OK, 'ok', 'spam', 'hammodule')]
+    widget.tests_yield_result(results)
+    widget.testdatamodel.update_testresults.assert_called_once_with(results)
+
 @pytest.mark.parametrize('framework', ['py.test', 'nose'])
 def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
     """Basic check."""

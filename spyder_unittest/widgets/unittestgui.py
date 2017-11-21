@@ -231,6 +231,7 @@ class UnitTestWidget(QWidget):
             config.framework, self, tempfilename)
         self.testrunner.sig_finished.connect(self.process_finished)
         self.testrunner.sig_collected.connect(self.tests_collected)
+        self.testrunner.sig_testresult.connect(self.tests_yield_result)
 
         try:
             self.testrunner.start(config, pythonpath)
@@ -297,6 +298,14 @@ class UnitTestWidget(QWidget):
                                   detail.module)
                        for detail in testdetails]
         self.testdatamodel.add_testresults(testresults)
+
+    def tests_yield_result(self, testresults):
+        """
+        Called when test results are received.
+
+        Bla bla bla
+        """
+        self.testdatamodel.update_testresults(testresults)
 
 
 def test():
