@@ -45,7 +45,8 @@ class SpyderPlugin():
             'event': 'logreport',
             'when': report.when,
             'outcome': report.outcome,
-            'nodeid': report.nodeid})
+            'nodeid': report.nodeid,
+            'duration': report.duration})
 
 
 def main(args):
@@ -56,6 +57,7 @@ def main(args):
     writer = JSONStreamWriter(old_stdout)
     pytest.main(args, plugins=[SpyderPlugin(writer)])
     # TODO Recover contents of stdout buffer and restore old stdout
+    sys.stdout = old_stdout
 
 
 if __name__ == '__main__':

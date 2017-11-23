@@ -113,9 +113,10 @@ def test_pytestrunner_process_output_with_logreport_passed(qtbot):
         'event': 'logreport',
         'when': 'call',
         'outcome': 'passed',
-        'nodeid': 'foo::bar'
+        'nodeid': 'foo::bar',
+        'duration': 42
     }]
     with qtbot.waitSignal(runner.sig_testresult) as blocker:
         runner.process_output(output)
-    expected = [TestResult(Category.OK, 'ok', 'bar', 'foo')]
+    expected = [TestResult(Category.OK, 'ok', 'bar', 'foo', time=42)]
     assert blocker.args == [expected]

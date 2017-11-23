@@ -48,12 +48,14 @@ def test_spyderplugin_runtest_logreport(plugin):
     report.when = 'call'
     report.outcome = 'passed'
     report.nodeid = 'foo::bar'
+    report.duration = 42
     plugin.pytest_runtest_logreport(report)
     plugin.writer.write.assert_called_once_with({
         'event': 'logreport',
         'when': 'call',
         'outcome': 'passed',
-        'nodeid': 'foo::bar'
+        'nodeid': 'foo::bar',
+        'duration': 42
     })
 
 
@@ -80,26 +82,24 @@ def test_pytestworker_integration(monkeypatch, tmpdir):
         MockJSONStreamWriter)
     main([testfilename])
 
-    expected = [
-        call({
-            'event': 'collected',
-            'name': 'test_ok',
-            'module': 'test_foo.py'
-        }), call({
-            'event': 'collected',
-            'name': 'test_fail',
-            'module': 'test_foo.py'
-        }), call({
-            'event': 'logreport',
-            'when': 'call',
-            'outcome': 'passed',
-            'nodeid': 'test_foo.py::test_ok'
-        }), call({
-            'event': 'logreport',
-            'when': 'call',
-            'outcome': 'failed',
-            'nodeid': 'test_foo.py::test_fail'
-        })
-    ]
-    print(mock_writer.write.call_args_list)
-    assert mock_writer.write.call_args_list == expected
+    args = mock_writer.write.call_args_list
+
+    assert args[0][0][0]['event'] == 'collected'
+    assert args[0][0][0]['name'] == 'test_ok'
+    assert args[0][0][0]['module'] == 'test_foo.py'
+
+    assert args[1][0][0]['event'] == 'collected'
+    assert args[1][0][0]['name'] == 'test_fail'
+    assert args[1][0][0]['module'] == 'test_foo.py'
+
+    assert args[2][0][0]['event'] == 'logreport'
+    assert args[2][0][0]['when'] == 'call'
+    assert args[2][0][0]['outcome'] == 'passed'
+    assert args[2][0][0]['nodeid'] == 'test_foo.py::test_ok'
+    assert 'duration' in args[2][0][0]
+
+    assert args[3][0][0]['event'] == 'logreport'
+    assert args[3][0][0]['when'] == 'call'
+    assert args[3][0][0]['outcome'] == 'failed'
+    assert args[3][0][0]['nodeid'] == 'test_foo.py::test_fail'
+    assert 'duration' in args[3][0][0]

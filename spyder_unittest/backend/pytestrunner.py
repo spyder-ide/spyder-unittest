@@ -120,7 +120,8 @@ class PyTestRunner(RunnerBase):
                     cat = Category.FAIL
                     status = result_item['outcome']
                 module, name = result_item['nodeid'].split('::', maxsplit=1)
-                result = TestResult(cat, status, name, module)
+                duration = result_item['duration']
+                result = TestResult(cat, status, name, module, time=duration)
                 result_list.append(result)
         if details_list:
             self.sig_collected.emit(details_list)
