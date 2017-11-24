@@ -63,8 +63,8 @@ class UnitTestWidget(QWidget):
 
     Attributes
     ----------
-    config : Config
-        Configuration for running tests.
+    config : Config or None
+        Configuration for running tests, or `None` if not set.
     default_wdir : str
         Default choice of working directory.
     framework_registry : FrameworkRegistry
@@ -154,6 +154,10 @@ class UnitTestWidget(QWidget):
         if self.config_is_valid():
             self.sig_newconfig.emit(new_config)
 
+    def set_config_without_emit(self, new_config):
+        """Set test configuration but do not emit any signal."""
+        self._config = new_config
+
     def create_actions(self):
         """Create the actions for the unittest widget."""
         self.config_action = create_action(
@@ -201,10 +205,18 @@ class UnitTestWidget(QWidget):
         if config:
             self.config = config
 
-    def config_is_valid(self):
-        """Return whether configuration for running tests is valid."""
-        return (self.config and self.config.framework and
-                osp.isdir(self.config.wdir))
+    def config_is_valid(self, config=None):
+        """
+        Return whether configuration for running tests is valid.
+
+        Parameters
+        ----------
+        config : Config or None
+            configuration for unit tests. If None, use `self.config`.
+        """
+        if config is None:
+            config = self.config
+        return (config and config.framework and osp.isdir(config.wdir))
 
     def maybe_configure_and_start(self):
         """
