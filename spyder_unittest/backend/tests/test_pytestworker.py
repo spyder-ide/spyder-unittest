@@ -43,27 +43,101 @@ def test_spyderplugin_test_collected(plugin):
     })
 
 
-def test_spyderplugin_runtest_logreport(plugin):
+def standard_logreport():
     report = EmptyClass()
     report.when = 'call'
     report.outcome = 'passed'
     report.nodeid = 'foo::bar'
     report.duration = 42
+    report.sections = []
+    report.longrepr = ''
+    return report
+
+
+def test_spyderplugin_runtest_logreport(plugin):
+    report = standard_logreport()
     plugin.pytest_runtest_logreport(report)
     plugin.writer.write.assert_called_once_with({
         'event': 'logreport',
         'when': 'call',
         'outcome': 'passed',
         'nodeid': 'foo::bar',
-        'duration': 42
+        'duration': 42,
+        'sections': []
+    })
+
+
+def test_spyderplugin_runtest_logreport_passes_longrepr(plugin):
+    report = standard_logreport()
+    report.longrepr = 15
+    plugin.pytest_runtest_logreport(report)
+    plugin.writer.write.assert_called_once_with({
+        'event': 'logreport',
+        'when': 'call',
+        'outcome': 'passed',
+        'nodeid': 'foo::bar',
+        'duration': 42,
+        'sections': [],
+        'longrepr': '15'
+    })
+
+
+def test_spyderplugin_runtest_logreport_with_longrepr_tuple(plugin):
+    report = standard_logreport()
+    report.longrepr = ('ham', 'spam')
+    plugin.pytest_runtest_logreport(report)
+    plugin.writer.write.assert_called_once_with({
+        'event': 'logreport',
+        'when': 'call',
+        'outcome': 'passed',
+        'nodeid': 'foo::bar',
+        'duration': 42,
+        'sections': [],
+        'longrepr': ('ham', 'spam')
+    })
+
+
+def test_spyderplugin_runtest_logreport_passes_wasxfail(plugin):
+    report = standard_logreport()
+    report.wasxfail = ''
+    plugin.pytest_runtest_logreport(report)
+    plugin.writer.write.assert_called_once_with({
+        'event': 'logreport',
+        'when': 'call',
+        'outcome': 'passed',
+        'nodeid': 'foo::bar',
+        'duration': 42,
+        'sections': [],
+        'wasxfail': ''
+    })
+
+
+def test_spyderplugin_runtest_logreport_passes_message(plugin):
+    class MockLongrepr:
+        def __init__(self):
+            self.reprcrash = EmptyClass()
+            self.reprcrash.message = 'msg'
+        def __str__(self):
+            return 'text'
+
+    report = standard_logreport()
+    report.longrepr = MockLongrepr()
+    plugin.pytest_runtest_logreport(report)
+    plugin.writer.write.assert_called_once_with({
+        'event': 'logreport',
+        'when': 'call',
+        'outcome': 'passed',
+        'nodeid': 'foo::bar',
+        'duration': 42,
+        'sections': [],
+        'longrepr': 'text',
+        'message': 'msg'
     })
 
 
 def test_spyderplugin_runtest_logreport_ignores_teardown_passed(plugin):
-    report = EmptyClass()
+    report = standard_logreport()
     report.when = 'teardown'
-    report.outcome = 'passed'
-    report.nodeid = 'foo::bar'
     plugin.pytest_runtest_logreport(report)
     plugin.writer.write.assert_not_called()
 
@@ -96,10 +170,12 @@ def test_pytestworker_integration(monkeypatch, tmpdir):
     assert args[2][0][0]['when'] == 'call'
     assert args[2][0][0]['outcome'] == 'passed'
     assert args[2][0][0]['nodeid'] == 'test_foo.py::test_ok'
+    assert args[2][0][0]['sections'] == []
     assert 'duration' in args[2][0][0]
 
     assert args[3][0][0]['event'] == 'logreport'
     assert args[3][0][0]['when'] == 'call'
     assert args[3][0][0]['outcome'] == 'failed'
     assert args[3][0][0]['nodeid'] == 'test_foo.py::test_fail'
+    assert args[3][0][0]['sections'] == []
     assert 'duration' in args[3][0][0]

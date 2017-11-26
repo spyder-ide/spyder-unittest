@@ -66,8 +66,8 @@ class TestResult:
         self.module = module
         self.message = message
         self.time = time
-        extra_test = extra_text.rstrip()
-        if extra_test:
+        extra_text = extra_text.rstrip()
+        if extra_text:
             self.extra_text = extra_text.split("\n")
         else:
             self.extra_text = []

@@ -41,12 +41,23 @@ class SpyderPlugin():
         """Called by py.test when a (phase of a) test is completed."""
         if report.when in ['setup', 'teardown'] and report.outcome == 'passed':
             return
-        self.writer.write({
-            'event': 'logreport',
-            'when': report.when,
-            'outcome': report.outcome,
-            'nodeid': report.nodeid,
-            'duration': report.duration})
+        # print(report.__dict__)
+        data = {'event': 'logreport',
+                'when': report.when,
+                'outcome': report.outcome,
+                'nodeid': report.nodeid,
+                'sections': report.sections,
+                'duration': report.duration}
+        if report.longrepr:
+            if isinstance(report.longrepr, tuple):
+                data['longrepr'] = report.longrepr
+            else:
+                data['longrepr'] = str(report.longrepr)
+        if hasattr(report, 'wasxfail'):
+            data['wasxfail'] = report.wasxfail
+        if hasattr(report.longrepr, 'reprcrash'):
+            data['message'] = report.longrepr.reprcrash.message
+        self.writer.write(data)
 
 
 def main(args):

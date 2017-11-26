@@ -120,3 +120,96 @@ def test_pytestrunner_process_output_with_logreport_passed(qtbot):
         runner.process_output(output)
     expected = [TestResult(Category.OK, 'ok', 'bar', 'foo', time=42)]
     assert blocker.args == [expected]
+
+
+def test_pytestrunner_logreport_to_testresult_passed():
+    runner = PyTestRunner(None)
+    report = {
+        'event': 'logreport',
+        'when': 'call',
+        'outcome': 'passed',
+        'nodeid': 'foo::bar',
+        'duration': 42
+    }
+    expected = TestResult(Category.OK, 'ok', 'bar', 'foo', time=42)
+    assert runner.logreport_to_testresult(report) == expected
+
+
+def test_pytestrunner_logreport_to_testresult_failed():
+    runner = PyTestRunner(None)
+    report = {
+        'event': 'logreport',
+        'when': 'call',
+        'outcome': 'failed',
+        'nodeid': 'foo::bar',
+        'duration': 42,
+        'message': 'msg',
+        'longrepr': 'exception text'
+    }
+    expected = TestResult(Category.FAIL, 'failure', 'bar', 'foo',
+                          message='msg', time=42, extra_text='exception text')
+    assert runner.logreport_to_testresult(report) == expected
+
+
+def test_pytestrunner_logreport_to_testresult_skipped():
+    runner = PyTestRunner(None)
+    report = {
+        'event': 'logreport',
+        'when': 'setup',
+        'outcome': 'skipped',
+        'nodeid': 'foo::bar',
+        'duration': 42,
+        'longrepr': ['file', 24, 'skipmsg']
+    }
+    expected = TestResult(Category.SKIP, 'skipped', 'bar', 'foo',
+                          time=42, extra_text='skipmsg')
+    assert runner.logreport_to_testresult(report) == expected
+
+
+def test_pytestrunner_logreport_to_testresult_xfail():
+    runner = PyTestRunner(None)
+    report = {
+        'event': 'logreport',
+        'when': 'call',
+        'outcome': 'skipped',
+        'nodeid': 'foo::bar',
+        'duration': 42,
+        'message': 'msg',
+        'longrepr': 'exception text',
+        'wasxfail': ''
+    }
+    expected = TestResult(Category.SKIP, 'skipped', 'bar', 'foo',
+                          message='msg', time=42, extra_text='exception text')
+    assert runner.logreport_to_testresult(report) == expected
+
+
+def test_pytestrunner_logreport_to_testresult_xpass():
+    runner = PyTestRunner(None)
+    report = {
+        'event': 'logreport',
+        'when': 'call',
+        'outcome': 'passed',
+        'nodeid': 'foo::bar',
+        'duration': 42,
+        'wasxfail': ''
+    }
+    expected = TestResult(Category.OK, 'ok', 'bar', 'foo', time=42)
+    assert runner.logreport_to_testresult(report) == expected
+
+
+def test_pytestrunner_logreport_to_testresult_with_output():
+    runner = PyTestRunner(None)
+    report = {
+        'event': 'logreport',
+        'when': 'call',
+        'outcome': 'passed',
+        'nodeid': 'foo::bar',
+        'duration': 42,
+        'sections': [['Captured stdout call', 'ham\n'],
+                     ['Captured stderr call', 'spam\n']],
+    }
+    txt = ('----- Captured stdout call -----\nham\n'
+           '----- Captured stderr call -----\nspam\n')
+    expected = TestResult(Category.OK, 'ok', 'bar', 'foo', time=42,
+                          extra_text=txt)
+    assert runner.logreport_to_testresult(report) == expected

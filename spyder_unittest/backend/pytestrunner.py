@@ -113,17 +113,36 @@ class PyTestRunner(RunnerBase):
                                       result_item['module'])
                 details_list.append(details)
             elif result_item['event'] == 'logreport':
-                if result_item['outcome'] == 'passed':
-                    cat = Category.OK
-                    status = 'ok'
-                else:
-                    cat = Category.FAIL
-                    status = result_item['outcome']
-                module, name = result_item['nodeid'].split('::', maxsplit=1)
-                duration = result_item['duration']
-                result = TestResult(cat, status, name, module, time=duration)
-                result_list.append(result)
+                result_list.append(self.logreport_to_testresult(result_item))
         if details_list:
             self.sig_collected.emit(details_list)
         if result_list:
             self.sig_testresult.emit(result_list)
+
+    def logreport_to_testresult(self, report):
+        """Convert a logreport sent by test process to a TestResult."""
+        if report['outcome'] == 'passed':
+            cat = Category.OK
+            status = 'ok'
+        elif report['outcome'] == 'failed':
+            cat = Category.FAIL
+            status = 'failure'
+        else:
+            cat = Category.SKIP
+            status = report['outcome']
+        module, name = report['nodeid'].split('::', maxsplit=1)
+        duration = report['duration']
+        message = report['message'] if 'message' in report else ''
+        if 'longrepr' not in report:
+            extra_text = ''
+        elif isinstance(report['longrepr'], list):
+            extra_text = report['longrepr'][2]
+        else:
+            extra_text = report['longrepr']
+        if 'sections' in report:
+            for (heading, text) in report['sections']:
+                extra_text += '----- {} -----\n'.format(heading)
+                extra_text += text
+        result = TestResult(cat, status, name, module, message=message,
+                            time=duration, extra_text=extra_text)
+        return result
