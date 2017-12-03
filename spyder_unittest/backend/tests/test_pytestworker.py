@@ -34,12 +34,12 @@ def test_spyderplugin_test_collected(plugin):
     testitem = EmptyClass()
     testitem.name = 'foo'
     testitem.parent = EmptyClass()
-    testitem.parent.name = 'bar'
+    testitem.parent.name = 'bar.py'
     plugin.pytest_itemcollected(testitem)
     plugin.writer.write.assert_called_once_with({
         'event': 'collected',
         'name': 'foo',
-        'module': 'bar'
+        'module': 'bar.py'
     })
 
 
@@ -47,7 +47,7 @@ def standard_logreport():
     report = EmptyClass()
     report.when = 'call'
     report.outcome = 'passed'
-    report.nodeid = 'foo::bar'
+    report.nodeid = 'foo.py::bar'
     report.duration = 42
     report.sections = []
     report.longrepr = ''
@@ -61,7 +61,7 @@ def test_spyderplugin_runtest_logreport(plugin):
         'event': 'logreport',
         'when': 'call',
         'outcome': 'passed',
-        'nodeid': 'foo::bar',
+        'nodeid': 'foo.py::bar',
         'duration': 42,
         'sections': []
     })
@@ -75,7 +75,7 @@ def test_spyderplugin_runtest_logreport_passes_longrepr(plugin):
         'event': 'logreport',
         'when': 'call',
         'outcome': 'passed',
-        'nodeid': 'foo::bar',
+        'nodeid': 'foo.py::bar',
         'duration': 42,
         'sections': [],
         'longrepr': '15'
@@ -90,7 +90,7 @@ def test_spyderplugin_runtest_logreport_with_longrepr_tuple(plugin):
         'event': 'logreport',
         'when': 'call',
         'outcome': 'passed',
-        'nodeid': 'foo::bar',
+        'nodeid': 'foo.py::bar',
         'duration': 42,
         'sections': [],
         'longrepr': ('ham', 'spam')
@@ -105,7 +105,7 @@ def test_spyderplugin_runtest_logreport_passes_wasxfail(plugin):
         'event': 'logreport',
         'when': 'call',
         'outcome': 'passed',
-        'nodeid': 'foo::bar',
+        'nodeid': 'foo.py::bar',
         'duration': 42,
         'sections': [],
         'wasxfail': ''
@@ -127,7 +127,7 @@ def test_spyderplugin_runtest_logreport_passes_message(plugin):
         'event': 'logreport',
         'when': 'call',
         'outcome': 'passed',
-        'nodeid': 'foo::bar',
+        'nodeid': 'foo.py::bar',
         'duration': 42,
         'sections': [],
         'longrepr': 'text',

@@ -109,8 +109,10 @@ class PyTestRunner(RunnerBase):
         result_list = []
         for result_item in output:
             if result_item['event'] == 'collected':
-                details = TestDetails(result_item['name'],
-                                      result_item['module'])
+                module = result_item['module']
+                if module.endswith('.py'):
+                    module = module[:-3]
+                details = TestDetails(result_item['name'], module)
                 details_list.append(details)
             elif result_item['event'] == 'logreport':
                 result_list.append(self.logreport_to_testresult(result_item))
@@ -131,6 +133,8 @@ class PyTestRunner(RunnerBase):
             cat = Category.SKIP
             status = report['outcome']
         module, name = report['nodeid'].split('::', maxsplit=1)
+        if module.endswith('.py'):
+            module = module[:-3]
         duration = report['duration']
         message = report['message'] if 'message' in report else ''
         if 'longrepr' not in report:

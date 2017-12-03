@@ -91,11 +91,11 @@ def test_pytestrunner_process_output_with_collected(qtbot):
     runner = PyTestRunner(None)
     output = [{
         'event': 'collected',
-        'module': 'spam',
+        'module': 'spam.py',
         'name': 'ham'
     }, {
         'event': 'collected',
-        'module': 'eggs',
+        'module': 'eggs.py',
         'name': 'bacon'
     }]
     with qtbot.waitSignal(runner.sig_collected) as blocker:
@@ -113,7 +113,7 @@ def test_pytestrunner_process_output_with_logreport_passed(qtbot):
         'event': 'logreport',
         'when': 'call',
         'outcome': 'passed',
-        'nodeid': 'foo::bar',
+        'nodeid': 'foo.py::bar',
         'duration': 42
     }]
     with qtbot.waitSignal(runner.sig_testresult) as blocker:
@@ -128,7 +128,7 @@ def test_pytestrunner_logreport_to_testresult_passed():
         'event': 'logreport',
         'when': 'call',
         'outcome': 'passed',
-        'nodeid': 'foo::bar',
+        'nodeid': 'foo.py::bar',
         'duration': 42
     }
     expected = TestResult(Category.OK, 'ok', 'bar', 'foo', time=42)
@@ -141,7 +141,7 @@ def test_pytestrunner_logreport_to_testresult_failed():
         'event': 'logreport',
         'when': 'call',
         'outcome': 'failed',
-        'nodeid': 'foo::bar',
+        'nodeid': 'foo.py::bar',
         'duration': 42,
         'message': 'msg',
         'longrepr': 'exception text'
@@ -157,7 +157,7 @@ def test_pytestrunner_logreport_to_testresult_skipped():
         'event': 'logreport',
         'when': 'setup',
         'outcome': 'skipped',
-        'nodeid': 'foo::bar',
+        'nodeid': 'foo.py::bar',
         'duration': 42,
         'longrepr': ['file', 24, 'skipmsg']
     }
@@ -172,7 +172,7 @@ def test_pytestrunner_logreport_to_testresult_xfail():
         'event': 'logreport',
         'when': 'call',
         'outcome': 'skipped',
-        'nodeid': 'foo::bar',
+        'nodeid': 'foo.py::bar',
         'duration': 42,
         'message': 'msg',
         'longrepr': 'exception text',
@@ -189,7 +189,7 @@ def test_pytestrunner_logreport_to_testresult_xpass():
         'event': 'logreport',
         'when': 'call',
         'outcome': 'passed',
-        'nodeid': 'foo::bar',
+        'nodeid': 'foo.py::bar',
         'duration': 42,
         'wasxfail': ''
     }
@@ -203,7 +203,7 @@ def test_pytestrunner_logreport_to_testresult_with_output():
         'event': 'logreport',
         'when': 'call',
         'outcome': 'passed',
-        'nodeid': 'foo::bar',
+        'nodeid': 'foo.py::bar',
         'duration': 42,
         'sections': [['Captured stdout call', 'ham\n'],
                      ['Captured stderr call', 'spam\n']],
