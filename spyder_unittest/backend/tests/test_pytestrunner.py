@@ -63,7 +63,7 @@ def test_pytestrunner_start(monkeypatch):
     workerfile = os.path.abspath(
         os.path.join(os.path.dirname(__file__), os.pardir, 'pytestworker.py'))
     mock_process.start.assert_called_once_with(
-        get_python_executable(), [workerfile, '--junit-xml', 'results'])
+        get_python_executable(), [workerfile])
 
     mock_environment.insert.assert_any_call('VAR', 'VALUE')
     # mock_environment.insert.assert_any_call('PYTHONPATH', 'pythondir:old')

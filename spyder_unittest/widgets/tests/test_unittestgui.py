@@ -42,6 +42,24 @@ def test_unittestgui_set_config_does_not_emit_when_invalid(qtbot):
         widget.config = config
     assert widget.config == config
 
+def test_unittestwidget_process_finished_updates_results(qtbot):
+    widget = UnitTestWidget(None)
+    widget.testdatamodel = Mock()
+    widget.testdatamodel.summary = lambda: 'message'
+    widget.testdatamodel.testresults = []
+    results = [TestResult(Category.OK, 'ok', 'spam', 'hammodule')]
+    widget.process_finished(results, 'output')
+    assert widget.testdatamodel.testresults == results
+
+def test_unittestwidget_process_finished_with_results_none(qtbot):
+    widget = UnitTestWidget(None)
+    widget.testdatamodel = Mock()
+    widget.testdatamodel.summary = lambda: 'message'
+    results = [TestResult(Category.OK, 'ok', 'spam', 'hammodule')]
+    widget.testdatamodel.testresults = results
+    widget.process_finished(None, 'output')
+    assert widget.testdatamodel.testresults == results
+
 def test_unittestwidget_tests_collected(qtbot):
     widget = UnitTestWidget(None)
     widget.testdatamodel = Mock()

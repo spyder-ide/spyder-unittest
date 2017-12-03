@@ -277,14 +277,21 @@ class UnitTestWidget(QWidget):
         Called when unit test process finished.
 
         This function collects and shows the test results and output.
+
+        Parameters
+        ----------
+        testresults : list of TestResult or None
+            `None` indicates all test results have already been transmitted.
+        output : str
         """
         self.output = output
         self.set_running_state(False)
         self.testrunner = None
         self.log_action.setEnabled(bool(output))
-        self.testdatamodel.testresults = testresults
-        msg = self.testdatamodel.summary()
-        self.status_label.setText(msg)
+        if testresults:
+            self.testdatamodel.testresults = testresults
+            msg = self.testdatamodel.summary()
+            self.status_label.setText(msg)
         self.sig_finished.emit()
 
     def tests_collected(self, testdetails):

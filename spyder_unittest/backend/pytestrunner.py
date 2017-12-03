@@ -28,7 +28,7 @@ class PyTestRunner(RunnerBase):
     def create_argument_list(self):
         """Create argument list for testing process."""
         pyfile = os.path.join(os.path.dirname(__file__), 'pytestworker.py')
-        return [pyfile, '--junit-xml', self.resultfilename]
+        return [pyfile]
 
     def start(self, config, pythonpath):
         # TODO: Refactor to eliminate duplication with RunnerBase.start()
@@ -150,3 +150,11 @@ class PyTestRunner(RunnerBase):
         result = TestResult(cat, status, name, module, message=message,
                             time=duration, extra_text=extra_text)
         return result
+
+    def finished(self):
+        """
+        Called when the unit test process has finished.
+
+        This function emits `sig_finished`.
+        """
+        self.sig_finished.emit(None, '')
