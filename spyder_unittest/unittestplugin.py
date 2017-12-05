@@ -28,8 +28,13 @@ class UnitTestPlugin(SpyderPluginWidget):
     CONF_DEFAULTS = [(CONF_SECTION, {'framework': '', 'wdir': ''})]
     CONF_VERSION = '0.1.0'
 
-    def __init__(self, parent=None):
-        """Initialize plugin and corresponding widget."""
+    def __init__(self, parent):
+        """
+        Initialize plugin and corresponding widget.
+
+        The part of the initialization that depends on `parent` is done in
+        `self.register_plugin()`.
+        """
         SpyderPluginWidget.__init__(self, parent)
         self.main = parent  # Spyder 3 compatibility
 
@@ -45,21 +50,6 @@ class UnitTestPlugin(SpyderPluginWidget):
         else:
             # Works with Spyder 3.x
             self.unittestwidget = UnitTestWidget(self.main)
-
-        self.update_pythonpath()
-        self.update_default_wdir()
-
-        # Connect to relevant signals
-        self.main.sig_pythonpath_changed.connect(self.update_pythonpath)
-        self.main.workingdirectory.set_explorer_cwd.connect(
-            self.update_default_wdir)
-        self.main.projects.sig_project_created.connect(
-            self.handle_project_change)
-        self.main.projects.sig_project_loaded.connect(
-            self.handle_project_change)
-        self.main.projects.sig_project_closed.connect(
-            self.handle_project_change)
-        self.unittestwidget.sig_newconfig.connect(self.save_config)
 
         # Add unit test widget in dockwindow
         layout = QVBoxLayout()
@@ -174,8 +164,26 @@ class UnitTestPlugin(SpyderPluginWidget):
 
     def register_plugin(self):
         """Register plugin in Spyder's main window."""
+        # Get information from Spyder proper into plugin
+        self.update_pythonpath()
+        self.update_default_wdir()
+
+        # Connect to relevant signals
+        self.main.sig_pythonpath_changed.connect(self.update_pythonpath)
+        self.main.workingdirectory.set_explorer_cwd.connect(
+            self.update_default_wdir)
+        self.main.projects.sig_project_created.connect(
+            self.handle_project_change)
+        self.main.projects.sig_project_loaded.connect(
+            self.handle_project_change)
+        self.main.projects.sig_project_closed.connect(
+            self.handle_project_change)
+        self.unittestwidget.sig_newconfig.connect(self.save_config)
+
+        # Add plugin as dockwidget to main window
         self.main.add_dockwidget(self)
 
+        # Create action and add it to Spyder's menu
         unittesting_act = create_action(
             self,
             _("Run unit tests"),
