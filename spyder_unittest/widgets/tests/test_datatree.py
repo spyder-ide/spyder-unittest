@@ -49,14 +49,24 @@ def test_testdatamodel_data_background():
     assert model.data(index, Qt.BackgroundRole) == COLORS[Category.FAIL]
 
 
-def test_testdatamodel_add_tests():
+def test_testdatamodel_add_tests(qtbot):
     model = TestDataModel()
     assert model.testresults == []
+
     result1 = TestResult(Category.OK, 'status', 'bar', 'foo')
-    model.add_testresults([result1])
+    with qtbot.waitSignal(model.rowsInserted) as blocker:
+        model.add_testresults([result1])
+    assert not blocker.args[0].isValid()  # args[0] is parent
+    assert blocker.args[1] == 0  # args[1] is begin
+    assert blocker.args[2] == 0  # args[2] is end
     assert model.testresults == [result1]
+
     result2 = TestResult(Category.FAIL, 'error', 'bar', 'foo', 'kadoom')
-    model.add_testresults([result2])
+    with qtbot.waitSignal(model.rowsInserted) as blocker:
+        model.add_testresults([result2])
+    assert not blocker.args[0].isValid()
+    assert blocker.args[1] == 1
+    assert blocker.args[2] == 1
     assert model.testresults == [result1, result2]
 
 
@@ -67,10 +77,10 @@ def test_testdatamodel_replace_tests(qtbot):
     result2 = TestResult(Category.FAIL, 'error', 'bar', 'foo', 'kadoom')
     with qtbot.waitSignal(model.dataChanged) as blocker:
         model.update_testresults([result2])
-    assert blocker.args[0].row() == 0
+    assert blocker.args[0].row() == 0  # args[0] is topLeft
     assert blocker.args[0].column() == 0
     assert not blocker.args[0].parent().isValid()
-    assert blocker.args[1].row() == 0
+    assert blocker.args[1].row() == 0  # args[1] is bpttpmRight
     assert blocker.args[1].column() == 3
     assert not blocker.args[1].parent().isValid()
     assert blocker.args[2] == [Qt.DisplayRole]

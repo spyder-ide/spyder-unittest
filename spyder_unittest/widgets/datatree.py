@@ -55,19 +55,50 @@ class TestDataView(QTreeView):
         Reset internal state of the view and read all data afresh from model.
 
         This function is called whenever the model data changes drastically.
-        It resizes the columns to fix their contents and makes the first column
-        span the whole row in the second-level children, which display the test
-        output.
         """
         QTreeView.reset(self)
+        self.resizeColumns()
+        self.spanFirstColumn(0, self.model().rowCount() - 1)
+
+    def rowsInserted(self, parent, firstRow, lastRow):
+        """Called when rows are inserted."""
+        QTreeView.rowsInserted(self, parent, firstRow, lastRow)
+        self.resizeColumns()
+
+    def dataChanged(self, topLeft, bottomRight, roles):
+        """Called when data in model has changed."""
+        QTreeView.dataChanged(self, topLeft, bottomRight, roles)
+        self.resizeColumns()
+        while topLeft.parent().isValid():
+            topLeft = topLeft.parent()
+        while bottomRight.parent().isValid():
+            bottomRight = bottomRight.parent()
+        self.spanFirstColumn(topLeft.row(), bottomRight.row())
+
+    def resizeColumns(self):
+        """Resize column to fit their contents."""
+        for col in range(self.model().columnCount()):
+            self.resizeColumnToContents(col)
+
+    def spanFirstColumn(self, firstRow, lastRow):
+        """
+        Make first column span whole row in second-level children.
+
+        Note: Second-level children display the test output.
+
+        Arguments
+        ---------
+        firstRow : int
+            Index of first row to act on.
+        lastRow : int
+            Index of last row to act on. Note that this row is included in the
+            range, following Qt conventions and contrary to Python conventions.
+        """
         model = self.model()
-        if model.hasChildren():
-            for col in range(model.columnCount()):
-                self.resizeColumnToContents(col)
-            for row in range(model.rowCount()):
-                index = model.index(row, 0)
-                for i in range(model.rowCount(index)):
-                    self.setFirstColumnSpanned(i, index, True)
+        for row in range(firstRow, lastRow + 1):
+            index = model.index(row, 0)
+            for i in range(model.rowCount(index)):
+                self.setFirstColumnSpanned(i, index, True)
 
     # Not yet implemented ...
     # def item_activated(self, item):
@@ -120,7 +151,11 @@ class TestDataModel(QAbstractItemModel):
         ---------
         new_tests : list of TestResult
         """
-        self.testresults += new_tests
+        firstRow = len(self.testresults)
+        lastRow = firstRow + len(new_tests) - 1
+        self.beginInsertRows(QModelIndex(), firstRow, lastRow)
+        self.testresults.extend(new_tests)
+        self.endInsertRows()
 
     def update_testresults(self, new_results):
         """
