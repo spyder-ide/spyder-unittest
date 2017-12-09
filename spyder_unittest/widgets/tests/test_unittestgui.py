@@ -25,6 +25,25 @@ except ImportError:
     from mock import Mock  # Python 2
 
 
+def test_unittestgui_set_config_emits_newconfig(qtbot):
+    widget = UnitTestWidget(None)
+    qtbot.addWidget(widget)
+    config = Config(wdir=os.getcwd(), framework='unittest')
+    with qtbot.waitSignal(widget.sig_newconfig) as blocker:
+        widget.config = config
+    assert blocker.args == [config]
+    assert widget.config == config
+
+
+def test_unittestgui_set_config_does_not_emit_when_invalid(qtbot):
+    widget = UnitTestWidget(None)
+    qtbot.addWidget(widget)
+    config = Config(wdir=os.getcwd(), framework=None)
+    with qtbot.assertNotEmitted(widget.sig_newconfig):
+        widget.config = config
+    assert widget.config == config
+
+
 def test_unittestdatatree_shows_short_name_in_table(qtbot):
     datatree = UnitTestDataTree()
     res = TestResult(Category.OK, 'status', 'bar', 'foo', '', 0, '')

@@ -12,9 +12,12 @@ from spyder.plugins import SpyderPluginWidget
 from spyder.py3compat import getcwd
 from spyder.utils import icon_manager as ima
 from spyder.utils.qthelpers import create_action
+from spyder.widgets.projects.config import ProjectConfig
 
 # Local imports
-from .widgets.unittestgui import UnitTestWidget, is_unittesting_installed
+from spyder_unittest.widgets.configdialog import Config
+from spyder_unittest.widgets.unittestgui import (UnitTestWidget,
+                                                 is_unittesting_installed)
 
 _ = get_translation("unittest", dirname="spyder_unittest")
 
@@ -23,6 +26,8 @@ class UnitTestPlugin(SpyderPluginWidget):
     """Spyder plugin for unit testing."""
 
     CONF_SECTION = 'unittest'
+    CONF_DEFAULTS = [(CONF_SECTION, {'framework': '', 'wdir': ''})]
+    CONF_VERSION = '0.1.0'
 
     def __init__(self, parent=None):
         """Initialize plugin and corresponding widget."""
@@ -50,9 +55,12 @@ class UnitTestPlugin(SpyderPluginWidget):
         self.main.workingdirectory.set_explorer_cwd.connect(
             self.update_default_wdir)
         self.main.projects.sig_project_created.connect(
-            self.update_default_wdir)
-        self.main.projects.sig_project_loaded.connect(self.update_default_wdir)
-        self.main.projects.sig_project_closed.connect(self.update_default_wdir)
+            self.handle_project_change)
+        self.main.projects.sig_project_loaded.connect(
+            self.handle_project_change)
+        self.main.projects.sig_project_closed.connect(
+            self.handle_project_change)
+        self.unittestwidget.sig_newconfig.connect(self.save_config)
 
         # Add unit test widget in dockwindow
         layout = QVBoxLayout()
@@ -72,6 +80,16 @@ class UnitTestPlugin(SpyderPluginWidget):
         """
         self.unittestwidget.pythonpath = self.main.get_spyder_pythonpath()
 
+    def handle_project_change(self):
+        """
+        Handle the event where the current project changes.
+
+        This updates the default working directory for running tests and loads
+        the test configuration from the project preferences.
+        """
+        self.update_default_wdir()
+        self.load_config()
+
     def update_default_wdir(self):
         """
         Update default working dir for running unit tests.
@@ -86,7 +104,54 @@ class UnitTestPlugin(SpyderPluginWidget):
             wdir = getcwd()
         self.unittestwidget.default_wdir = wdir
 
-    # ----- SpyderPluginWidget API --------------------------------------------
+    def load_config(self):
+        """
+        Load test configuration from project preferences.
+
+        If the test configuration stored in the project preferences is valid,
+        then use it. If it is not valid (e.g., because the user never
+        configured testing for this project) or no project is opened, then
+        invalidate the current test configuration.
+        """
+        project = self.main.projects.get_active_project()
+        if not project:
+            self.unittestwidget.set_config_without_emit(None)
+            return
+
+        try:
+            project_conf = project.CONF[self.CONF_SECTION]
+        except KeyError:
+            project_conf = ProjectConfig(
+                name=self.CONF_SECTION,
+                root_path=project.root_path,
+                filename=self.CONF_SECTION + '.ini',
+                defaults=self.CONF_DEFAULTS,
+                load=True,
+                version=self.CONF_VERSION)
+            project.CONF[self.CONF_SECTION] = project_conf
+
+        new_config = Config(
+            framework=project_conf[self.CONF_SECTION]['framework'],
+            wdir=project_conf[self.CONF_SECTION]['wdir'])
+        if not self.unittestwidget.config_is_valid(new_config):
+            new_config = None
+        self.unittestwidget.set_config_without_emit(new_config)
+
+    def save_config(self, test_config):
+        """
+        Save test configuration in project preferences.
+
+        If no project is opened, then do not save.
+        """
+        project = self.main.projects.get_active_project()
+        if not project:
+            return
+        project_conf = project.CONF[self.CONF_SECTION]
+        project_conf[self.CONF_SECTION]['framework'] = test_config.framework
+        project_conf[self.CONF_SECTION]['wdir'] = test_config.wdir
+
+# ----- SpyderPluginWidget API --------------------------------------------
+
     def get_plugin_title(self):
         """Return widget title."""
         return _("Unit testing")
