@@ -7,6 +7,7 @@
 
 # Standard library imports
 import os
+import sys
 
 # Third party imports
 import pytest
@@ -142,6 +143,23 @@ def test_spyderplugin_runtest_logreport_ignores_teardown_passed(plugin):
     plugin.writer.write.assert_not_called()
 
 
+def test_main_captures_stdout_and_stderr(monkeypatch):
+    def mock_main(args, plugins):
+        print('output')
+    monkeypatch.setattr(
+        'spyder_unittest.backend.pytestworker.pytest.main', mock_main)
+
+    mock_writer = create_autospec(JSONStreamWriter)
+    MockJSONStreamWriter = Mock(return_value=mock_writer)
+    monkeypatch.setattr(
+        'spyder_unittest.backend.pytestworker.JSONStreamWriter',
+        MockJSONStreamWriter)
+
+    main(None)
+    mock_writer.write.assert_called_once_with({
+            'event': 'finished', 'stdout': 'output\n'})
+
+
 def test_pytestworker_integration(monkeypatch, tmpdir):
     os.chdir(tmpdir.strpath)
     testfilename = tmpdir.join('test_foo.py').strpath
@@ -179,3 +197,6 @@ def test_pytestworker_integration(monkeypatch, tmpdir):
     assert args[3][0][0]['nodeid'] == 'test_foo.py::test_fail'
     assert args[3][0][0]['sections'] == []
     assert 'duration' in args[3][0][0]
+
+    assert args[4][0][0]['event'] == 'finished'
+    assert 'pytest' in args[4][0][0]['stdout']

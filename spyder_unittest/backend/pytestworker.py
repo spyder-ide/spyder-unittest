@@ -65,9 +65,12 @@ def main(args):
     old_stdout = sys.stdout
     stdout_buffer = io.StringIO()
     sys.stdout = stdout_buffer
+
     writer = JSONStreamWriter(old_stdout)
     pytest.main(args, plugins=[SpyderPlugin(writer)])
-    # TODO Recover contents of stdout buffer and restore old stdout
+
+    data = {'event': 'finished', 'stdout': stdout_buffer.getvalue()}
+    writer.write(data)
     sys.stdout = old_stdout
 
 

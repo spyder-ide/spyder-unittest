@@ -62,6 +62,7 @@ class PyTestRunner(RunnerBase):
         self.process.finished.connect(self.finished)
 
         self.reader = JSONStreamReader()
+        self.output = ''
 
         if pythonpath is not None:
             env = [
@@ -116,6 +117,8 @@ class PyTestRunner(RunnerBase):
                 details_list.append(details)
             elif result_item['event'] == 'logreport':
                 result_list.append(self.logreport_to_testresult(result_item))
+            elif result_item['event'] == 'finished':
+                self.output = result_item['stdout']
         if details_list:
             self.sig_collected.emit(details_list)
         if result_list:
@@ -157,4 +160,4 @@ class PyTestRunner(RunnerBase):
 
         This function emits `sig_finished`.
         """
-        self.sig_finished.emit(None, '')
+        self.sig_finished.emit(None, self.output)
