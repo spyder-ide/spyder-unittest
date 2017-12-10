@@ -285,18 +285,23 @@ class TestDataModel(QAbstractItemModel):
 
     def summary(self):
         """Return summary for current results."""
+        def n_test_or_tests(n):
+            test_or_tests = _('test') if n == 1 else _('tests')
+            return '{} {}'.format(n, test_or_tests)
+
         if not len(self.testresults):
             return _('No results to show.')
         counts = Counter(res.category for res in self.testresults)
-        if counts[Category.FAIL] == 1:
-            test_or_tests = _('test')
-        else:
-            test_or_tests = _('tests')
-        failed_txt = '{} {} failed'.format(counts[Category.FAIL],
-                                           test_or_tests)
-        passed_txt = '{} passed'.format(counts[Category.OK])
-        other_txt = '{} other'.format(counts[Category.SKIP])
-        msg = '<b>{}, {}, {}</b>'.format(failed_txt, passed_txt, other_txt)
+        if all(counts[cat] == 0
+               for cat in (Category.FAIL, Category.OK, Category.SKIP)):
+            txt = n_test_or_tests(counts[Category.PENDING])
+            return _('collected {}').format(txt)
+        msg = _('{} failed').format(n_test_or_tests(counts[Category.FAIL]))
+        msg += _(', {} passed').format(counts[Category.OK])
+        if counts[Category.SKIP]:
+            msg += _(', {} other').format(counts[Category.SKIP])
+        if counts[Category.PENDING]:
+            msg += _(', {} pending').format(counts[Category.PENDING])
         return msg
 
     def emit_summary(self):
