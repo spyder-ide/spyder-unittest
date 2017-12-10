@@ -84,6 +84,7 @@ class UnitTestWidget(QWidget):
         self.testdataview = TestDataView(self)
         self.testdatamodel = TestDataModel(self)
         self.testdataview.setModel(self.testdatamodel)
+        self.testdatamodel.sig_summary.connect(self.set_status_label)
 
         self.framework_registry = FrameworkRegistry()
         for runner in FRAMEWORKS:
@@ -307,12 +308,18 @@ class UnitTestWidget(QWidget):
         self.testdatamodel.add_testresults(testresults)
 
     def tests_yield_result(self, testresults):
-        """
-        Called when test results are received.
-
-        Bla bla bla
-        """
+        """Called when test results are received."""
         self.testdatamodel.update_testresults(testresults)
+
+    def set_status_label(self, msg):
+        """
+        Set status label to the specified message.
+
+        Arguments
+        ---------
+        msg: str
+        """
+        self.status_label.setText('<b>{}</b>'.format(msg))
 
 
 def test():

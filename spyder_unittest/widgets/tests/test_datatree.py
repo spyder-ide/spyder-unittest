@@ -50,38 +50,46 @@ def test_testdatamodel_data_background():
 
 
 def test_testdatamodel_add_tests(qtbot):
+    def check_args1(parent, begin, end):
+        return not parent.isValid() and begin == 0 and end == 0
+
+    def check_args2(parent, begin, end):
+        return not parent.isValid() and begin == 1 and end == 1
+
     model = TestDataModel()
     assert model.testresults == []
 
     result1 = TestResult(Category.OK, 'status', 'bar', 'foo')
-    with qtbot.waitSignal(model.rowsInserted) as blocker:
+    with qtbot.waitSignals([model.rowsInserted, model.sig_summary],
+                           check_params_cbs=[check_args1, None],
+                           raising=True):
         model.add_testresults([result1])
-    assert not blocker.args[0].isValid()  # args[0] is parent
-    assert blocker.args[1] == 0  # args[1] is begin
-    assert blocker.args[2] == 0  # args[2] is end
     assert model.testresults == [result1]
 
     result2 = TestResult(Category.FAIL, 'error', 'bar', 'foo', 'kadoom')
-    with qtbot.waitSignal(model.rowsInserted) as blocker:
+    with qtbot.waitSignals([model.rowsInserted, model.sig_summary],
+                           check_params_cbs=[check_args2, None],
+                           raising=True):
         model.add_testresults([result2])
-    assert not blocker.args[0].isValid()
-    assert blocker.args[1] == 1
-    assert blocker.args[2] == 1
     assert model.testresults == [result1, result2]
 
 
 def test_testdatamodel_replace_tests(qtbot):
+    def check_args(topLeft, bottomRight, roles):
+        return (topLeft.row() == 0
+                and topLeft.column() == 0
+                and not topLeft.parent().isValid()
+                and bottomRight.row() == 0
+                and bottomRight.column() == 3
+                and not bottomRight.parent().isValid()
+                and roles == [Qt.DisplayRole])
+
     model = TestDataModel()
     result1 = TestResult(Category.OK, 'status', 'bar', 'foo')
     model.testresults = [result1]
     result2 = TestResult(Category.FAIL, 'error', 'bar', 'foo', 'kadoom')
-    with qtbot.waitSignal(model.dataChanged) as blocker:
+    with qtbot.waitSignals([model.dataChanged, model.sig_summary],
+                           check_params_cbs=[check_args, None],
+                           raising=True):
         model.update_testresults([result2])
-    assert blocker.args[0].row() == 0  # args[0] is topLeft
-    assert blocker.args[0].column() == 0
-    assert not blocker.args[0].parent().isValid()
-    assert blocker.args[1].row() == 0  # args[1] is bpttpmRight
-    assert blocker.args[1].column() == 3
-    assert not blocker.args[1].parent().isValid()
-    assert blocker.args[2] == [Qt.DisplayRole]
     assert model.testresults == [result2]

@@ -77,6 +77,12 @@ def test_unittestwidget_tests_yield_results(qtbot):
     widget.tests_yield_result(results)
     widget.testdatamodel.update_testresults.assert_called_once_with(results)
 
+def test_unittestwidget_set_message(qtbot):
+    widget = UnitTestWidget(None)
+    widget.status_label = Mock()
+    widget.set_status_label('xxx')
+    widget.status_label.setText.assert_called_once_with('<b>xxx</b>')
+
 @pytest.mark.parametrize('framework', ['py.test', 'nose'])
 def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
     """Basic check."""

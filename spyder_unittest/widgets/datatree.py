@@ -9,7 +9,7 @@
 from collections import Counter
 
 # Third party imports
-from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt
+from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal
 from qtpy.QtGui import QBrush, QColor, QFont
 from qtpy.QtWidgets import QTreeView
 from spyder.config.base import get_translation
@@ -119,7 +119,14 @@ class TestDataModel(QAbstractItemModel):
     As in every model, an iteem of data is identified by its index, which is
     a tuple (row, column, id). The id is TOPLEVEL_ID for top-level items.
     For level-2 items, the id is the index of the test in `self.testresults`.
+
+    Signals
+    -------
+    sig_summary(str)
+       Emitted with new summary if test results change.
     """
+
+    sig_summary = Signal(str)
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -142,6 +149,7 @@ class TestDataModel(QAbstractItemModel):
         self.beginResetModel()
         self._testresults = new_value
         self.endResetModel()
+        self.emit_summary()
 
     def add_testresults(self, new_tests):
         """
@@ -156,6 +164,7 @@ class TestDataModel(QAbstractItemModel):
         self.beginInsertRows(QModelIndex(), firstRow, lastRow)
         self.testresults.extend(new_tests)
         self.endInsertRows()
+        self.emit_summary()
 
     def update_testresults(self, new_results):
         """
@@ -187,6 +196,7 @@ class TestDataModel(QAbstractItemModel):
             self.dataChanged.emit(self.index(idx_min, 0),
                                   self.index(idx_max, len(HEADERS) - 1),
                                   [Qt.DisplayRole])
+            self.emit_summary()
 
     def index(self, row, column, parent=QModelIndex()):
         """
@@ -288,3 +298,7 @@ class TestDataModel(QAbstractItemModel):
         other_txt = '{} other'.format(counts[Category.SKIP])
         msg = '<b>{}, {}, {}</b>'.format(failed_txt, passed_txt, other_txt)
         return msg
+
+    def emit_summary(self):
+        """Emit sig_summary with summary for current results."""
+        self.sig_summary.emit(self.summary())
