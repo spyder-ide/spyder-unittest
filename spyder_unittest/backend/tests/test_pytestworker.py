@@ -184,19 +184,25 @@ def test_pytestworker_integration(monkeypatch, tmpdir):
     assert args[1][0][0]['name'] == 'test_fail'
     assert args[1][0][0]['module'] == 'test_foo.py'
 
-    assert args[2][0][0]['event'] == 'logreport'
-    assert args[2][0][0]['when'] == 'call'
-    assert args[2][0][0]['outcome'] == 'passed'
+    assert args[2][0][0]['event'] == 'starttest'
     assert args[2][0][0]['nodeid'] == 'test_foo.py::test_ok'
-    assert args[2][0][0]['sections'] == []
-    assert 'duration' in args[2][0][0]
 
     assert args[3][0][0]['event'] == 'logreport'
     assert args[3][0][0]['when'] == 'call'
-    assert args[3][0][0]['outcome'] == 'failed'
-    assert args[3][0][0]['nodeid'] == 'test_foo.py::test_fail'
+    assert args[3][0][0]['outcome'] == 'passed'
+    assert args[3][0][0]['nodeid'] == 'test_foo.py::test_ok'
     assert args[3][0][0]['sections'] == []
     assert 'duration' in args[3][0][0]
 
-    assert args[4][0][0]['event'] == 'finished'
-    assert 'pytest' in args[4][0][0]['stdout']
+    assert args[4][0][0]['event'] == 'starttest'
+    assert args[4][0][0]['nodeid'] == 'test_foo.py::test_fail'
+
+    assert args[5][0][0]['event'] == 'logreport'
+    assert args[5][0][0]['when'] == 'call'
+    assert args[5][0][0]['outcome'] == 'failed'
+    assert args[5][0][0]['nodeid'] == 'test_foo.py::test_fail'
+    assert args[5][0][0]['sections'] == []
+    assert 'duration' in args[5][0][0]
+
+    assert args[6][0][0]['event'] == 'finished'
+    assert 'pytest' in args[6][0][0]['stdout']

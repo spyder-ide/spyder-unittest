@@ -70,6 +70,14 @@ def test_unittestwidget_tests_collected(qtbot):
                TestResult(Category.PENDING, 'pending', 'eggs', 'hammodule')]
     widget.testdatamodel.add_testresults.assert_called_once_with(results)
 
+def test_unittestwidget_tests_started(qtbot):
+    widget = UnitTestWidget(None)
+    widget.testdatamodel = Mock()
+    details = [TestDetails('spam', 'hammodule')]
+    results = [TestResult(Category.PENDING, 'pending', 'spam', 'hammodule', 'running')]
+    widget.tests_started(details)
+    widget.testdatamodel.update_testresults.assert_called_once_with(results)
+
 def test_unittestwidget_tests_yield_results(qtbot):
     widget = UnitTestWidget(None)
     widget.testdatamodel = Mock()

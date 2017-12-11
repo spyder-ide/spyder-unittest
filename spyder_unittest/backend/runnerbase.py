@@ -102,6 +102,8 @@ class RunnerBase(QObject):
     -------
     sig_collected(list of TestDetails)
         Emitted when tests are collected.
+    sig_starttest(list of TestDetails)
+        Emitted just before tests are run.
     sig_testresult(list of TestResult)
         Emitted when tests are finished.
     sig_finished(list of TestResult, str)
@@ -110,6 +112,7 @@ class RunnerBase(QObject):
     """
 
     sig_collected = Signal(object)
+    sig_starttest = Signal(object)
     sig_testresult = Signal(object)
     sig_finished = Signal(object, str)
 

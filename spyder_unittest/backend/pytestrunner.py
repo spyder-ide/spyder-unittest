@@ -106,23 +106,42 @@ class PyTestRunner(RunnerBase):
         output : list
             list of decoded Python object sent by test process.
         """
-        details_list = []
+        collected_list = []
+        starttest_list = []
         result_list = []
+
         for result_item in output:
             if result_item['event'] == 'collected':
-                module = result_item['module']
-                if module.endswith('.py'):
-                    module = module[:-3]
-                details = TestDetails(result_item['name'], module)
-                details_list.append(details)
+                collected_list.append(
+                        self.logreport_collected_to_testdetails(result_item))
+            elif result_item['event'] == 'starttest':
+                starttest_list.append(
+                        self.logreport_starttest_to_testdetails(result_item))
             elif result_item['event'] == 'logreport':
                 result_list.append(self.logreport_to_testresult(result_item))
             elif result_item['event'] == 'finished':
                 self.output = result_item['stdout']
-        if details_list:
-            self.sig_collected.emit(details_list)
+
+        if collected_list:
+            self.sig_collected.emit(collected_list)
+        if starttest_list:
+            self.sig_starttest.emit(starttest_list)
         if result_list:
             self.sig_testresult.emit(result_list)
+
+    def logreport_collected_to_testdetails(self, report):
+        """Convert a 'collected' logreport to a TestDetails."""
+        module = report['module']
+        if module.endswith('.py'):
+            module = module[:-3]
+        return TestDetails(report['name'], module)
+
+    def logreport_starttest_to_testdetails(self, report):
+        """Convert a 'starttest' logreport to a TestDetails."""
+        module, name = report['nodeid'].split('::', maxsplit=1)
+        if module.endswith('.py'):
+            module = module[:-3]
+        return TestDetails(name, module)
 
     def logreport_to_testresult(self, report):
         """Convert a logreport sent by test process to a TestResult."""

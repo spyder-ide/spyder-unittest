@@ -107,6 +107,19 @@ def test_pytestrunner_process_output_with_collected(qtbot):
     assert blocker.args == [expected]
 
 
+def test_pytestrunner_process_output_with_starttest(qtbot):
+    runner = PyTestRunner(None)
+    output = [{'event': 'starttest', 'nodeid': 'spam.py::ham'},
+              {'event': 'starttest', 'nodeid': 'eggs.py::bacon'}]
+    with qtbot.waitSignal(runner.sig_starttest) as blocker:
+        runner.process_output(output)
+    expected = [
+        TestDetails(name='ham', module='spam'),
+        TestDetails(name='bacon', module='eggs')
+    ]
+    assert blocker.args == [expected]
+
+
 def test_pytestrunner_process_output_with_logreport_passed(qtbot):
     runner = PyTestRunner(None)
     output = [{
