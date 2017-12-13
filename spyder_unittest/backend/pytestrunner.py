@@ -138,7 +138,7 @@ class PyTestRunner(RunnerBase):
 
     def logreport_starttest_to_testdetails(self, report):
         """Convert a 'starttest' logreport to a TestDetails."""
-        module, name = report['nodeid'].split('::', maxsplit=1)
+        module, name = report['nodeid'].split('::', 1)
         if module.endswith('.py'):
             module = module[:-3]
         return TestDetails(name, module)
@@ -154,7 +154,7 @@ class PyTestRunner(RunnerBase):
         else:
             cat = Category.SKIP
             status = report['outcome']
-        module, name = report['nodeid'].split('::', maxsplit=1)
+        module, name = report['nodeid'].split('::', 1)
         if module.endswith('.py'):
             module = module[:-3]
         duration = report['duration']

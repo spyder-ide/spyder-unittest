@@ -12,10 +12,10 @@ PyTestRunner can read them.
 """
 
 # Standard library imports
-import io
 import sys
 
 # Third party imports
+from spyder.py3compat import io
 import pytest
 
 # Local imports

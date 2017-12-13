@@ -19,6 +19,9 @@ of s.
 # Standard library imports
 import json
 
+# Third party imports
+from spyder.py3compat import PY2, to_text_string
+
 
 class JSONStreamWriter:
     """
@@ -49,7 +52,9 @@ class JSONStreamWriter:
             int, float, str, bool, list, dict or None).
         """
         txt = json.dumps(obj)
-        self.stream.write(str(len(txt)) + '\n')
+        if PY2:
+            txt = to_text_string(txt)
+        self.stream.write(to_text_string(len(txt)) + '\n')
         self.stream.write(txt + '\n')
         self.stream.flush()
 

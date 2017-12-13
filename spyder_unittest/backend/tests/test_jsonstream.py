@@ -7,11 +7,15 @@
 
 # Standard library imports
 from io import StringIO, TextIOBase
-from unittest.mock import create_autospec
 
 # Local imports
 from spyder_unittest.backend.jsonstream import (JSONStreamReader,
                                                 JSONStreamWriter)
+
+try:
+    from unittest.mock import create_autospec
+except ImportError:
+    from mock import create_autospec  # Python 2
 
 
 def test_jsonstreamwriter_with_list():
@@ -24,7 +28,7 @@ def test_jsonstreamwriter_with_list():
 def test_jsonstreamwriter_with_unicode():
     stream = StringIO()
     writer = JSONStreamWriter(stream)
-    writer.write('三')
+    writer.write(u'三')  # u prefix for Python2 compatibility
     assert stream.getvalue() == '8\n"\\u4e09"\n'
 
 
@@ -32,7 +36,7 @@ def test_jsonstreamwriter_flushes():
     stream = create_autospec(TextIOBase)
     writer = JSONStreamWriter(stream)
     writer.write(1)
-    stream.flush.assert_called_once()
+    stream.flush.assert_called_once_with()
 
 
 def test_jsonstreamreader_with_list():
@@ -42,7 +46,7 @@ def test_jsonstreamreader_with_list():
 
 def test_jsonstreamreader_with_unicode():
     reader = JSONStreamReader()
-    assert reader.consume('8\n"\\u4e09"\n') == ['三']
+    assert reader.consume('8\n"\\u4e09"\n') == [u'三']
 
 
 def test_jsonstreamreader_with_partial_frames():
