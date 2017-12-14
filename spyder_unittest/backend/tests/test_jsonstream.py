@@ -44,6 +44,11 @@ def test_jsonstreamreader_with_list():
     assert reader.consume('6\n[1, 2]\n') == [[1, 2]]
 
 
+def test_jsonstreamreader_with_windows_lineending():
+    reader = JSONStreamReader()
+    assert reader.consume('6\r\n[1, 2]\r\n') == [[1, 2]]
+
+
 def test_jsonstreamreader_with_unicode():
     reader = JSONStreamReader()
     assert reader.consume('8\n"\\u4e09"\n') == [u'三']

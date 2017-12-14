@@ -86,12 +86,24 @@ class JSONStreamReader:
         res = []
         txt = self.buffer + txt
         while index < len(txt):
+            has_r = False  # whether line ends with \r\n or \n
             end_of_line1 = txt.find('\n', index)
-            len_encoding = int(txt[index:end_of_line1])
+            try:
+                len_encoding = int(txt[index:end_of_line1])
+            except ValueError:
+                raise ValueError('txt = %s  index = %d  end_of_line1 = %d'
+                                 % (repr(txt), index, end_of_line1))
             if end_of_line1 + len_encoding + 2 > len(txt):  # 2 for two \n
                 break
+            if txt[end_of_line1 + len_encoding + 1] == '\r':
+                if end_of_line1 + len_encoding + 3 > len(txt):
+                    break
+                else:
+                    has_r = True
             encoding = txt[end_of_line1 + 1:end_of_line1 + len_encoding + 1]
             res.append(json.loads(encoding))
             index = end_of_line1 + len_encoding + 2
+            if has_r:
+                index += 1
         self.buffer = txt[index:]
         return res
