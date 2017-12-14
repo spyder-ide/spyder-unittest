@@ -30,19 +30,19 @@ def test_pytestrunner_is_installed():
 
 def test_pytestrunner_start(monkeypatch):
     MockQProcess = Mock()
-    monkeypatch.setattr('spyder_unittest.backend.pytestrunner.QProcess',
+    monkeypatch.setattr('spyder_unittest.backend.runnerbase.QProcess',
                         MockQProcess)
     mock_process = MockQProcess()
     mock_process.systemEnvironment = lambda: ['VAR=VALUE', 'PYTHONPATH=old']
 
     MockEnvironment = Mock()
     monkeypatch.setattr(
-        'spyder_unittest.backend.pytestrunner.QProcessEnvironment',
+        'spyder_unittest.backend.runnerbase.QProcessEnvironment',
         MockEnvironment)
     mock_environment = MockEnvironment()
 
     mock_remove = Mock(side_effect=OSError())
-    monkeypatch.setattr('spyder_unittest.backend.pytestrunner.os.remove',
+    monkeypatch.setattr('spyder_unittest.backend.runnerbase.os.remove',
                         mock_remove)
 
     MockJSONStreamReader = Mock()

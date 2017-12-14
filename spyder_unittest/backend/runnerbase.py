@@ -158,6 +158,29 @@ class RunnerBase(QObject):
         """
         raise NotImplementedError
 
+    def _prepare_process(self, config, pythonpath):
+        """
+        Prepare and return process for running the unit test suite.
+
+        This sets the working directory and environment.
+        """
+        process = QProcess(self)
+        process.setProcessChannelMode(QProcess.MergedChannels)
+        process.setWorkingDirectory(config.wdir)
+        process.finished.connect(self.finished)
+        if pythonpath is not None:
+            env = [
+                to_text_string(_pth)
+                for _pth in process.systemEnvironment()
+            ]
+            add_pathlist_to_PYTHONPATH(env, pythonpath)
+            processEnvironment = QProcessEnvironment()
+            for envItem in env:
+                envName, separator, envValue = envItem.partition('=')
+                processEnvironment.insert(envName, envValue)
+            process.setProcessEnvironment(processEnvironment)
+        return process
+
     def start(self, config, pythonpath):
         """
         Start process which will run the unit test suite.
@@ -180,33 +203,13 @@ class RunnerBase(QObject):
         RuntimeError
             If process failed to start.
         """
-        wdir = config.wdir
-
-        self.process = QProcess(self)
-        self.process.setProcessChannelMode(QProcess.MergedChannels)
-        self.process.setWorkingDirectory(wdir)
-        self.process.finished.connect(self.finished)
-
-        if pythonpath is not None:
-            env = [
-                to_text_string(_pth)
-                for _pth in self.process.systemEnvironment()
-            ]
-            add_pathlist_to_PYTHONPATH(env, pythonpath)
-            processEnvironment = QProcessEnvironment()
-            for envItem in env:
-                envName, separator, envValue = envItem.partition('=')
-                processEnvironment.insert(envName, envValue)
-            self.process.setProcessEnvironment(processEnvironment)
-
+        self.process = self._prepare_process(config, pythonpath)
         executable = get_python_executable()
         p_args = self.create_argument_list()
-
         try:
             os.remove(self.resultfilename)
         except OSError:
             pass
-
         self.process.start(executable, p_args)
         running = self.process.waitForStarted()
         if not running:
