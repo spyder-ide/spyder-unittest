@@ -75,14 +75,13 @@ def test_testdatamodel_add_tests(qtbot):
 
 
 def test_testdatamodel_replace_tests(qtbot):
-    def check_args(topLeft, bottomRight, roles):
+    def check_args(topLeft, bottomRight, *args):
         return (topLeft.row() == 0
                 and topLeft.column() == 0
                 and not topLeft.parent().isValid()
                 and bottomRight.row() == 0
                 and bottomRight.column() == 3
-                and not bottomRight.parent().isValid()
-                and roles == [Qt.DisplayRole])
+                and not bottomRight.parent().isValid())
 
     model = TestDataModel()
     result1 = TestResult(Category.OK, 'status', 'bar', 'foo')

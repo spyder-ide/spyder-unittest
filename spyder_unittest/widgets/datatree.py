@@ -9,6 +9,7 @@
 from collections import Counter
 
 # Third party imports
+from qtpy import PYQT4
 from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal
 from qtpy.QtGui import QBrush, QColor, QFont
 from qtpy.QtWidgets import QTreeView
@@ -65,9 +66,12 @@ class TestDataView(QTreeView):
         QTreeView.rowsInserted(self, parent, firstRow, lastRow)
         self.resizeColumns()
 
-    def dataChanged(self, topLeft, bottomRight, roles):
+    def dataChanged(self, topLeft, bottomRight, roles=[]):
         """Called when data in model has changed."""
-        QTreeView.dataChanged(self, topLeft, bottomRight, roles)
+        if PYQT4:
+            QTreeView.dataChanged(self, topLeft, bottomRight)
+        else:
+            QTreeView.dataChanged(self, topLeft, bottomRight, roles)
         self.resizeColumns()
         while topLeft.parent().isValid():
             topLeft = topLeft.parent()
@@ -194,8 +198,7 @@ class TestDataModel(QAbstractItemModel):
                 raise KeyError('test not found')
         if idx_min is not None:
             self.dataChanged.emit(self.index(idx_min, 0),
-                                  self.index(idx_max, len(HEADERS) - 1),
-                                  [Qt.DisplayRole])
+                                  self.index(idx_max, len(HEADERS) - 1))
             self.emit_summary()
 
     def index(self, row, column, parent=QModelIndex()):
