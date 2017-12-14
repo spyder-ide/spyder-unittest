@@ -11,10 +11,7 @@ import os
 import tempfile
 
 # Third party imports
-from lxml import etree
-from qtpy.QtCore import (QObject, QProcess, QProcessEnvironment, QTextCodec,
-                         Signal)
-from spyder.config.base import get_translation
+from qtpy.QtCore import QObject, QProcess, QProcessEnvironment, Signal
 from spyder.py3compat import to_text_string
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH, get_python_executable
 
@@ -22,12 +19,6 @@ try:
     from importlib.util import find_spec as find_spec_or_loader
 except ImportError:  # Python 2
     from pkgutil import find_loader as find_spec_or_loader
-
-try:
-    _ = get_translation("unittest", dirname="spyder_unittest")
-except KeyError as error:
-    import gettext
-    _ = gettext.gettext
 
 # Class with details of the tests
 TestDetails = namedtuple('TestDetails', ['name', 'module'])
@@ -219,74 +210,12 @@ class RunnerBase(QObject):
         """
         Called when the unit test process has finished.
 
-        This function reads the results and emits `sig_finished`.
+        This function should be implemented in derived classes. It should read
+        the results (if necessary) and emit `sig_finished`.
         """
-        qbytearray = self.process.readAllStandardOutput()
-        locale_codec = QTextCodec.codecForLocale()
-        output = to_text_string(locale_codec.toUnicode(qbytearray.data()))
-        testresults = self.load_data()
-        self.sig_finished.emit(testresults, output)
+        raise NotImplementedError
 
     def kill_if_running(self):
         """Kill testing process if it is running."""
         if self.process and self.process.state() == QProcess.Running:
             self.process.kill()
-
-    def load_data(self):
-        """
-        Read and parse unit test results.
-
-        This function reads the unit test results from the file with name
-        `self.resultfilename` and parses them. The file should contain the
-        test results in JUnitXML format.
-
-        Returns
-        -------
-        list of TestResult
-            Unit test results.
-        """
-        try:
-            data = etree.parse(self.resultfilename).getroot()
-        except OSError:
-            data = []
-
-        testresults = []
-        for testcase in data:
-            category = Category.OK
-            status = 'ok'
-            module = testcase.get('classname')
-            name = testcase.get('name')
-            message = ''
-            time = float(testcase.get('time'))
-            extras = []
-
-            for child in testcase:
-                if child.tag in ('error', 'failure', 'skipped'):
-                    if child.tag == 'skipped':
-                        category = Category.SKIP
-                    else:
-                        category = Category.FAIL
-                    status = child.tag
-                    type_ = child.get('type')
-                    message = child.get('message', default='')
-                    if type_ and message:
-                        message = '{0}: {1}'.format(type_, message)
-                    elif type_:
-                        message = type_
-                    if child.text:
-                        extras.append(child.text)
-                elif child.tag in ('system-out', 'system-err'):
-                    if child.tag == 'system-out':
-                        heading = _('Captured stdout')
-                    else:
-                        heading = _('Captured stderr')
-                    contents = child.text.rstrip('\n')
-                    extras.append('----- {} -----\n{}'.format(heading,
-                                                              contents))
-
-            extra_text = '\n\n'.join(extras)
-            testresults.append(
-                TestResult(category, status, name, module, message, time,
-                           extra_text))
-
-        return testresults
