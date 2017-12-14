@@ -12,14 +12,30 @@ PyTestRunner can read them.
 """
 
 # Standard library imports
+import io
 import sys
 
 # Third party imports
-from spyder.py3compat import io
 import pytest
 
 # Local imports
 from spyder_unittest.backend.jsonstream import JSONStreamWriter
+
+
+class StdoutBuffer(io.TextIOWrapper):
+    """
+    Wrapper for binary stream which accepts both text and binary strings.
+
+    Source: https://stackoverflow.com/a/19344871
+    """
+
+    def write(self, string):
+        """Write text or binary string to underlying stream."""
+        try:
+            return super(StdoutBuffer, self).write(string)
+        except TypeError:
+            # redirect encoded byte strings directly to buffer
+            return super(StdoutBuffer, self).buffer.write(string)
 
 
 class SpyderPlugin():
@@ -70,13 +86,14 @@ class SpyderPlugin():
 def main(args):
     """Run py.test with the Spyder plugin."""
     old_stdout = sys.stdout
-    stdout_buffer = io.StringIO()
+    stdout_buffer = StdoutBuffer(io.BytesIO(), sys.stdout.encoding)
     sys.stdout = stdout_buffer
 
     writer = JSONStreamWriter(old_stdout)
     pytest.main(args, plugins=[SpyderPlugin(writer)])
 
-    data = {'event': 'finished', 'stdout': stdout_buffer.getvalue()}
+    stdout_buffer.seek(0)
+    data = {'event': 'finished', 'stdout': stdout_buffer.read()}
     writer.write(data)
     sys.stdout = old_stdout
 
