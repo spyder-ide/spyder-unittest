@@ -8,10 +8,6 @@
 # Standard library imports
 import re
 
-# Third party imports
-from qtpy.QtCore import QTextCodec
-from spyder.py3compat import to_text_string
-
 # Local imports
 from spyder_unittest.backend.runnerbase import Category, RunnerBase, TestResult
 
@@ -32,10 +28,8 @@ class UnittestRunner(RunnerBase):
 
         This function reads the results and emits `sig_finished`.
         """
-        qbytearray = self.process.readAllStandardOutput()
-        locale_codec = QTextCodec.codecForLocale()
-        output = to_text_string(locale_codec.toUnicode(qbytearray.data()))
-        testresults = self.load_data(output)  # overrides base class method
+        output = self.read_all_process_output()
+        testresults = self.load_data(output)
         self.sig_finished.emit(testresults, output)
 
     def load_data(self, output):

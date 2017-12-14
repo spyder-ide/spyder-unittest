@@ -11,7 +11,8 @@ import os
 import tempfile
 
 # Third party imports
-from qtpy.QtCore import QObject, QProcess, QProcessEnvironment, Signal
+from qtpy.QtCore import (QObject, QProcess, QProcessEnvironment, QTextCodec,
+                         Signal)
 from spyder.py3compat import to_text_string
 from spyder.utils.misc import add_pathlist_to_PYTHONPATH, get_python_executable
 
@@ -214,6 +215,12 @@ class RunnerBase(QObject):
         the results (if necessary) and emit `sig_finished`.
         """
         raise NotImplementedError
+
+    def read_all_process_output(self):
+        """Read and return all output from `self.process` as unicode."""
+        qbytearray = self.process.readAllStandardOutput()
+        locale_codec = QTextCodec.codecForLocale()
+        return to_text_string(locale_codec.toUnicode(qbytearray.data()))
 
     def kill_if_running(self):
         """Kill testing process if it is running."""

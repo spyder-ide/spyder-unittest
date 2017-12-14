@@ -7,9 +7,7 @@
 
 # Third party imports
 from lxml import etree
-from qtpy.QtCore import QTextCodec
 from spyder.config.base import get_translation
-from spyder.py3compat import to_text_string
 
 # Local imports
 from spyder_unittest.backend.runnerbase import Category, RunnerBase, TestResult
@@ -36,9 +34,7 @@ class NoseRunner(RunnerBase):
 
     def finished(self):
         """Called when the unit test process has finished."""
-        qbytearray = self.process.readAllStandardOutput()
-        locale_codec = QTextCodec.codecForLocale()
-        output = to_text_string(locale_codec.toUnicode(qbytearray.data()))
+        output = self.read_all_process_output()
         testresults = self.load_data()
         self.sig_finished.emit(testresults, output)
 

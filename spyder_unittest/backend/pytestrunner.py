@@ -8,10 +8,6 @@
 # Standard library imports
 import os
 
-# Third party imports
-from qtpy.QtCore import QTextCodec
-from spyder.py3compat import to_text_string
-
 # Local imports
 from spyder_unittest.backend.jsonstream import JSONStreamReader
 from spyder_unittest.backend.runnerbase import (Category, RunnerBase,
@@ -43,9 +39,7 @@ class PyTestRunner(RunnerBase):
 
     def read_output(self):
         """Called when test process emits output."""
-        qbytearray = self.process.readAllStandardOutput()
-        locale_codec = QTextCodec.codecForLocale()
-        output = to_text_string(locale_codec.toUnicode(qbytearray.data()))
+        output = self.read_all_process_output()
         result = self.reader.consume(output)
         self.process_output(result)
 
