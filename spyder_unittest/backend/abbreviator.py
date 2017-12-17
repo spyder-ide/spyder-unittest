@@ -10,8 +10,16 @@ class Abbreviator:
     """
     Abbreviates names so that abbreviation identifies name uniquely.
 
-    The abbreviation is the smallest prefix not shared by other names in a
-    given list.
+    First, all names are split in components separated by full stop (like
+    module names in Python). Every component is abbreviated by the smallest
+    prefix not shared by other names in the same directory.
+
+    Attributes
+    ----------
+    dic : dict of (str, [str, Abbreviator])
+        keys are the first-level components, values are a list, with the
+        abbreviation as its first element and an Abbreviator for abbreviating
+        the higher-level components as its second element.
     """
 
     def __init__(self, names=[]):
@@ -36,21 +44,37 @@ class Abbreviator:
         name : str
         """
         len_abbrev = 1
+        if '.' in name:
+            start, rest = name.split('.', 1)
+        else:
+            start = name
+            rest = None
         for other in self.dic:
-            if name[:len_abbrev] == other[:len_abbrev]:
-                assert name != other
-                while (name[:len_abbrev] == other[:len_abbrev]
-                       and len_abbrev < len(name) and len_abbrev < len(other)):
+            if start[:len_abbrev] == other[:len_abbrev]:
+                if start == other:
+                    break
+                while (start[:len_abbrev] == other[:len_abbrev]
+                       and len_abbrev < len(start)
+                       and len_abbrev < len(other)):
                     len_abbrev += 1
-                if len_abbrev == len(name):
-                    self.dic[other] = other[:len_abbrev + 1]
+                if len_abbrev == len(start):
+                    self.dic[other][0] = other[:len_abbrev + 1]
                 elif len_abbrev == len(other):
-                    self.dic[other] = other
+                    self.dic[other][0] = other
                     len_abbrev += 1
                 else:
-                    self.dic[other] = other[:len_abbrev]
-        self.dic[name] = name[:len_abbrev]
+                    self.dic[other][0] = other[:len_abbrev]
+        else:
+            self.dic[start] = [start[:len_abbrev], Abbreviator()]
+        if rest:
+            self.dic[start][1].add(rest)
 
     def abbreviate(self, name):
         """Return abbreviation of name."""
-        return self.dic[name]
+        if '.' in name:
+            start, rest = name.split('.', 1)
+            res = (self.dic[start][0]
+                   + '.' + self.dic[start][1].abbreviate(rest))
+        else:
+            res = self.dic[name][0]
+        return res
