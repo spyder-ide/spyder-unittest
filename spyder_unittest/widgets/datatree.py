@@ -16,6 +16,7 @@ from qtpy.QtWidgets import QTreeView
 from spyder.config.base import get_translation
 
 # Local imports
+from spyder_unittest.backend.abbreviator import Abbreviator
 from spyder_unittest.backend.runnerbase import Category
 
 try:
@@ -135,6 +136,7 @@ class TestDataModel(QAbstractItemModel):
     def __init__(self, parent=None):
         """Constructor."""
         QAbstractItemModel.__init__(self, parent)
+        self.abbreviator = Abbreviator()
         self.testresults = []
         try:
             self.monospace_font = parent.window().editor.get_plugin_font()
@@ -151,6 +153,7 @@ class TestDataModel(QAbstractItemModel):
     def testresults(self, new_value):
         """Setter for test results."""
         self.beginResetModel()
+        self.abbreviator = Abbreviator(res.module for res in new_value)
         self._testresults = new_value
         self.endResetModel()
         self.emit_summary()
@@ -165,6 +168,8 @@ class TestDataModel(QAbstractItemModel):
         """
         firstRow = len(self.testresults)
         lastRow = firstRow + len(new_tests) - 1
+        for test in new_tests:
+            self.abbreviator.add(test.module)
         self.beginInsertRows(QModelIndex(), firstRow, lastRow)
         self.testresults.extend(new_tests)
         self.endInsertRows()
@@ -234,7 +239,10 @@ class TestDataModel(QAbstractItemModel):
             elif column == STATUS_COLUMN:
                 return self.testresults[row].status
             elif column == NAME_COLUMN:
-                return self.testresults[row].name
+                module_abbrev = self.abbreviator.abbreviate(
+                        self.testresults[row].module)
+                return '{0}.{1}'.format(module_abbrev,
+                                        self.testresults[row].name)
             elif column == MESSAGE_COLUMN:
                 return self.testresults[row].message
             elif column == TIME_COLUMN:
