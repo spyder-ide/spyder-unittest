@@ -14,10 +14,10 @@ from qtpy.QtCore import Qt
 import pytest
 
 # Local imports
-from spyder_unittest.backend.runnerbase import Category, TestResult
+from spyder_unittest.backend.runnerbase import (Category, TestDetails,
+                                                TestResult)
 from spyder_unittest.widgets.configdialog import Config
-from spyder_unittest.widgets.unittestgui import (UnitTestDataTree,
-                                                 UnitTestWidget)
+from spyder_unittest.widgets.unittestgui import UnitTestWidget
 
 try:
     from unittest.mock import Mock
@@ -34,7 +34,6 @@ def test_unittestgui_set_config_emits_newconfig(qtbot):
     assert blocker.args == [config]
     assert widget.config == config
 
-
 def test_unittestgui_set_config_does_not_emit_when_invalid(qtbot):
     widget = UnitTestWidget(None)
     qtbot.addWidget(widget)
@@ -43,22 +42,54 @@ def test_unittestgui_set_config_does_not_emit_when_invalid(qtbot):
         widget.config = config
     assert widget.config == config
 
+def test_unittestwidget_process_finished_updates_results(qtbot):
+    widget = UnitTestWidget(None)
+    widget.testdatamodel = Mock()
+    widget.testdatamodel.summary = lambda: 'message'
+    widget.testdatamodel.testresults = []
+    results = [TestResult(Category.OK, 'ok', 'spam', 'hammodule')]
+    widget.process_finished(results, 'output')
+    assert widget.testdatamodel.testresults == results
 
-def test_unittestdatatree_shows_short_name_in_table(qtbot):
-    datatree = UnitTestDataTree()
-    res = TestResult(Category.OK, 'status', 'bar', 'foo', '', 0, '')
-    datatree.testresults = [res]
-    datatree.populate_tree()
-    assert datatree.topLevelItem(0).data(1, Qt.DisplayRole) == 'bar'
+def test_unittestwidget_process_finished_with_results_none(qtbot):
+    widget = UnitTestWidget(None)
+    widget.testdatamodel = Mock()
+    widget.testdatamodel.summary = lambda: 'message'
+    results = [TestResult(Category.OK, 'ok', 'spam', 'hammodule')]
+    widget.testdatamodel.testresults = results
+    widget.process_finished(None, 'output')
+    assert widget.testdatamodel.testresults == results
 
+def test_unittestwidget_tests_collected(qtbot):
+    widget = UnitTestWidget(None)
+    widget.testdatamodel = Mock()
+    details = [TestDetails('spam', 'hammodule'),
+               TestDetails('eggs', 'hammodule') ]
+    widget.tests_collected(details)
+    results = [TestResult(Category.PENDING, 'pending', 'spam', 'hammodule'),
+               TestResult(Category.PENDING, 'pending', 'eggs', 'hammodule')]
+    widget.testdatamodel.add_testresults.assert_called_once_with(results)
 
-def test_unittestdatatree_shows_full_name_in_tooltip(qtbot):
-    datatree = UnitTestDataTree()
-    res = TestResult(Category.OK, 'status', 'bar', 'foo', '', 0, '')
-    datatree.testresults = [res]
-    datatree.populate_tree()
-    assert datatree.topLevelItem(0).data(1, Qt.ToolTipRole) == 'foo.bar'
+def test_unittestwidget_tests_started(qtbot):
+    widget = UnitTestWidget(None)
+    widget.testdatamodel = Mock()
+    details = [TestDetails('spam', 'hammodule')]
+    results = [TestResult(Category.PENDING, 'pending', 'spam', 'hammodule', 'running')]
+    widget.tests_started(details)
+    widget.testdatamodel.update_testresults.assert_called_once_with(results)
 
+def test_unittestwidget_tests_yield_results(qtbot):
+    widget = UnitTestWidget(None)
+    widget.testdatamodel = Mock()
+    results = [TestResult(Category.OK, 'ok', 'spam', 'hammodule')]
+    widget.tests_yield_result(results)
+    widget.testdatamodel.update_testresults.assert_called_once_with(results)
+
+def test_unittestwidget_set_message(qtbot):
+    widget = UnitTestWidget(None)
+    widget.status_label = Mock()
+    widget.set_status_label('xxx')
+    widget.status_label.setText.assert_called_once_with('<b>xxx</b>')
 
 @pytest.mark.parametrize('framework', ['py.test', 'nose'])
 def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
@@ -81,16 +112,15 @@ def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
         widget.run_tests(config)
 
     MockQMessageBox.assert_not_called()
-    dt = widget.datatree
-    itemcount = dt.topLevelItemCount()
-    assert itemcount == 2
-    assert dt.topLevelItem(0).data(0, Qt.DisplayRole) == 'ok'
-    assert dt.topLevelItem(0).data(1, Qt.DisplayRole) == 'test_ok'
-    assert dt.topLevelItem(0).data(1, Qt.ToolTipRole) == 'test_foo.test_ok'
-    assert dt.topLevelItem(0).data(2, Qt.DisplayRole) == ''
-    assert dt.topLevelItem(1).data(0, Qt.DisplayRole) == 'failure'
-    assert dt.topLevelItem(1).data(1, Qt.DisplayRole) == 'test_fail'
-    assert dt.topLevelItem(1).data(1, Qt.ToolTipRole) == 'test_foo.test_fail'
+    model = widget.testdatamodel
+    assert model.rowCount() == 2
+    assert model.index(0, 0).data(Qt.DisplayRole) == 'ok'
+    assert model.index(0, 1).data(Qt.DisplayRole) == 'test_ok'
+    assert model.index(0, 1).data(Qt.ToolTipRole) == 'test_foo.test_ok'
+    assert model.index(0, 2).data(Qt.DisplayRole) == ''
+    assert model.index(1, 0).data(Qt.DisplayRole) == 'failure'
+    assert model.index(1, 1).data(Qt.DisplayRole) == 'test_fail'
+    assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.test_fail'
 
 
 def test_run_tests_using_unittest_and_display_results(qtbot, tmpdir,
@@ -116,15 +146,13 @@ def test_run_tests_using_unittest_and_display_results(qtbot, tmpdir,
         widget.run_tests(config)
 
     MockQMessageBox.assert_not_called()
-    dt = widget.datatree
-    assert dt.topLevelItemCount() == 2
-    assert dt.topLevelItem(0).data(0, Qt.DisplayRole) == 'FAIL'
-    assert dt.topLevelItem(0).data(1, Qt.DisplayRole) == 'test_fail'
-    assert (dt.topLevelItem(0).data(1, Qt.ToolTipRole) ==
-            'test_foo.MyTest.test_fail')
-    assert dt.topLevelItem(0).data(2, Qt.DisplayRole) == ''
-    assert dt.topLevelItem(1).data(0, Qt.DisplayRole) == 'ok'
-    assert dt.topLevelItem(1).data(1, Qt.DisplayRole) == 'test_ok'
-    assert (dt.topLevelItem(1).data(1, Qt.ToolTipRole) ==
-            'test_foo.MyTest.test_ok')
-    assert dt.topLevelItem(1).data(2, Qt.DisplayRole) == ''
+    model = widget.testdatamodel
+    assert model.rowCount() == 2
+    assert model.index(0, 0).data(Qt.DisplayRole) == 'FAIL'
+    assert model.index(0, 1).data(Qt.DisplayRole) == 'test_fail'
+    assert model.index(0, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_fail'
+    assert model.index(0, 2).data(Qt.DisplayRole) == ''
+    assert model.index(1, 0).data(Qt.DisplayRole) == 'ok'
+    assert model.index(1, 1).data(Qt.DisplayRole) == 'test_ok'
+    assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_ok'
+    assert model.index(1, 2).data(Qt.DisplayRole) == ''

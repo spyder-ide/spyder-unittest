@@ -8,16 +8,13 @@
 from __future__ import with_statement
 
 # Standard library imports
-from collections import Counter
 import os.path as osp
 import sys
 
 # Third party imports
-from qtpy.QtCore import Qt, Signal
-from qtpy.QtGui import QBrush, QColor, QFont
+from qtpy.QtCore import Signal
 from qtpy.QtWidgets import (QHBoxLayout, QLabel, QMenu, QMessageBox,
-                            QToolButton, QTreeWidget, QTreeWidgetItem,
-                            QVBoxLayout, QWidget)
+                            QToolButton, QVBoxLayout, QWidget)
 from spyder.config.base import get_conf_path, get_translation
 from spyder.utils import icon_manager as ima
 from spyder.utils.qthelpers import create_action, create_toolbutton
@@ -27,9 +24,10 @@ from spyder.widgets.variableexplorer.texteditor import TextEditor
 from spyder_unittest.backend.frameworkregistry import FrameworkRegistry
 from spyder_unittest.backend.noserunner import NoseRunner
 from spyder_unittest.backend.pytestrunner import PyTestRunner
-from spyder_unittest.backend.runnerbase import Category
+from spyder_unittest.backend.runnerbase import Category, TestResult
 from spyder_unittest.backend.unittestrunner import UnittestRunner
 from spyder_unittest.widgets.configdialog import Config, ask_for_config
+from spyder_unittest.widgets.datatree import TestDataModel, TestDataView
 
 # This is needed for testing this module as a stand alone script
 try:
@@ -38,23 +36,8 @@ except KeyError as error:
     import gettext
     _ = gettext.gettext
 
-COL_POS = 0  # Position is not displayed but set as Qt.UserRole
-
-COLORS = {
-    Category.OK: QBrush(QColor("#C1FFBA")),
-    Category.FAIL: QBrush(QColor("#FF0000")),
-    Category.SKIP: QBrush(QColor("#C5C5C5"))
-}
-
 # Supported testing framework
 FRAMEWORKS = {NoseRunner, PyTestRunner, UnittestRunner}
-
-
-def is_unittesting_installed():
-    """Check if the program and the library for line_profiler is installed."""
-    # return (programs.is_module_installed('line_profiler')
-    # and programs.find_program('kernprof.py') is not None)
-    return True
 
 
 class UnitTestWidget(QWidget):
@@ -98,7 +81,10 @@ class UnitTestWidget(QWidget):
         self.default_wdir = None
         self.testrunner = None
         self.output = None
-        self.datatree = UnitTestDataTree(self)
+        self.testdataview = TestDataView(self)
+        self.testdatamodel = TestDataModel(self)
+        self.testdataview.setModel(self.testdatamodel)
+        self.testdatamodel.sig_summary.connect(self.set_status_label)
 
         self.framework_registry = FrameworkRegistry()
         for runner in FRAMEWORKS:
@@ -132,15 +118,8 @@ class UnitTestWidget(QWidget):
 
         layout = QVBoxLayout()
         layout.addLayout(hlayout)
-        layout.addWidget(self.datatree)
+        layout.addWidget(self.testdataview)
         self.setLayout(layout)
-
-        if not is_unittesting_installed():
-            for widget in (self.datatree, self.log_action, self.start_button,
-                           self.collapse_action, self.expand_action):
-                widget.setDisabled(True)
-        else:
-            pass  # self.show_data()
 
     @property
     def config(self):
@@ -174,12 +153,12 @@ class UnitTestWidget(QWidget):
             self,
             text=_('Collapse all'),
             icon=ima.icon('collapse'),
-            triggered=self.datatree.collapseAll())
+            triggered=self.testdataview.collapseAll)
         self.expand_action = create_action(
             self,
             text=_('Expand all'),
             icon=ima.icon('expand'),
-            triggered=self.datatree.expandAll())
+            triggered=self.testdataview.expandAll)
         return [
             self.config_action, self.log_action, self.collapse_action,
             self.expand_action
@@ -246,11 +225,15 @@ class UnitTestWidget(QWidget):
         if config is None:
             config = self.config
         pythonpath = self.pythonpath
-        self.datatree.clear()
+        self.testdatamodel.testresults = []
+        self.testdetails = []
         tempfilename = get_conf_path('unittest.results')
         self.testrunner = self.framework_registry.create_runner(
             config.framework, self, tempfilename)
         self.testrunner.sig_finished.connect(self.process_finished)
+        self.testrunner.sig_collected.connect(self.tests_collected)
+        self.testrunner.sig_starttest.connect(self.tests_started)
+        self.testrunner.sig_testresult.connect(self.tests_yield_result)
 
         try:
             self.testrunner.start(config, pythonpath)
@@ -296,87 +279,50 @@ class UnitTestWidget(QWidget):
         Called when unit test process finished.
 
         This function collects and shows the test results and output.
+
+        Parameters
+        ----------
+        testresults : list of TestResult or None
+            `None` indicates all test results have already been transmitted.
+        output : str
         """
         self.output = output
         self.set_running_state(False)
         self.testrunner = None
         self.log_action.setEnabled(bool(output))
-        self.datatree.testresults = testresults
-        msg = self.datatree.show_tree()
-        self.status_label.setText(msg)
+        if testresults:
+            self.testdatamodel.testresults = testresults
+            msg = self.testdatamodel.summary()
+            self.status_label.setText(msg)
         self.sig_finished.emit()
 
+    def tests_collected(self, testdetails):
+        """Called when tests are collected."""
+        testresults = [TestResult(Category.PENDING, _('pending'), detail.name,
+                                  detail.module)
+                       for detail in testdetails]
+        self.testdatamodel.add_testresults(testresults)
 
-class UnitTestDataTree(QTreeWidget):
-    """Convenience tree widget to store and view unit testing data."""
+    def tests_started(self, testdetails):
+        """Called when tests are about to be run.s are collected."""
+        testresults = [TestResult(Category.PENDING, _('pending'), detail.name,
+                                  detail.module, message=_('running'))
+                       for detail in testdetails]
+        self.testdatamodel.update_testresults(testresults)
 
-    def __init__(self, parent=None):
-        """Convenience tree widget to store and view unit testing data."""
-        QTreeWidget.__init__(self, parent)
-        self.header_list = [
-            _('Status'), _('Name'), _('Message'), _('Time (ms)')
-        ]
-        self.testresults = []
-        self.header().setDefaultAlignment(Qt.AlignCenter)
-        self.setColumnCount(len(self.header_list))
-        self.setHeaderLabels(self.header_list)
-        self.clear()
-        self.setItemsExpandable(True)
-        self.setSortingEnabled(False)
+    def tests_yield_result(self, testresults):
+        """Called when test results are received."""
+        self.testdatamodel.update_testresults(testresults)
 
-    def show_tree(self):
-        """Populate the tree with unit testing data and display it."""
-        self.clear()  # Clear before re-populating
-        msg = self.populate_tree()
-        for col in range(self.columnCount() - 1):
-            self.resizeColumnToContents(col)
-        return msg
+    def set_status_label(self, msg):
+        """
+        Set status label to the specified message.
 
-    def populate_tree(self):
-        """Create each item (and associated data) in the tree."""
-        if not len(self.testresults):
-            return _('No results to show.')
-
-        try:
-            monospace_font = self.window().editor.get_plugin_font()
-        except AttributeError:  # If run standalone for testing
-            monospace_font = QFont("Courier New")
-            monospace_font.setPointSize(10)
-
-        for testresult in self.testresults:
-            testcase_item = QTreeWidgetItem(self)
-            testcase_item.setData(0, Qt.DisplayRole, testresult.status)
-            testcase_item.setData(1, Qt.DisplayRole, testresult.name)
-            fullname = '{0}.{1}'.format(testresult.module, testresult.name)
-            testcase_item.setToolTip(1, fullname)
-            testcase_item.setData(2, Qt.DisplayRole, testresult.message)
-            testcase_item.setData(3, Qt.DisplayRole, testresult.time * 1e3)
-            color = COLORS[testresult.category]
-            for col in range(self.columnCount()):
-                testcase_item.setBackground(col, color)
-            if testresult.extra_text:
-                for line in testresult.extra_text.rstrip().split("\n"):
-                    error_content_item = QTreeWidgetItem(testcase_item)
-                    error_content_item.setData(0, Qt.DisplayRole, line)
-                    error_content_item.setFirstColumnSpanned(True)
-                    error_content_item.setFont(0, monospace_font)
-
-        counts = Counter(res.category for res in self.testresults)
-        if counts[Category.FAIL] == 1:
-            test_or_tests = _('test')
-        else:
-            test_or_tests = _('tests')
-        failed_txt = '{} {} failed'.format(counts[Category.FAIL],
-                                           test_or_tests)
-        passed_txt = '{} passed'.format(counts[Category.OK])
-        other_txt = '{} other'.format(counts[Category.SKIP])
-        msg = '<b>{}, {}, {}</b>'.format(failed_txt, passed_txt, other_txt)
-        return msg
-
-    def item_activated(self, item):
-        """Called if user clicks on item."""
-        filename, line_no = item.data(COL_POS, Qt.UserRole)
-        self.parent().edit_goto.emit(filename, line_no, '')
+        Arguments
+        ---------
+        msg: str
+        """
+        self.status_label.setText('<b>{}</b>'.format(msg))
 
 
 def test():

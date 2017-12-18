@@ -22,7 +22,7 @@ add_init = true
 # -----------------------------------------------------------------------------
 [pep8]
 exclude = */tests/*
-ignore = E126,
+ignore = E126,W503
 max-line-length = 79
 
 # -----------------------------------------------------------------------------
@@ -40,7 +40,7 @@ match = .*/(?!test)[^/]*.py
 # -----------------------------------------------------------------------------
 [flake8]
 exclude = */tests/*
-ignore = E126,
+ignore = E126,W503
 max-line-length = 79
 max-complexity = 64
 
@@ -74,6 +74,7 @@ sections = FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER
 based_on_style = pep8
 column_limit = 79
 spaces_before_comment = 2
+split_before_named_assigned = False
 
 # -----------------------------------------------------------------------------
 # autopep8

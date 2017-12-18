@@ -16,8 +16,7 @@ from spyder.widgets.projects.config import ProjectConfig
 
 # Local imports
 from spyder_unittest.widgets.configdialog import Config
-from spyder_unittest.widgets.unittestgui import (UnitTestWidget,
-                                                 is_unittesting_installed)
+from spyder_unittest.widgets.unittestgui import UnitTestWidget
 
 _ = get_translation("unittest", dirname="spyder_unittest")
 
@@ -162,7 +161,7 @@ class UnitTestPlugin(SpyderPluginWidget):
 
     def get_focus_widget(self):
         """Return the widget to give focus to this dockwidget when raised."""
-        return self.unittestwidget.datatree
+        return self.unittestwidget.testdataview
 
     def get_plugin_actions(self):
         """Return a list of actions related to plugin."""
@@ -183,7 +182,6 @@ class UnitTestPlugin(SpyderPluginWidget):
             icon=ima.icon('profiler'),
             shortcut="Shift+Alt+F11",
             triggered=self.maybe_configure_and_start)
-        unittesting_act.setEnabled(is_unittesting_installed())
 
         self.main.run_menu_actions += [unittesting_act]
         self.main.editor.pythonfile_dependent_actions += [unittesting_act]

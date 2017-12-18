@@ -8,10 +8,6 @@
 # Standard library imports
 import re
 
-# Third party imports
-from qtpy.QtCore import QTextCodec
-from spyder.py3compat import to_text_string
-
 # Local imports
 from spyder_unittest.backend.runnerbase import Category, RunnerBase, TestResult
 
@@ -24,7 +20,7 @@ class UnittestRunner(RunnerBase):
 
     def create_argument_list(self):
         """Create argument list for testing process."""
-        return ['discover', '-v']
+        return ['-m', self.module, 'discover', '-v']
 
     def finished(self):
         """
@@ -32,10 +28,8 @@ class UnittestRunner(RunnerBase):
 
         This function reads the results and emits `sig_finished`.
         """
-        qbytearray = self.process.readAllStandardOutput()
-        locale_codec = QTextCodec.codecForLocale()
-        output = to_text_string(locale_codec.toUnicode(qbytearray.data()))
-        testresults = self.load_data(output)  # overrides base class method
+        output = self.read_all_process_output()
+        testresults = self.load_data(output)
         self.sig_finished.emit(testresults, output)
 
     def load_data(self, output):
@@ -88,8 +82,7 @@ class UnittestRunner(RunnerBase):
                 continue
 
             if test_index is not None:
-                text = res[test_index].extra_text + lines[line_index] + '\n'
-                res[test_index] = res[test_index]._replace(extra_text=text)
+                res[test_index].extra_text.append(lines[line_index] + '\n')
                 line_index += 1
 
         return res
