@@ -120,8 +120,8 @@ class UnitTestPlugin(SpyderPluginWidget):
             project.CONF[self.CONF_SECTION] = project_conf
 
         new_config = Config(
-            framework=project_conf[self.CONF_SECTION]['framework'],
-            wdir=project_conf[self.CONF_SECTION]['wdir'])
+            framework=project_conf.get(self.CONF_SECTION, 'framework'),
+            wdir=project_conf.get(self.CONF_SECTION, 'wdir'))
         if not self.unittestwidget.config_is_valid(new_config):
             new_config = None
         self.unittestwidget.set_config_without_emit(new_config)
@@ -136,8 +136,8 @@ class UnitTestPlugin(SpyderPluginWidget):
         if not project:
             return
         project_conf = project.CONF[self.CONF_SECTION]
-        project_conf[self.CONF_SECTION]['framework'] = test_config.framework
-        project_conf[self.CONF_SECTION]['wdir'] = test_config.wdir
+        project_conf.set(self.CONF_SECTION, 'framework', test_config.framework)
+        project_conf.set(self.CONF_SECTION, 'wdir', test_config.wdir)
 
 # ----- SpyderPluginWidget API --------------------------------------------
 
