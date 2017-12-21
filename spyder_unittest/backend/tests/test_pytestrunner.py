@@ -109,13 +109,13 @@ def test_pytestrunner_process_output_with_collected(qtbot):
 
 def test_pytestrunner_process_output_with_starttest(qtbot):
     runner = PyTestRunner(None)
-    output = [{'event': 'starttest', 'nodeid': 'spam.py::ham'},
-              {'event': 'starttest', 'nodeid': 'eggs.py::bacon'}]
+    output = [{'event': 'starttest', 'nodeid': 'ham/spam.py::ham'},
+              {'event': 'starttest', 'nodeid': 'ham/eggs.py::bacon'}]
     with qtbot.waitSignal(runner.sig_starttest) as blocker:
         runner.process_output(output)
     expected = [
-        TestDetails(name='ham', module='spam'),
-        TestDetails(name='bacon', module='eggs')
+        TestDetails(name='ham', module='ham.spam'),
+        TestDetails(name='bacon', module='ham.eggs')
     ]
     assert blocker.args == [expected]
 
