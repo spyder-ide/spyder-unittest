@@ -62,7 +62,7 @@ def test_jsonstreamreader_with_partial_frames():
     assert reader.consume(txt[-2:]) == [2]
 
 
-def test_isonsteamreader_writer_integration():
+def test_jsonsteamreader_writer_integration():
     stream = StringIO()
     writer = JSONStreamWriter(stream)
     reader = JSONStreamReader()
