@@ -63,7 +63,8 @@ class Abbreviator:
                     self.dic[other][0] = other
                     len_abbrev += 1
                 else:
-                    self.dic[other][0] = other[:len_abbrev]
+                    if len(self.dic[other][0]) < len_abbrev:
+                        self.dic[other][0] = other[:len_abbrev]
         else:
             self.dic[start] = [start[:len_abbrev], Abbreviator()]
         if rest:

@@ -34,6 +34,12 @@ def test_abbreviator_with_second_word_prefix_of_first():
     assert abb.abbreviate('hameggs') == 'hame'
     assert abb.abbreviate('ham') == 'ham'
 
+def test_abbreviator_with_three_words():
+    abb = Abbreviator(['hamegg', 'hameggs', 'hall'])
+    assert abb.abbreviate('hamegg') == 'hamegg'
+    assert abb.abbreviate('hameggs') == 'hameggs'
+    assert abb.abbreviate('hall') == 'hal'
+
 def test_abbreviator_with_multilevel():
     abb = Abbreviator(['ham.eggs', 'ham.spam', 'eggs.ham', 'eggs.hamspam'])
     assert abb.abbreviate('ham.eggs') == 'h.e'
