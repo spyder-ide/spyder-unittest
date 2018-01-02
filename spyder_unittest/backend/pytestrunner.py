@@ -148,5 +148,6 @@ def logreport_to_testresult(report):
             extra_text += '----- {} -----\n'.format(heading)
             extra_text += text
     result = TestResult(cat, status, testname, message=message,
-                        time=duration, extra_text=extra_text)
+                        time=duration, extra_text=extra_text,
+                        filename=report['filename'], lineno=report['lineno'])
     return result
