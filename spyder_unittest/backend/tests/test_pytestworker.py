@@ -7,7 +7,6 @@
 
 # Standard library imports
 import os
-import sys
 
 # Third party imports
 import pytest
@@ -31,7 +30,27 @@ def plugin():
     mock_writer = create_autospec(JSONStreamWriter)
     return SpyderPlugin(mock_writer)
 
-def test_spyderplugin_test_collected(plugin):
+def test_spyderplugin_test_collectreport_with_success(plugin):
+    report = EmptyClass()
+    report.outcome = 'success'
+    report.nodeid = 'foo.py::bar'
+    plugin.pytest_collectreport(report)
+    plugin.writer.write.assert_not_called()
+
+def test_spyderplugin_test_collectreport_with_failure(plugin):
+    report = EmptyClass()
+    report.outcome = 'failed'
+    report.nodeid = 'foo.py::bar'
+    report.longrepr = EmptyClass()
+    report.longrepr.longrepr = 'message'
+    plugin.pytest_collectreport(report)
+    plugin.writer.write.assert_called_once_with({
+        'event': 'collecterror',
+        'nodeid': 'foo.py::bar',
+        'longrepr': 'message'
+    })
+
+def test_spyderplugin_test_itemcollected(plugin):
     testitem = EmptyClass()
     testitem.name = 'foo'
     testitem.parent = EmptyClass()
@@ -43,7 +62,6 @@ def test_spyderplugin_test_collected(plugin):
         'module': 'bar.py'
     })
 
-
 def standard_logreport():
     report = EmptyClass()
     report.when = 'call'
@@ -53,7 +71,6 @@ def standard_logreport():
     report.sections = []
     report.longrepr = ''
     return report
-
 
 def test_spyderplugin_runtest_logreport(plugin):
     report = standard_logreport()
@@ -66,7 +83,6 @@ def test_spyderplugin_runtest_logreport(plugin):
         'duration': 42,
         'sections': []
     })
-
 
 def test_spyderplugin_runtest_logreport_passes_longrepr(plugin):
     report = standard_logreport()
@@ -82,7 +98,6 @@ def test_spyderplugin_runtest_logreport_passes_longrepr(plugin):
         'longrepr': '15'
     })
 
-
 def test_spyderplugin_runtest_logreport_with_longrepr_tuple(plugin):
     report = standard_logreport()
     report.longrepr = ('ham', 'spam')
@@ -97,7 +112,6 @@ def test_spyderplugin_runtest_logreport_with_longrepr_tuple(plugin):
         'longrepr': ('ham', 'spam')
     })
 
-
 def test_spyderplugin_runtest_logreport_passes_wasxfail(plugin):
     report = standard_logreport()
     report.wasxfail = ''
@@ -111,7 +125,6 @@ def test_spyderplugin_runtest_logreport_passes_wasxfail(plugin):
         'sections': [],
         'wasxfail': ''
     })
-
 
 def test_spyderplugin_runtest_logreport_passes_message(plugin):
     class MockLongrepr:
@@ -142,7 +155,6 @@ def test_spyderplugin_runtest_logreport_ignores_teardown_passed(plugin):
     plugin.pytest_runtest_logreport(report)
     plugin.writer.write.assert_not_called()
 
-
 def test_main_captures_stdout_and_stderr(monkeypatch):
     def mock_main(args, plugins):
         print('output')
@@ -158,7 +170,6 @@ def test_main_captures_stdout_and_stderr(monkeypatch):
     main(None)
     mock_writer.write.assert_called_once_with({
             'event': 'finished', 'stdout': 'output\n'})
-
 
 def test_pytestworker_integration(monkeypatch, tmpdir):
     os.chdir(tmpdir.strpath)
