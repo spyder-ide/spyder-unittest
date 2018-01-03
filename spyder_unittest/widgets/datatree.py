@@ -12,8 +12,9 @@ from collections import Counter
 from qtpy import PYQT4
 from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal
 from qtpy.QtGui import QBrush, QColor, QFont
-from qtpy.QtWidgets import QTreeView
+from qtpy.QtWidgets import QMenu, QTreeView
 from spyder.config.base import get_translation
+from spyder.utils.qthelpers import create_action
 
 # Local imports
 from spyder_unittest.backend.abbreviator import Abbreviator
@@ -80,6 +81,14 @@ class TestDataView(QTreeView):
         while bottomRight.parent().isValid():
             bottomRight = bottomRight.parent()
         self.spanFirstColumn(topLeft.row(), bottomRight.row())
+
+    def contextMenuEvent(self, event):
+        """Called when user requests a context menu."""
+        contextMenu = QMenu(self)
+        menuItem = create_action(self, _('Do nothing'),
+                                 triggered=lambda: None)
+        contextMenu.addAction(menuItem)
+        contextMenu.exec_(event.globalPos())
 
     def resizeColumns(self):
         """Resize column to fit their contents."""
