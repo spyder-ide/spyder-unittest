@@ -84,9 +84,21 @@ class TestDataView(QTreeView):
 
     def contextMenuEvent(self, event):
         """Called when user requests a context menu."""
+        index = self.indexAt(event.pos())
+        if not index.isValid():  # do nothing if no item under mouse position
+            return
+        while index.parent().isValid():  # find top-level node
+            index = index.parent()
+        index = index.sibling(index.row(), 0)  # go to first column
         contextMenu = QMenu(self)
-        menuItem = create_action(self, _('Do nothing'),
-                                 triggered=lambda: None)
+        if self.isExpanded(index):
+            menuItem = create_action(self, _('Collapse'),
+                                     triggered=lambda: self.collapse(index))
+        else:
+            menuItem = create_action(self, _('Expand'),
+                                     triggered=lambda: self.expand(index))
+            if not self.model().hasChildren(index):
+                menuItem.setEnabled(False)
         contextMenu.addAction(menuItem)
         contextMenu.exec_(event.globalPos())
 
@@ -114,13 +126,6 @@ class TestDataView(QTreeView):
             index = model.index(row, 0)
             for i in range(model.rowCount(index)):
                 self.setFirstColumnSpanned(i, index, True)
-
-    # Not yet implemented ...
-    # def item_activated(self, item):
-    #     """Called if user clicks on item."""
-    #     COL_POS = 0  # Position is not displayed but set as Qt.UserRole
-    #     filename, line_no = item.data(COL_POS, Qt.UserRole)
-    #     self.parent().edit_goto.emit(filename, line_no, '')
 
 
 class TestDataModel(QAbstractItemModel):
