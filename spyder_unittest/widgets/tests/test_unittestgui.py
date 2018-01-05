@@ -14,8 +14,7 @@ from qtpy.QtCore import Qt
 import pytest
 
 # Local imports
-from spyder_unittest.backend.runnerbase import (Category, TestDetails,
-                                                TestResult)
+from spyder_unittest.backend.runnerbase import Category, TestResult
 from spyder_unittest.widgets.configdialog import Config
 from spyder_unittest.widgets.unittestgui import UnitTestWidget
 
@@ -47,7 +46,7 @@ def test_unittestwidget_process_finished_updates_results(qtbot):
     widget.testdatamodel = Mock()
     widget.testdatamodel.summary = lambda: 'message'
     widget.testdatamodel.testresults = []
-    results = [TestResult(Category.OK, 'ok', 'spam', 'hammodule')]
+    results = [TestResult(Category.OK, 'ok', 'hammodule.spam')]
     widget.process_finished(results, 'output')
     assert widget.testdatamodel.testresults == results
 
@@ -55,7 +54,7 @@ def test_unittestwidget_process_finished_with_results_none(qtbot):
     widget = UnitTestWidget(None)
     widget.testdatamodel = Mock()
     widget.testdatamodel.summary = lambda: 'message'
-    results = [TestResult(Category.OK, 'ok', 'spam', 'hammodule')]
+    results = [TestResult(Category.OK, 'ok', 'hammodule.spam')]
     widget.testdatamodel.testresults = results
     widget.process_finished(None, 'output')
     assert widget.testdatamodel.testresults == results
@@ -63,25 +62,24 @@ def test_unittestwidget_process_finished_with_results_none(qtbot):
 def test_unittestwidget_tests_collected(qtbot):
     widget = UnitTestWidget(None)
     widget.testdatamodel = Mock()
-    details = [TestDetails('spam', 'hammodule'),
-               TestDetails('eggs', 'hammodule') ]
+    details = ['hammodule.spam', 'hammodule.eggs']
     widget.tests_collected(details)
-    results = [TestResult(Category.PENDING, 'pending', 'spam', 'hammodule'),
-               TestResult(Category.PENDING, 'pending', 'eggs', 'hammodule')]
+    results = [TestResult(Category.PENDING, 'pending', 'hammodule.spam'),
+               TestResult(Category.PENDING, 'pending', 'hammodule.eggs')]
     widget.testdatamodel.add_testresults.assert_called_once_with(results)
 
 def test_unittestwidget_tests_started(qtbot):
     widget = UnitTestWidget(None)
     widget.testdatamodel = Mock()
-    details = [TestDetails('spam', 'hammodule')]
-    results = [TestResult(Category.PENDING, 'pending', 'spam', 'hammodule', 'running')]
+    details = ['hammodule.spam']
+    results = [TestResult(Category.PENDING, 'pending', 'hammodule.spam', 'running')]
     widget.tests_started(details)
     widget.testdatamodel.update_testresults.assert_called_once_with(results)
 
 def test_unittestwidget_tests_yield_results(qtbot):
     widget = UnitTestWidget(None)
     widget.testdatamodel = Mock()
-    results = [TestResult(Category.OK, 'ok', 'spam', 'hammodule')]
+    results = [TestResult(Category.OK, 'ok', 'hammodule.spam')]
     widget.tests_yield_result(results)
     widget.testdatamodel.update_testresults.assert_called_once_with(results)
 

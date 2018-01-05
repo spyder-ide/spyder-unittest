@@ -55,14 +55,9 @@ class UnittestRunner(RunnerBase):
                     cat = Category.FAIL
                 else:
                     cat = Category.SKIP
-                tr = TestResult(
-                    category=cat,
-                    status=data[2],
-                    name=data[0],
-                    module=data[1],
-                    message=data[3],
-                    time=0,
-                    extra_text='')
+                name = '{}.{}'.format(data[1], data[0])
+                tr = TestResult(category=cat, status=data[2], name=name,
+                                message=data[3], time=0, extra_text='')
                 res.append(tr)
                 line_index += 1
                 test_index = -1
@@ -73,7 +68,7 @@ class UnittestRunner(RunnerBase):
                 line_index = data[0]
                 test_index = next(
                     i for i, tr in enumerate(res)
-                    if tr.name == data[1] and tr.module == data[2])
+                    if tr.name == '{}.{}'.format(data[2], data[1]))
 
             data = self.try_parse_footer(lines, line_index)
             if data:

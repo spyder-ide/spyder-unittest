@@ -14,8 +14,7 @@ from spyder.utils.misc import get_python_executable
 
 # Local imports
 from spyder_unittest.backend.pytestrunner import PyTestRunner
-from spyder_unittest.backend.runnerbase import (Category, TestDetails,
-                                                TestResult)
+from spyder_unittest.backend.runnerbase import Category, TestResult
 from spyder_unittest.widgets.configdialog import Config
 
 try:
@@ -100,10 +99,7 @@ def test_pytestrunner_process_output_with_collected(qtbot):
     }]
     with qtbot.waitSignal(runner.sig_collected) as blocker:
         runner.process_output(output)
-    expected = [
-        TestDetails(name='ham', module='spam'),
-        TestDetails(name='bacon', module='eggs')
-    ]
+    expected = ['spam.ham', 'eggs.bacon']
     assert blocker.args == [expected]
 
 
@@ -113,10 +109,7 @@ def test_pytestrunner_process_output_with_starttest(qtbot):
               {'event': 'starttest', 'nodeid': 'ham/eggs.py::bacon'}]
     with qtbot.waitSignal(runner.sig_starttest) as blocker:
         runner.process_output(output)
-    expected = [
-        TestDetails(name='ham', module='ham.spam'),
-        TestDetails(name='bacon', module='ham.eggs')
-    ]
+    expected = ['ham.spam.ham', 'ham.eggs.bacon']
     assert blocker.args == [expected]
 
 
@@ -131,7 +124,7 @@ def test_pytestrunner_process_output_with_logreport_passed(qtbot):
     }]
     with qtbot.waitSignal(runner.sig_testresult) as blocker:
         runner.process_output(output)
-    expected = [TestResult(Category.OK, 'ok', 'bar', 'foo', time=42)]
+    expected = [TestResult(Category.OK, 'ok', 'foo.bar', time=42)]
     assert blocker.args == [expected]
 
 
@@ -144,7 +137,7 @@ def test_pytestrunner_logreport_to_testresult_passed():
         'nodeid': 'foo.py::bar',
         'duration': 42
     }
-    expected = TestResult(Category.OK, 'ok', 'bar', 'foo', time=42)
+    expected = TestResult(Category.OK, 'ok', 'foo.bar', time=42)
     assert runner.logreport_to_testresult(report) == expected
 
 
@@ -159,7 +152,7 @@ def test_pytestrunner_logreport_to_testresult_failed():
         'message': 'msg',
         'longrepr': 'exception text'
     }
-    expected = TestResult(Category.FAIL, 'failure', 'bar', 'foo',
+    expected = TestResult(Category.FAIL, 'failure', 'foo.bar',
                           message='msg', time=42, extra_text='exception text')
     assert runner.logreport_to_testresult(report) == expected
 
@@ -174,7 +167,7 @@ def test_pytestrunner_logreport_to_testresult_skipped():
         'duration': 42,
         'longrepr': ['file', 24, 'skipmsg']
     }
-    expected = TestResult(Category.SKIP, 'skipped', 'bar', 'foo',
+    expected = TestResult(Category.SKIP, 'skipped', 'foo.bar',
                           time=42, extra_text='skipmsg')
     assert runner.logreport_to_testresult(report) == expected
 
@@ -191,7 +184,7 @@ def test_pytestrunner_logreport_to_testresult_xfail():
         'longrepr': 'exception text',
         'wasxfail': ''
     }
-    expected = TestResult(Category.SKIP, 'skipped', 'bar', 'foo',
+    expected = TestResult(Category.SKIP, 'skipped', 'foo.bar',
                           message='msg', time=42, extra_text='exception text')
     assert runner.logreport_to_testresult(report) == expected
 
@@ -206,7 +199,7 @@ def test_pytestrunner_logreport_to_testresult_xpass():
         'duration': 42,
         'wasxfail': ''
     }
-    expected = TestResult(Category.OK, 'ok', 'bar', 'foo', time=42)
+    expected = TestResult(Category.OK, 'ok', 'foo.bar', time=42)
     assert runner.logreport_to_testresult(report) == expected
 
 
@@ -223,6 +216,6 @@ def test_pytestrunner_logreport_to_testresult_with_output():
     }
     txt = ('----- Captured stdout call -----\nham\n'
            '----- Captured stderr call -----\nspam\n')
-    expected = TestResult(Category.OK, 'ok', 'bar', 'foo', time=42,
+    expected = TestResult(Category.OK, 'ok', 'foo.bar', time=42,
                           extra_text=txt)
     assert runner.logreport_to_testresult(report) == expected

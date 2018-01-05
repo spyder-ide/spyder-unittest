@@ -10,8 +10,7 @@ import os
 
 # Local imports
 from spyder_unittest.backend.jsonstream import JSONStreamReader
-from spyder_unittest.backend.runnerbase import (Category, RunnerBase,
-                                                TestDetails, TestResult)
+from spyder_unittest.backend.runnerbase import Category, RunnerBase, TestResult
 
 
 class PyTestRunner(RunnerBase):
@@ -59,10 +58,10 @@ class PyTestRunner(RunnerBase):
         for result_item in output:
             if result_item['event'] == 'collected':
                 collected_list.append(
-                        self.logreport_collected_to_testdetails(result_item))
+                        self.logreport_collected_to_str(result_item))
             elif result_item['event'] == 'starttest':
                 starttest_list.append(
-                        self.logreport_starttest_to_testdetails(result_item))
+                        self.logreport_starttest_to_str(result_item))
             elif result_item['event'] == 'logreport':
                 result_list.append(self.logreport_to_testresult(result_item))
             elif result_item['event'] == 'finished':
@@ -86,16 +85,16 @@ class PyTestRunner(RunnerBase):
             name = name[:-3]
         return name.replace('/', '.')
 
-    def logreport_collected_to_testdetails(self, report):
-        """Convert a 'collected' logreport to a TestDetails."""
+    def logreport_collected_to_str(self, report):
+        """Convert a 'collected' logreport to a str."""
         module = self.normalize_module_name(report['module'])
-        return TestDetails(report['name'], module)
+        return '{}.{}'.format(module, report['name'])
 
-    def logreport_starttest_to_testdetails(self, report):
-        """Convert a 'starttest' logreport to a TestDetails."""
+    def logreport_starttest_to_str(self, report):
+        """Convert a 'starttest' logreport to a str."""
         module, name = report['nodeid'].split('::', 1)
         module = self.normalize_module_name(module)
-        return TestDetails(name, module)
+        return '{}.{}'.format(module, name)
 
     def logreport_to_testresult(self, report):
         """Convert a logreport sent by test process to a TestResult."""
@@ -110,6 +109,7 @@ class PyTestRunner(RunnerBase):
             status = report['outcome']
         module, name = report['nodeid'].split('::', 1)
         module = self.normalize_module_name(module)
+        testname = '{}.{}'.format(module, name)
         duration = report['duration']
         message = report['message'] if 'message' in report else ''
         if 'longrepr' not in report:
@@ -122,7 +122,7 @@ class PyTestRunner(RunnerBase):
             for (heading, text) in report['sections']:
                 extra_text += '----- {} -----\n'.format(heading)
                 extra_text += text
-        result = TestResult(cat, status, name, module, message=message,
+        result = TestResult(cat, status, testname, message=message,
                             time=duration, extra_text=extra_text)
         return result
 

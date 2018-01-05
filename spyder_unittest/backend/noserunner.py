@@ -60,8 +60,8 @@ class NoseRunner(RunnerBase):
         for testcase in data:
             category = Category.OK
             status = 'ok'
-            module = testcase.get('classname')
-            name = testcase.get('name')
+            name = '{}.{}'.format(testcase.get('classname'),
+                                  testcase.get('name'))
             message = ''
             time = float(testcase.get('time'))
             extras = []
@@ -92,7 +92,6 @@ class NoseRunner(RunnerBase):
 
             extra_text = '\n\n'.join(extras)
             testresults.append(
-                TestResult(category, status, name, module, message, time,
-                           extra_text))
+                TestResult(category, status, name, message, time, extra_text))
 
         return testresults

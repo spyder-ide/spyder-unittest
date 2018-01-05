@@ -296,18 +296,17 @@ class UnitTestWidget(QWidget):
             self.status_label.setText(msg)
         self.sig_finished.emit()
 
-    def tests_collected(self, testdetails):
+    def tests_collected(self, testnames):
         """Called when tests are collected."""
-        testresults = [TestResult(Category.PENDING, _('pending'), detail.name,
-                                  detail.module)
-                       for detail in testdetails]
+        testresults = [TestResult(Category.PENDING, _('pending'), name)
+                       for name in testnames]
         self.testdatamodel.add_testresults(testresults)
 
-    def tests_started(self, testdetails):
+    def tests_started(self, testnames):
         """Called when tests are about to be run.s are collected."""
-        testresults = [TestResult(Category.PENDING, _('pending'), detail.name,
-                                  detail.module, message=_('running'))
-                       for detail in testdetails]
+        testresults = [TestResult(Category.PENDING, _('pending'), name,
+                                  message=_('running'))
+                       for name in testnames]
         self.testdatamodel.update_testresults(testresults)
 
     def tests_yield_result(self, testresults):

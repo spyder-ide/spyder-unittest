@@ -153,7 +153,7 @@ class TestDataModel(QAbstractItemModel):
     def testresults(self, new_value):
         """Setter for test results."""
         self.beginResetModel()
-        self.abbreviator = Abbreviator(res.module for res in new_value)
+        self.abbreviator = Abbreviator(res.name for res in new_value)
         self._testresults = new_value
         self.endResetModel()
         self.emit_summary()
@@ -169,7 +169,7 @@ class TestDataModel(QAbstractItemModel):
         firstRow = len(self.testresults)
         lastRow = firstRow + len(new_tests) - 1
         for test in new_tests:
-            self.abbreviator.add(test.module)
+            self.abbreviator.add(test.name)
         self.beginInsertRows(QModelIndex(), firstRow, lastRow)
         self.testresults.extend(new_tests)
         self.endInsertRows()
@@ -190,8 +190,7 @@ class TestDataModel(QAbstractItemModel):
         idx_min = idx_max = None
         for new_result in new_results:
             for (idx, old_result) in enumerate(self.testresults):
-                if (old_result.name == new_result.name
-                        and old_result.module == new_result.module):
+                if old_result.name == new_result.name:
                     self.testresults[idx] = new_result
                     if idx_min is None:
                         idx_min = idx_max = idx
@@ -227,6 +226,7 @@ class TestDataModel(QAbstractItemModel):
         If `role` is `DisplayRole`, then return string to display.
         If `role` is `TooltipRole`, then return string for tool tip.
         If `role` is `FontRole`, then return monospace font for level-2 items.
+        If `role` is `BackgroundRole`, then return background color
         """
         if not index.isValid():
             return None
@@ -239,10 +239,7 @@ class TestDataModel(QAbstractItemModel):
             elif column == STATUS_COLUMN:
                 return self.testresults[row].status
             elif column == NAME_COLUMN:
-                module_abbrev = self.abbreviator.abbreviate(
-                        self.testresults[row].module)
-                return '{0}.{1}'.format(module_abbrev,
-                                        self.testresults[row].name)
+                return self.abbreviator.abbreviate(self.testresults[row].name)
             elif column == MESSAGE_COLUMN:
                 return self.testresults[row].message
             elif column == TIME_COLUMN:
@@ -250,8 +247,7 @@ class TestDataModel(QAbstractItemModel):
                 return str(time * 1e3) if time else ''
         elif role == Qt.ToolTipRole:
             if id == TOPLEVEL_ID and column == NAME_COLUMN:
-                return '{0}.{1}'.format(self.testresults[row].module,
-                                        self.testresults[row].name)
+                return self.testresults[row].name
         elif role == Qt.FontRole:
             if id != TOPLEVEL_ID:
                 return self.monospace_font
