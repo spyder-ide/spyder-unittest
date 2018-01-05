@@ -232,6 +232,7 @@ class UnitTestWidget(QWidget):
             config.framework, self, tempfilename)
         self.testrunner.sig_finished.connect(self.process_finished)
         self.testrunner.sig_collected.connect(self.tests_collected)
+        self.testrunner.sig_collecterror.connect(self.tests_collect_error)
         self.testrunner.sig_starttest.connect(self.tests_started)
         self.testrunner.sig_testresult.connect(self.tests_yield_result)
 
@@ -303,11 +304,19 @@ class UnitTestWidget(QWidget):
         self.testdatamodel.add_testresults(testresults)
 
     def tests_started(self, testnames):
-        """Called when tests are about to be run.s are collected."""
+        """Called when tests are about to be run."""
         testresults = [TestResult(Category.PENDING, _('pending'), name,
                                   message=_('running'))
                        for name in testnames]
         self.testdatamodel.update_testresults(testresults)
+
+    def tests_collect_error(self, testnames_plus_msg):
+        """Called when errors are encountered during collection."""
+        testresults = [TestResult(Category.FAIL, _('failure'), name,
+                                  message=_('collection error'),
+                                  extra_text=msg)
+                       for name, msg in testnames_plus_msg]
+        self.testdatamodel.add_testresults(testresults)
 
     def tests_yield_result(self, testresults):
         """Called when test results are received."""

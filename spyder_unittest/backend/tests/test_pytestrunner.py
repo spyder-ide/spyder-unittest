@@ -26,7 +26,6 @@ except ImportError:
 def test_pytestrunner_is_installed():
     assert PyTestRunner(None).is_installed()
 
-
 def test_pytestrunner_start(monkeypatch):
     MockQProcess = Mock()
     monkeypatch.setattr('spyder_unittest.backend.runnerbase.QProcess',
@@ -71,7 +70,6 @@ def test_pytestrunner_start(monkeypatch):
 
     assert runner.reader is mock_reader
 
-
 def test_pytestrunner_read_output(monkeypatch):
     runner = PyTestRunner(None)
     runner.process = Mock()
@@ -84,7 +82,6 @@ def test_pytestrunner_read_output(monkeypatch):
     runner.read_output()
     assert runner.reader.consume.called_once_with('encoded')
     assert runner.process_output.called_once_with('decoded')
-
 
 def test_pytestrunner_process_output_with_collected(qtbot):
     runner = PyTestRunner(None)
@@ -102,6 +99,17 @@ def test_pytestrunner_process_output_with_collected(qtbot):
     expected = ['spam.ham', 'eggs.bacon']
     assert blocker.args == [expected]
 
+def test_pytestrunner_process_output_with_collecterror(qtbot):
+    runner = PyTestRunner(None)
+    output = [{
+            'event': 'collecterror',
+            'nodeid': 'ham/spam.py',
+            'longrepr': 'msg'
+    }]
+    with qtbot.waitSignal(runner.sig_collecterror) as blocker:
+        runner.process_output(output)
+    expected = [('ham.spam', 'msg')]
+    assert blocker.args == [expected]
 
 def test_pytestrunner_process_output_with_starttest(qtbot):
     runner = PyTestRunner(None)
@@ -111,7 +119,6 @@ def test_pytestrunner_process_output_with_starttest(qtbot):
         runner.process_output(output)
     expected = ['ham.spam.ham', 'ham.eggs.bacon']
     assert blocker.args == [expected]
-
 
 def test_pytestrunner_process_output_with_logreport_passed(qtbot):
     runner = PyTestRunner(None)
@@ -127,7 +134,6 @@ def test_pytestrunner_process_output_with_logreport_passed(qtbot):
     expected = [TestResult(Category.OK, 'ok', 'foo.bar', time=42)]
     assert blocker.args == [expected]
 
-
 def test_pytestrunner_logreport_to_testresult_passed():
     runner = PyTestRunner(None)
     report = {
@@ -139,7 +145,6 @@ def test_pytestrunner_logreport_to_testresult_passed():
     }
     expected = TestResult(Category.OK, 'ok', 'foo.bar', time=42)
     assert runner.logreport_to_testresult(report) == expected
-
 
 def test_pytestrunner_logreport_to_testresult_failed():
     runner = PyTestRunner(None)
@@ -156,7 +161,6 @@ def test_pytestrunner_logreport_to_testresult_failed():
                           message='msg', time=42, extra_text='exception text')
     assert runner.logreport_to_testresult(report) == expected
 
-
 def test_pytestrunner_logreport_to_testresult_skipped():
     runner = PyTestRunner(None)
     report = {
@@ -170,7 +174,6 @@ def test_pytestrunner_logreport_to_testresult_skipped():
     expected = TestResult(Category.SKIP, 'skipped', 'foo.bar',
                           time=42, extra_text='skipmsg')
     assert runner.logreport_to_testresult(report) == expected
-
 
 def test_pytestrunner_logreport_to_testresult_xfail():
     runner = PyTestRunner(None)
@@ -188,7 +191,6 @@ def test_pytestrunner_logreport_to_testresult_xfail():
                           message='msg', time=42, extra_text='exception text')
     assert runner.logreport_to_testresult(report) == expected
 
-
 def test_pytestrunner_logreport_to_testresult_xpass():
     runner = PyTestRunner(None)
     report = {
@@ -201,7 +203,6 @@ def test_pytestrunner_logreport_to_testresult_xpass():
     }
     expected = TestResult(Category.OK, 'ok', 'foo.bar', time=42)
     assert runner.logreport_to_testresult(report) == expected
-
 
 def test_pytestrunner_logreport_to_testresult_with_output():
     runner = PyTestRunner(None)

@@ -76,6 +76,15 @@ def test_unittestwidget_tests_started(qtbot):
     widget.tests_started(details)
     widget.testdatamodel.update_testresults.assert_called_once_with(results)
 
+def test_unittestwidget_tests_collect_error(qtbot):
+    widget = UnitTestWidget(None)
+    widget.testdatamodel = Mock()
+    names_plus_msg = [('hammodule.spam', 'msg')]
+    results = [TestResult(Category.FAIL, 'failure', 'hammodule.spam',
+                          'collection error', extra_text='msg')]
+    widget.tests_collect_error(names_plus_msg)
+    widget.testdatamodel.add_testresults.assert_called_once_with(results)
+
 def test_unittestwidget_tests_yield_results(qtbot):
     widget = UnitTestWidget(None)
     widget.testdatamodel = Mock()

@@ -88,6 +88,9 @@ class RunnerBase(QObject):
     -------
     sig_collected(list of str)
         Emitted when tests are collected.
+    sig_collecterror(list of (str, str) tuples)
+        Emitted when errors are encountered during collection. First element
+        of tuple is test name, second element is error message.
     sig_starttest(list of str)
         Emitted just before tests are run.
     sig_testresult(list of TestResult)
@@ -98,6 +101,7 @@ class RunnerBase(QObject):
     """
 
     sig_collected = Signal(object)
+    sig_collecterror = Signal(object)
     sig_starttest = Signal(object)
     sig_testresult = Signal(object)
     sig_finished = Signal(object, str)

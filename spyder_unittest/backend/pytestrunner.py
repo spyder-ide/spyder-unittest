@@ -52,6 +52,7 @@ class PyTestRunner(RunnerBase):
             list of decoded Python object sent by test process.
         """
         collected_list = []
+        collecterror_list = []
         starttest_list = []
         result_list = []
 
@@ -59,6 +60,9 @@ class PyTestRunner(RunnerBase):
             if result_item['event'] == 'collected':
                 collected_list.append(
                         self.logreport_collected_to_str(result_item))
+            elif result_item['event'] == 'collecterror':
+                collecterror_list.append(
+                        self.logreport_collecterror_to_tuple(result_item))
             elif result_item['event'] == 'starttest':
                 starttest_list.append(
                         self.logreport_starttest_to_str(result_item))
@@ -69,6 +73,8 @@ class PyTestRunner(RunnerBase):
 
         if collected_list:
             self.sig_collected.emit(collected_list)
+        if collecterror_list:
+            self.sig_collecterror.emit(collecterror_list)
         if starttest_list:
             self.sig_starttest.emit(starttest_list)
         if result_list:
@@ -89,6 +95,11 @@ class PyTestRunner(RunnerBase):
         """Convert a 'collected' logreport to a str."""
         module = self.normalize_module_name(report['module'])
         return '{}.{}'.format(module, report['name'])
+
+    def logreport_collecterror_to_tuple(self, report):
+        """Convert a 'collecterror' logreport to a (str, str) tuple."""
+        module = self.normalize_module_name(report['nodeid'])
+        return (module, report['longrepr'])
 
     def logreport_starttest_to_str(self, report):
         """Convert a 'starttest' logreport to a str."""

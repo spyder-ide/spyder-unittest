@@ -66,6 +66,7 @@ class TestDataView(QTreeView):
         """Called when rows are inserted."""
         QTreeView.rowsInserted(self, parent, firstRow, lastRow)
         self.resizeColumns()
+        self.spanFirstColumn(firstRow, lastRow)
 
     def dataChanged(self, topLeft, bottomRight, roles=[]):
         """Called when data in model has changed."""
