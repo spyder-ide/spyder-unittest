@@ -87,6 +87,7 @@ class PyTestRunner(RunnerBase):
         This function strips the .py suffix and replaces '/' by '.', so that
         'ham/spam.py' becomes 'ham.spam'.
         """
+        # TODO: Move this function and others that don't use self out of class?
         if name.endswith('.py'):
             name = name[:-3]
         return name.replace('/', '.')

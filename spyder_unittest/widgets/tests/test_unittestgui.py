@@ -59,6 +59,16 @@ def test_unittestwidget_process_finished_with_results_none(qtbot):
     widget.process_finished(None, 'output')
     assert widget.testdatamodel.testresults == results
 
+def test_unittestwidget_replace_pending_with_not_run(qtbot):
+    widget = UnitTestWidget(None)
+    widget.testdatamodel = Mock()
+    results = [TestResult(Category.PENDING, 'pending', 'hammodule.eggs'),
+               TestResult(Category.OK, 'ok', 'hammodule.spam')]
+    widget.testdatamodel.testresults = results
+    widget.replace_pending_with_not_run()
+    expected = [TestResult(Category.SKIP, 'not run', 'hammodule.eggs')]
+    widget.testdatamodel.update_testresults.assert_called_once_with(expected)
+
 def test_unittestwidget_tests_collected(qtbot):
     widget = UnitTestWidget(None)
     widget.testdatamodel = Mock()

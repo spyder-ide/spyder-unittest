@@ -8,6 +8,7 @@
 from __future__ import with_statement
 
 # Standard library imports
+import copy
 import os.path as osp
 import sys
 
@@ -293,9 +294,22 @@ class UnitTestWidget(QWidget):
         self.log_action.setEnabled(bool(output))
         if testresults:
             self.testdatamodel.testresults = testresults
-            msg = self.testdatamodel.summary()
+            msg = self.testdatamodel.summary()  # TODO: Remove?
             self.status_label.setText(msg)
+        self.replace_pending_with_not_run()
         self.sig_finished.emit()
+
+    def replace_pending_with_not_run(self):
+        """Change status of pending tests to 'not run''."""
+        new_results = []
+        for res in self.testdatamodel.testresults:
+            if res.category == Category.PENDING:
+                new_res = copy.copy(res)
+                new_res.category = Category.SKIP
+                new_res.status = _('not run')
+                new_results.append(new_res)
+        if new_results:
+            self.testdatamodel.update_testresults(new_results)
 
     def tests_collected(self, testnames):
         """Called when tests are collected."""
