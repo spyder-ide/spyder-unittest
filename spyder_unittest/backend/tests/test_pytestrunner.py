@@ -13,7 +13,8 @@ from qtpy.QtCore import QByteArray
 from spyder.utils.misc import get_python_executable
 
 # Local imports
-from spyder_unittest.backend.pytestrunner import PyTestRunner
+from spyder_unittest.backend.pytestrunner import (PyTestRunner,
+                                                  logreport_to_testresult)
 from spyder_unittest.backend.runnerbase import Category, TestResult
 from spyder_unittest.widgets.configdialog import Config
 
@@ -134,8 +135,7 @@ def test_pytestrunner_process_output_with_logreport_passed(qtbot):
     expected = [TestResult(Category.OK, 'ok', 'foo.bar', time=42)]
     assert blocker.args == [expected]
 
-def test_pytestrunner_logreport_to_testresult_passed():
-    runner = PyTestRunner(None)
+def test_logreport_to_testresult_passed():
     report = {
         'event': 'logreport',
         'when': 'call',
@@ -144,10 +144,9 @@ def test_pytestrunner_logreport_to_testresult_passed():
         'duration': 42
     }
     expected = TestResult(Category.OK, 'ok', 'foo.bar', time=42)
-    assert runner.logreport_to_testresult(report) == expected
+    assert logreport_to_testresult(report) == expected
 
-def test_pytestrunner_logreport_to_testresult_failed():
-    runner = PyTestRunner(None)
+def test_logreport_to_testresult_failed():
     report = {
         'event': 'logreport',
         'when': 'call',
@@ -159,10 +158,9 @@ def test_pytestrunner_logreport_to_testresult_failed():
     }
     expected = TestResult(Category.FAIL, 'failure', 'foo.bar',
                           message='msg', time=42, extra_text='exception text')
-    assert runner.logreport_to_testresult(report) == expected
+    assert logreport_to_testresult(report) == expected
 
-def test_pytestrunner_logreport_to_testresult_skipped():
-    runner = PyTestRunner(None)
+def test_logreport_to_testresult_skipped():
     report = {
         'event': 'logreport',
         'when': 'setup',
@@ -173,10 +171,9 @@ def test_pytestrunner_logreport_to_testresult_skipped():
     }
     expected = TestResult(Category.SKIP, 'skipped', 'foo.bar',
                           time=42, extra_text='skipmsg')
-    assert runner.logreport_to_testresult(report) == expected
+    assert logreport_to_testresult(report) == expected
 
-def test_pytestrunner_logreport_to_testresult_xfail():
-    runner = PyTestRunner(None)
+def test_logreport_to_testresult_xfail():
     report = {
         'event': 'logreport',
         'when': 'call',
@@ -189,10 +186,9 @@ def test_pytestrunner_logreport_to_testresult_xfail():
     }
     expected = TestResult(Category.SKIP, 'skipped', 'foo.bar',
                           message='msg', time=42, extra_text='exception text')
-    assert runner.logreport_to_testresult(report) == expected
+    assert logreport_to_testresult(report) == expected
 
-def test_pytestrunner_logreport_to_testresult_xpass():
-    runner = PyTestRunner(None)
+def test_logreport_to_testresult_xpass():
     report = {
         'event': 'logreport',
         'when': 'call',
@@ -202,10 +198,9 @@ def test_pytestrunner_logreport_to_testresult_xpass():
         'wasxfail': ''
     }
     expected = TestResult(Category.OK, 'ok', 'foo.bar', time=42)
-    assert runner.logreport_to_testresult(report) == expected
+    assert logreport_to_testresult(report) == expected
 
-def test_pytestrunner_logreport_to_testresult_with_output():
-    runner = PyTestRunner(None)
+def test_logreport_to_testresult_with_output():
     report = {
         'event': 'logreport',
         'when': 'call',
@@ -219,4 +214,4 @@ def test_pytestrunner_logreport_to_testresult_with_output():
            '----- Captured stderr call -----\nspam\n')
     expected = TestResult(Category.OK, 'ok', 'foo.bar', time=42,
                           extra_text=txt)
-    assert runner.logreport_to_testresult(report) == expected
+    assert logreport_to_testresult(report) == expected
