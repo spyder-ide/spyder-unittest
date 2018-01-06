@@ -22,12 +22,12 @@ def test_testdatamodel_using_qtmodeltester(qtmodeltester):
     qtmodeltester.check(model)
 
 
-def test_testdatamodel_shows_short_name_in_table(qtbot):
+def test_testdatamodel_shows_abbreviated_name_in_table(qtbot):
     model = TestDataModel()
     res = TestResult(Category.OK, 'status', 'bar', 'foo', '', 0, '')
     model.testresults = [res]
     index = model.index(0, 1)
-    assert model.data(index, Qt.DisplayRole) == 'bar'
+    assert model.data(index, Qt.DisplayRole) == 'f.bar'
 
 
 def test_testdatamodel_shows_full_name_in_tooltip(qtbot):

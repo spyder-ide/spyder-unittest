@@ -115,11 +115,11 @@ def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
     model = widget.testdatamodel
     assert model.rowCount() == 2
     assert model.index(0, 0).data(Qt.DisplayRole) == 'ok'
-    assert model.index(0, 1).data(Qt.DisplayRole) == 'test_ok'
+    assert model.index(0, 1).data(Qt.DisplayRole) == 't.test_ok'
     assert model.index(0, 1).data(Qt.ToolTipRole) == 'test_foo.test_ok'
     assert model.index(0, 2).data(Qt.DisplayRole) == ''
     assert model.index(1, 0).data(Qt.DisplayRole) == 'failure'
-    assert model.index(1, 1).data(Qt.DisplayRole) == 'test_fail'
+    assert model.index(1, 1).data(Qt.DisplayRole) == 't.test_fail'
     assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.test_fail'
 
 
@@ -149,10 +149,10 @@ def test_run_tests_using_unittest_and_display_results(qtbot, tmpdir,
     model = widget.testdatamodel
     assert model.rowCount() == 2
     assert model.index(0, 0).data(Qt.DisplayRole) == 'FAIL'
-    assert model.index(0, 1).data(Qt.DisplayRole) == 'test_fail'
+    assert model.index(0, 1).data(Qt.DisplayRole) == 't.M.test_fail'
     assert model.index(0, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_fail'
     assert model.index(0, 2).data(Qt.DisplayRole) == ''
     assert model.index(1, 0).data(Qt.DisplayRole) == 'ok'
-    assert model.index(1, 1).data(Qt.DisplayRole) == 'test_ok'
+    assert model.index(1, 1).data(Qt.DisplayRole) == 't.M.test_ok'
     assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_ok'
     assert model.index(1, 2).data(Qt.DisplayRole) == ''

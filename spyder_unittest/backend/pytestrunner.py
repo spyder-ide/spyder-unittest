@@ -75,18 +75,26 @@ class PyTestRunner(RunnerBase):
         if result_list:
             self.sig_testresult.emit(result_list)
 
+    def normalize_module_name(self, name):
+        """
+        Convert module name reported by pytest to Python conventions.
+
+        This function strips the .py suffix and replaces '/' by '.', so that
+        'ham/spam.py' becomes 'ham.spam'.
+        """
+        if name.endswith('.py'):
+            name = name[:-3]
+        return name.replace('/', '.')
+
     def logreport_collected_to_testdetails(self, report):
         """Convert a 'collected' logreport to a TestDetails."""
-        module = report['module']
-        if module.endswith('.py'):
-            module = module[:-3]
+        module = self.normalize_module_name(report['module'])
         return TestDetails(report['name'], module)
 
     def logreport_starttest_to_testdetails(self, report):
         """Convert a 'starttest' logreport to a TestDetails."""
         module, name = report['nodeid'].split('::', 1)
-        if module.endswith('.py'):
-            module = module[:-3]
+        module = self.normalize_module_name(module)
         return TestDetails(name, module)
 
     def logreport_to_testresult(self, report):
@@ -101,8 +109,7 @@ class PyTestRunner(RunnerBase):
             cat = Category.SKIP
             status = report['outcome']
         module, name = report['nodeid'].split('::', 1)
-        if module.endswith('.py'):
-            module = module[:-3]
+        module = self.normalize_module_name(module)
         duration = report['duration']
         message = report['message'] if 'message' in report else ''
         if 'longrepr' not in report:
