@@ -294,8 +294,6 @@ class UnitTestWidget(QWidget):
         self.log_action.setEnabled(bool(output))
         if testresults:
             self.testdatamodel.testresults = testresults
-            msg = self.testdatamodel.summary()  # TODO: Remove?
-            self.status_label.setText(msg)
         self.replace_pending_with_not_run()
         self.sig_finished.emit()
 
