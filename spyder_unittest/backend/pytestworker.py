@@ -45,6 +45,15 @@ class SpyderPlugin():
         """Constructor."""
         self.writer = writer
 
+    def pytest_collectreport(self, report):
+        """Called by py.test after collecting tests from a file."""
+        if report.outcome == 'failed':
+            self.writer.write({
+                    'event': 'collecterror',
+                    'nodeid': report.nodeid,
+                    'longrepr': report.longrepr.longrepr
+            })
+
     def pytest_itemcollected(self, item):
         """Called by py.test when a test item is collected."""
         self.writer.write({

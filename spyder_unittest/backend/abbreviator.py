@@ -12,7 +12,8 @@ class Abbreviator:
 
     First, all names are split in components separated by full stop (like
     module names in Python). Every component is abbreviated by the smallest
-    prefix not shared by other names in the same directory.
+    prefix not shared by other names in the same directory, except for the
+    last component which is not changed.
 
     Attributes
     ----------
@@ -43,12 +44,10 @@ class Abbreviator:
         ---------
         name : str
         """
+        if '.' not in name:
+            return
         len_abbrev = 1
-        if '.' in name:
-            start, rest = name.split('.', 1)
-        else:
-            start = name
-            rest = None
+        start, rest = name.split('.', 1)
         for other in self.dic:
             if start[:len_abbrev] == other[:len_abbrev]:
                 if start == other:
@@ -67,8 +66,7 @@ class Abbreviator:
                         self.dic[other][0] = other[:len_abbrev]
         else:
             self.dic[start] = [start[:len_abbrev], Abbreviator()]
-        if rest:
-            self.dic[start][1].add(rest)
+        self.dic[start][1].add(rest)
 
     def abbreviate(self, name):
         """Return abbreviation of name."""
@@ -77,5 +75,5 @@ class Abbreviator:
             res = (self.dic[start][0]
                    + '.' + self.dic[start][1].abbreviate(rest))
         else:
-            res = self.dic[name][0]
+            res = name
         return res

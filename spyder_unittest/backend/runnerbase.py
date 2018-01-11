@@ -6,7 +6,6 @@
 """Classes for running tests within various frameworks."""
 
 # Standard library imports
-from collections import namedtuple
 import os
 import tempfile
 
@@ -21,9 +20,6 @@ try:
 except ImportError:  # Python 2
     from pkgutil import find_loader as find_spec_or_loader
 
-# Class with details of the tests
-TestDetails = namedtuple('TestDetails', ['name', 'module'])
-
 
 class Category:
     """Enum type representing category of test result."""
@@ -37,7 +33,7 @@ class Category:
 class TestResult:
     """Class representing the result of running a single test."""
 
-    def __init__(self, category, status, name, module, message='', time=None,
+    def __init__(self, category, status, name, message='', time=None,
                  extra_text=''):
         """
         Construct a test result.
@@ -47,7 +43,6 @@ class TestResult:
         category : Category
         status : str
         name : str
-        module : str
         message : str
         time : float or None
         extra_text : str
@@ -55,7 +50,6 @@ class TestResult:
         self.category = category
         self.status = status
         self.name = name
-        self.module = module
         self.message = message
         self.time = time
         extra_text = extra_text.rstrip()
@@ -92,9 +86,12 @@ class RunnerBase(QObject):
 
     Signals
     -------
-    sig_collected(list of TestDetails)
+    sig_collected(list of str)
         Emitted when tests are collected.
-    sig_starttest(list of TestDetails)
+    sig_collecterror(list of (str, str) tuples)
+        Emitted when errors are encountered during collection. First element
+        of tuple is test name, second element is error message.
+    sig_starttest(list of str)
         Emitted just before tests are run.
     sig_testresult(list of TestResult)
         Emitted when tests are finished.
@@ -104,6 +101,7 @@ class RunnerBase(QObject):
     """
 
     sig_collected = Signal(object)
+    sig_collecterror = Signal(object)
     sig_starttest = Signal(object)
     sig_testresult = Signal(object)
     sig_finished = Signal(object, str)

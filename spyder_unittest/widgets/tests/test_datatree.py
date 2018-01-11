@@ -15,8 +15,8 @@ from spyder_unittest.widgets.datatree import COLORS, TestDataModel
 
 def test_testdatamodel_using_qtmodeltester(qtmodeltester):
     model = TestDataModel()
-    res = [TestResult(Category.OK, 'status', 'bar', 'foo'),
-           TestResult(Category.FAIL, 'error', 'bar', 'foo', 'kadoom', 0,
+    res = [TestResult(Category.OK, 'status', 'foo.bar'),
+           TestResult(Category.FAIL, 'error', 'foo.bar', 'kadoom', 0,
                       'crash!\nboom!')]
     model.testresults = res
     qtmodeltester.check(model)
@@ -24,7 +24,7 @@ def test_testdatamodel_using_qtmodeltester(qtmodeltester):
 
 def test_testdatamodel_shows_abbreviated_name_in_table(qtbot):
     model = TestDataModel()
-    res = TestResult(Category.OK, 'status', 'bar', 'foo', '', 0, '')
+    res = TestResult(Category.OK, 'status', 'foo.bar', '', 0, '')
     model.testresults = [res]
     index = model.index(0, 1)
     assert model.data(index, Qt.DisplayRole) == 'f.bar'
@@ -32,7 +32,7 @@ def test_testdatamodel_shows_abbreviated_name_in_table(qtbot):
 
 def test_testdatamodel_shows_full_name_in_tooltip(qtbot):
     model = TestDataModel()
-    res = TestResult(Category.OK, 'status', 'bar', 'foo', '', 0, '')
+    res = TestResult(Category.OK, 'status', 'foo.bar', '', 0, '')
     model.testresults = [res]
     index = model.index(0, 1)
     assert model.data(index, Qt.ToolTipRole) == 'foo.bar'
@@ -40,8 +40,8 @@ def test_testdatamodel_shows_full_name_in_tooltip(qtbot):
 
 def test_testdatamodel_data_background():
     model = TestDataModel()
-    res = [TestResult(Category.OK, 'status', 'bar', 'foo'),
-           TestResult(Category.FAIL, 'error', 'bar', 'foo', 'kadoom')]
+    res = [TestResult(Category.OK, 'status', 'foo.bar'),
+           TestResult(Category.FAIL, 'error', 'foo.bar', 'kadoom')]
     model.testresults = res
     index = model.index(0, 0)
     assert model.data(index, Qt.BackgroundRole) == COLORS[Category.OK]
@@ -59,14 +59,14 @@ def test_testdatamodel_add_tests(qtbot):
     model = TestDataModel()
     assert model.testresults == []
 
-    result1 = TestResult(Category.OK, 'status', 'bar', 'foo')
+    result1 = TestResult(Category.OK, 'status', 'foo.bar')
     with qtbot.waitSignals([model.rowsInserted, model.sig_summary],
                            check_params_cbs=[check_args1, None],
                            raising=True):
         model.add_testresults([result1])
     assert model.testresults == [result1]
 
-    result2 = TestResult(Category.FAIL, 'error', 'bar', 'foo', 'kadoom')
+    result2 = TestResult(Category.FAIL, 'error', 'foo.bar', 'kadoom')
     with qtbot.waitSignals([model.rowsInserted, model.sig_summary],
                            check_params_cbs=[check_args2, None],
                            raising=True):
@@ -84,9 +84,9 @@ def test_testdatamodel_replace_tests(qtbot):
                 and not bottomRight.parent().isValid())
 
     model = TestDataModel()
-    result1 = TestResult(Category.OK, 'status', 'bar', 'foo')
+    result1 = TestResult(Category.OK, 'status', 'foo.bar')
     model.testresults = [result1]
-    result2 = TestResult(Category.FAIL, 'error', 'bar', 'foo', 'kadoom')
+    result2 = TestResult(Category.FAIL, 'error', 'foo.bar', 'kadoom')
     with qtbot.waitSignals([model.dataChanged, model.sig_summary],
                            check_params_cbs=[check_args, None],
                            raising=True):

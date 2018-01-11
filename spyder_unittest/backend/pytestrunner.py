@@ -10,8 +10,7 @@ import os
 
 # Local imports
 from spyder_unittest.backend.jsonstream import JSONStreamReader
-from spyder_unittest.backend.runnerbase import (Category, RunnerBase,
-                                                TestDetails, TestResult)
+from spyder_unittest.backend.runnerbase import Category, RunnerBase, TestResult
 
 
 class PyTestRunner(RunnerBase):
@@ -53,78 +52,31 @@ class PyTestRunner(RunnerBase):
             list of decoded Python object sent by test process.
         """
         collected_list = []
+        collecterror_list = []
         starttest_list = []
         result_list = []
 
         for result_item in output:
             if result_item['event'] == 'collected':
-                collected_list.append(
-                        self.logreport_collected_to_testdetails(result_item))
+                collected_list.append(logreport_collected_to_str(result_item))
+            elif result_item['event'] == 'collecterror':
+                collecterror_list.append(
+                        logreport_collecterror_to_tuple(result_item))
             elif result_item['event'] == 'starttest':
-                starttest_list.append(
-                        self.logreport_starttest_to_testdetails(result_item))
+                starttest_list.append(logreport_starttest_to_str(result_item))
             elif result_item['event'] == 'logreport':
-                result_list.append(self.logreport_to_testresult(result_item))
+                result_list.append(logreport_to_testresult(result_item))
             elif result_item['event'] == 'finished':
                 self.output = result_item['stdout']
 
         if collected_list:
             self.sig_collected.emit(collected_list)
+        if collecterror_list:
+            self.sig_collecterror.emit(collecterror_list)
         if starttest_list:
             self.sig_starttest.emit(starttest_list)
         if result_list:
             self.sig_testresult.emit(result_list)
-
-    def normalize_module_name(self, name):
-        """
-        Convert module name reported by pytest to Python conventions.
-
-        This function strips the .py suffix and replaces '/' by '.', so that
-        'ham/spam.py' becomes 'ham.spam'.
-        """
-        if name.endswith('.py'):
-            name = name[:-3]
-        return name.replace('/', '.')
-
-    def logreport_collected_to_testdetails(self, report):
-        """Convert a 'collected' logreport to a TestDetails."""
-        module = self.normalize_module_name(report['module'])
-        return TestDetails(report['name'], module)
-
-    def logreport_starttest_to_testdetails(self, report):
-        """Convert a 'starttest' logreport to a TestDetails."""
-        module, name = report['nodeid'].split('::', 1)
-        module = self.normalize_module_name(module)
-        return TestDetails(name, module)
-
-    def logreport_to_testresult(self, report):
-        """Convert a logreport sent by test process to a TestResult."""
-        if report['outcome'] == 'passed':
-            cat = Category.OK
-            status = 'ok'
-        elif report['outcome'] == 'failed':
-            cat = Category.FAIL
-            status = 'failure'
-        else:
-            cat = Category.SKIP
-            status = report['outcome']
-        module, name = report['nodeid'].split('::', 1)
-        module = self.normalize_module_name(module)
-        duration = report['duration']
-        message = report['message'] if 'message' in report else ''
-        if 'longrepr' not in report:
-            extra_text = ''
-        elif isinstance(report['longrepr'], list):
-            extra_text = report['longrepr'][2]
-        else:
-            extra_text = report['longrepr']
-        if 'sections' in report:
-            for (heading, text) in report['sections']:
-                extra_text += '----- {} -----\n'.format(heading)
-                extra_text += text
-        result = TestResult(cat, status, name, module, message=message,
-                            time=duration, extra_text=extra_text)
-        return result
 
     def finished(self):
         """
@@ -133,3 +85,68 @@ class PyTestRunner(RunnerBase):
         This function emits `sig_finished`.
         """
         self.sig_finished.emit(None, self.output)
+
+
+def normalize_module_name(name):
+    """
+    Convert module name reported by pytest to Python conventions.
+
+    This function strips the .py suffix and replaces '/' by '.', so that
+    'ham/spam.py' becomes 'ham.spam'.
+    """
+    if name.endswith('.py'):
+        name = name[:-3]
+    return name.replace('/', '.')
+
+
+def convert_nodeid_to_testname(nodeid):
+    """Convert a nodeid to a test name."""
+    module, name = nodeid.split('::', 1)
+    module = normalize_module_name(module)
+    return '{}.{}'.format(module, name)
+
+
+def logreport_collected_to_str(report):
+    """Convert a 'collected' logreport to a str."""
+    module = normalize_module_name(report['module'])
+    return '{}.{}'.format(module, report['name'])
+
+
+def logreport_collecterror_to_tuple(report):
+    """Convert a 'collecterror' logreport to a (str, str) tuple."""
+    module = normalize_module_name(report['nodeid'])
+    return (module, report['longrepr'])
+
+
+def logreport_starttest_to_str(report):
+    """Convert a 'starttest' logreport to a str."""
+    return convert_nodeid_to_testname(report['nodeid'])
+
+
+def logreport_to_testresult(report):
+    """Convert a logreport sent by test process to a TestResult."""
+    if report['outcome'] == 'passed':
+        cat = Category.OK
+        status = 'ok'
+    elif report['outcome'] == 'failed':
+        cat = Category.FAIL
+        status = 'failure'
+    else:
+        cat = Category.SKIP
+        status = report['outcome']
+    testname = convert_nodeid_to_testname(report['nodeid'])
+    duration = report['duration']
+    message = report['message'] if 'message' in report else ''
+    if 'longrepr' not in report:
+        extra_text = ''
+    elif isinstance(report['longrepr'], list):
+        extra_text = report['longrepr'][2]
+    else:
+        extra_text = report['longrepr']
+    if 'sections' in report:
+        for (heading, text) in report['sections']:
+            extra_text += '----- {} -----\n'.format(heading)
+            extra_text += text
+    result = TestResult(cat, status, testname, message=message,
+                        time=duration, extra_text=extra_text)
+    return result

@@ -8,6 +8,7 @@
 from __future__ import with_statement
 
 # Standard library imports
+import copy
 import os.path as osp
 import sys
 
@@ -232,6 +233,7 @@ class UnitTestWidget(QWidget):
             config.framework, self, tempfilename)
         self.testrunner.sig_finished.connect(self.process_finished)
         self.testrunner.sig_collected.connect(self.tests_collected)
+        self.testrunner.sig_collecterror.connect(self.tests_collect_error)
         self.testrunner.sig_starttest.connect(self.tests_started)
         self.testrunner.sig_testresult.connect(self.tests_yield_result)
 
@@ -292,23 +294,41 @@ class UnitTestWidget(QWidget):
         self.log_action.setEnabled(bool(output))
         if testresults:
             self.testdatamodel.testresults = testresults
-            msg = self.testdatamodel.summary()
-            self.status_label.setText(msg)
+        self.replace_pending_with_not_run()
         self.sig_finished.emit()
 
-    def tests_collected(self, testdetails):
+    def replace_pending_with_not_run(self):
+        """Change status of pending tests to 'not run''."""
+        new_results = []
+        for res in self.testdatamodel.testresults:
+            if res.category == Category.PENDING:
+                new_res = copy.copy(res)
+                new_res.category = Category.SKIP
+                new_res.status = _('not run')
+                new_results.append(new_res)
+        if new_results:
+            self.testdatamodel.update_testresults(new_results)
+
+    def tests_collected(self, testnames):
         """Called when tests are collected."""
-        testresults = [TestResult(Category.PENDING, _('pending'), detail.name,
-                                  detail.module)
-                       for detail in testdetails]
+        testresults = [TestResult(Category.PENDING, _('pending'), name)
+                       for name in testnames]
         self.testdatamodel.add_testresults(testresults)
 
-    def tests_started(self, testdetails):
-        """Called when tests are about to be run.s are collected."""
-        testresults = [TestResult(Category.PENDING, _('pending'), detail.name,
-                                  detail.module, message=_('running'))
-                       for detail in testdetails]
+    def tests_started(self, testnames):
+        """Called when tests are about to be run."""
+        testresults = [TestResult(Category.PENDING, _('pending'), name,
+                                  message=_('running'))
+                       for name in testnames]
         self.testdatamodel.update_testresults(testresults)
+
+    def tests_collect_error(self, testnames_plus_msg):
+        """Called when errors are encountered during collection."""
+        testresults = [TestResult(Category.FAIL, _('failure'), name,
+                                  message=_('collection error'),
+                                  extra_text=msg)
+                       for name, msg in testnames_plus_msg]
+        self.testdatamodel.add_testresults(testresults)
 
     def tests_yield_result(self, testresults):
         """Called when test results are received."""
