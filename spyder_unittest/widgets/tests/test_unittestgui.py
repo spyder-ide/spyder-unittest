@@ -9,7 +9,6 @@
 import os
 
 # Third party imports
-from pytestqt import qtbot
 from qtpy.QtCore import Qt
 import pytest
 
@@ -24,7 +23,14 @@ except ImportError:
     from mock import Mock  # Python 2
 
 
-def test_unittestgui_set_config_emits_newconfig(qtbot):
+def test_unittestwidget_forwards_sig_edit_goto(qtbot):
+    widget = UnitTestWidget(None)
+    qtbot.addWidget(widget)
+    with qtbot.waitSignal(widget.sig_edit_goto) as blocker:
+        widget.testdataview.sig_edit_goto.emit('ham', 42)
+    assert blocker.args == ['ham', 42]
+
+def test_unittestwidget_set_config_emits_newconfig(qtbot):
     widget = UnitTestWidget(None)
     qtbot.addWidget(widget)
     config = Config(wdir=os.getcwd(), framework='unittest')
@@ -33,7 +39,7 @@ def test_unittestgui_set_config_emits_newconfig(qtbot):
     assert blocker.args == [config]
     assert widget.config == config
 
-def test_unittestgui_set_config_does_not_emit_when_invalid(qtbot):
+def test_unittestwidget_set_config_does_not_emit_when_invalid(qtbot):
     widget = UnitTestWidget(None)
     qtbot.addWidget(widget)
     config = Config(wdir=os.getcwd(), framework=None)

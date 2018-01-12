@@ -116,8 +116,13 @@ def test_plugin_config(plugin, tmpdir, qtbot):
     plugin.handle_project_change()
     assert plugin.unittestwidget.config is None
 
-    # Re-open project and test that config is correctly read    
+    # Re-open project and test that config is correctly read
     plugin.main.projects.get_active_project = lambda: project
     plugin.main.projects.get_active_project_path = lambda: project.root_path
     plugin.handle_project_change()
     assert plugin.unittestwidget.config == config
+
+
+def test_plugin_goto_in_editor(plugin, qtbot):
+    plugin.unittestwidget.sig_edit_goto.emit('somefile', 42)
+    plugin.main.editor.load.assert_called_with('somefile', 43, '')

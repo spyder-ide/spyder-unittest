@@ -64,12 +64,15 @@ class UnitTestWidget(QWidget):
     sig_finished: Emitted when plugin finishes processing tests.
     sig_newconfig(Config): Emitted when test config is changed.
         Argument is new config, which is always valid.
+    sig_edit_goto(str, int): Emitted if editor should go to some position.
+        Arguments are file name and line number (zero-based).
     """
 
     VERSION = '0.0.1'
 
     sig_finished = Signal()
     sig_newconfig = Signal(Config)
+    sig_edit_goto = Signal(str, int)
 
     def __init__(self, parent, options_button=None, options_menu=None):
         """Unit testing widget."""
@@ -85,6 +88,7 @@ class UnitTestWidget(QWidget):
         self.testdataview = TestDataView(self)
         self.testdatamodel = TestDataModel(self)
         self.testdataview.setModel(self.testdatamodel)
+        self.testdataview.sig_edit_goto.connect(self.sig_edit_goto)
         self.testdatamodel.sig_summary.connect(self.set_status_label)
 
         self.framework_registry = FrameworkRegistry()

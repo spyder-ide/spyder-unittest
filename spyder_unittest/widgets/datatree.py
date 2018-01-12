@@ -44,7 +44,16 @@ TOPLEVEL_ID = 2 ** 32 - 1
 
 
 class TestDataView(QTreeView):
-    """Tree widget displaying test results."""
+    """
+    Tree widget displaying test results.
+
+    Signals
+    -------
+    sig_edit_goto(str, int): Emitted if editor should go to some position.
+        Arguments are file name and line number (zero-based).
+    """
+
+    sig_edit_goto = Signal(str, int)
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -84,12 +93,30 @@ class TestDataView(QTreeView):
 
     def contextMenuEvent(self, event):
         """Called when user requests a context menu."""
-        index = self.indexAt(event.pos())
-        if not index.isValid():  # do nothing if no item under mouse position
+        index = self.getIndexFromPos(event.pos())
+        if not index:
+            return  # do nothing if no item under mouse position
+        contextMenu = self.buildContextMenu(index)
+        contextMenu.exec_(event.globalPos())
+
+    def getIndexFromPos(self, pos):
+        """
+        Convert a position to an index pointing to test item at that position.
+
+        The position should be relative to the current widget. The returned
+        index points to the item on the top level in the first column
+        corresponding to the given position.
+        """
+        index = self.indexAt(pos)
+        if not index.isValid():
             return
         while index.parent().isValid():  # find top-level node
             index = index.parent()
         index = index.sibling(index.row(), 0)  # go to first column
+        return index
+
+    def buildContextMenu(self, index):
+        """Build context menu for test item that given index points to."""
         contextMenu = QMenu(self)
         if self.isExpanded(index):
             menuItem = create_action(self, _('Collapse'),
@@ -97,10 +124,15 @@ class TestDataView(QTreeView):
         else:
             menuItem = create_action(self, _('Expand'),
                                      triggered=lambda: self.expand(index))
-            if not self.model().hasChildren(index):
-                menuItem.setEnabled(False)
+            menuItem.setEnabled(self.model().hasChildren(index))
         contextMenu.addAction(menuItem)
-        contextMenu.exec_(event.globalPos())
+        test_location = self.model().data(index, Qt.UserRole)
+        menuItem = create_action(
+                self, _('Go to definition'),
+                triggered=lambda: self.sig_edit_goto.emit(*test_location))
+        menuItem.setEnabled(test_location[0] is not None)
+        contextMenu.addAction(menuItem)
+        return contextMenu
 
     def resizeColumns(self):
         """Resize column to fit their contents."""
@@ -241,7 +273,8 @@ class TestDataModel(QAbstractItemModel):
         If `role` is `DisplayRole`, then return string to display.
         If `role` is `TooltipRole`, then return string for tool tip.
         If `role` is `FontRole`, then return monospace font for level-2 items.
-        If `role` is `BackgroundRole`, then return background color
+        If `role` is `BackgroundRole`, then return background color.
+        If `role` is `UserRole`, then return location of test as (file, line)
         """
         if not index.isValid():
             return None
@@ -270,6 +303,10 @@ class TestDataModel(QAbstractItemModel):
             if id == TOPLEVEL_ID:
                 testresult = self.testresults[row]
                 return COLORS[testresult.category]
+        elif role == Qt.UserRole:
+            if id == TOPLEVEL_ID:
+                testresult = self.testresults[row]
+                return (testresult.filename, testresult.lineno)
         else:
             return None
 

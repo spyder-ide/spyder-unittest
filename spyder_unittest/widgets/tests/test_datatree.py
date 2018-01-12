@@ -21,7 +21,6 @@ def test_testdatamodel_using_qtmodeltester(qtmodeltester):
     model.testresults = res
     qtmodeltester.check(model)
 
-
 def test_testdatamodel_shows_abbreviated_name_in_table(qtbot):
     model = TestDataModel()
     res = TestResult(Category.OK, 'status', 'foo.bar', '', 0, '')
@@ -29,14 +28,12 @@ def test_testdatamodel_shows_abbreviated_name_in_table(qtbot):
     index = model.index(0, 1)
     assert model.data(index, Qt.DisplayRole) == 'f.bar'
 
-
 def test_testdatamodel_shows_full_name_in_tooltip(qtbot):
     model = TestDataModel()
     res = TestResult(Category.OK, 'status', 'foo.bar', '', 0, '')
     model.testresults = [res]
     index = model.index(0, 1)
     assert model.data(index, Qt.ToolTipRole) == 'foo.bar'
-
 
 def test_testdatamodel_data_background():
     model = TestDataModel()
@@ -48,6 +45,13 @@ def test_testdatamodel_data_background():
     index = model.index(1, 2)
     assert model.data(index, Qt.BackgroundRole) == COLORS[Category.FAIL]
 
+def test_testdatamodel_data_userrole():
+    model = TestDataModel()
+    res = [TestResult(Category.OK, 'status', 'foo.bar', filename='somefile',
+                      lineno=42)]
+    model.testresults = res
+    index = model.index(0, 0)
+    assert model.data(index, Qt.UserRole) == ('somefile', 42)
 
 def test_testdatamodel_add_tests(qtbot):
     def check_args1(parent, begin, end):
