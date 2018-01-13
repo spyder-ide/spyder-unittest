@@ -61,6 +61,8 @@ class TestDataView(QTreeView):
         self.header().setDefaultAlignment(Qt.AlignCenter)
         self.setItemsExpandable(True)
         self.setSortingEnabled(False)
+        self.setExpandsOnDoubleClick(False)
+        self.doubleClicked.connect(self.go_to_test_definition)
 
     def reset(self):
         """
@@ -93,29 +95,35 @@ class TestDataView(QTreeView):
 
     def contextMenuEvent(self, event):
         """Called when user requests a context menu."""
-        index = self.getIndexFromPos(event.pos())
+        index = self.indexAt(event.pos())
+        index = self.make_index_canonical(index)
         if not index:
             return  # do nothing if no item under mouse position
-        contextMenu = self.buildContextMenu(index)
+        contextMenu = self.build_context_menu(index)
         contextMenu.exec_(event.globalPos())
 
-    def getIndexFromPos(self, pos):
-        """
-        Convert a position to an index pointing to test item at that position.
+    def go_to_test_definition(self, index):
+        """Ask editor to go to definition of test corresponding to index."""
+        index = self.make_index_canonical(index)
+        test_location = self.model().data(index, Qt.UserRole)
+        self.sig_edit_goto.emit(*test_location)
 
-        The position should be relative to the current widget. The returned
-        index points to the item on the top level in the first column
-        corresponding to the given position.
+    def make_index_canonical(self, index):
         """
-        index = self.indexAt(pos)
+        Convert given index to canonical index for the same test.
+
+        For every test, the canonical index points to the item on the top level
+        in the first column corresponding to the given position. If the given
+        index is invalid, then return None.
+        """
         if not index.isValid():
-            return
+            return None
         while index.parent().isValid():  # find top-level node
             index = index.parent()
         index = index.sibling(index.row(), 0)  # go to first column
         return index
 
-    def buildContextMenu(self, index):
+    def build_context_menu(self, index):
         """Build context menu for test item that given index points to."""
         contextMenu = QMenu(self)
         if self.isExpanded(index):
