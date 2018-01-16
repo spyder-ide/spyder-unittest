@@ -105,8 +105,11 @@ class TestDataView(QTreeView):
     def go_to_test_definition(self, index):
         """Ask editor to go to definition of test corresponding to index."""
         index = self.make_index_canonical(index)
-        test_location = self.model().data(index, Qt.UserRole)
-        self.sig_edit_goto.emit(*test_location)
+        filename, lineno = self.model().data(index, Qt.UserRole)
+        if filename is not None:
+            if lineno is None:
+                lineno = 0
+            self.sig_edit_goto.emit(filename, lineno)
 
     def make_index_canonical(self, index):
         """
@@ -134,10 +137,10 @@ class TestDataView(QTreeView):
                                      triggered=lambda: self.expand(index))
             menuItem.setEnabled(self.model().hasChildren(index))
         contextMenu.addAction(menuItem)
-        test_location = self.model().data(index, Qt.UserRole)
         menuItem = create_action(
                 self, _('Go to definition'),
-                triggered=lambda: self.sig_edit_goto.emit(*test_location))
+                triggered=lambda: self.go_to_test_definition(index))
+        test_location = self.model().data(index, Qt.UserRole)
         menuItem.setEnabled(test_location[0] is not None)
         contextMenu.addAction(menuItem)
         return contextMenu

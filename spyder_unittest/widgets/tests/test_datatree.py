@@ -50,11 +50,25 @@ def test_contextMenuEvent_calls_exec(view_and_model, monkeypatch):
     view.contextMenuEvent(event)
     assert not mock_exec.called
 
-def test_go_to_test_definition(view_and_model, qtbot):
+def test_go_to_test_definition_with_invalid_target(view_and_model, qtbot):
+    view, model = view_and_model
+    with qtbot.assertNotEmitted(view.sig_edit_goto):
+        view.go_to_test_definition(model.index(0, 0))
+
+def test_go_to_test_definition_with_valid_target(view_and_model, qtbot):
     view, model = view_and_model
     with qtbot.waitSignal(view.sig_edit_goto) as blocker:
         view.go_to_test_definition(model.index(1, 0))
     assert blocker.args == ['ham.py', 42]
+
+def test_go_to_test_definition_with_lineno_none(view_and_model, qtbot):
+    view, model = view_and_model
+    res = model.testresults
+    res[1].lineno = None
+    model.testresults = res
+    with qtbot.waitSignal(view.sig_edit_goto) as blocker:
+        view.go_to_test_definition(model.index(1, 0))
+    assert blocker.args == ['ham.py', 0]
 
 def test_make_index_canonical_with_index_in_column2(view_and_model):
     view, model = view_and_model
