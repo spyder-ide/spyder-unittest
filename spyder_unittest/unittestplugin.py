@@ -201,9 +201,11 @@ class UnitTestPlugin(SpyderPluginWidget):
             icon=ima.icon('profiler'),
             shortcut="Shift+Alt+F11",
             triggered=self.maybe_configure_and_start)
-
         self.main.run_menu_actions += [unittesting_act]
         self.main.editor.pythonfile_dependent_actions += [unittesting_act]
+
+        # Save all files before running tests
+        self.unittestwidget.pre_test_hook = self.main.editor.save_all
 
     def refresh_plugin(self):
         """Refresh unit testing widget."""
