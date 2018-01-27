@@ -70,6 +70,7 @@ def standard_logreport():
     report.duration = 42
     report.sections = []
     report.longrepr = ''
+    report.location = ('foo.py', 24, 'bar')
     return report
 
 def test_spyderplugin_runtest_logreport(plugin):
@@ -81,7 +82,9 @@ def test_spyderplugin_runtest_logreport(plugin):
         'outcome': 'passed',
         'nodeid': 'foo.py::bar',
         'duration': 42,
-        'sections': []
+        'sections': [],
+        'filename': 'foo.py',
+        'lineno': 24
     })
 
 def test_spyderplugin_runtest_logreport_passes_longrepr(plugin):
@@ -95,6 +98,8 @@ def test_spyderplugin_runtest_logreport_passes_longrepr(plugin):
         'nodeid': 'foo.py::bar',
         'duration': 42,
         'sections': [],
+        'filename': 'foo.py',
+        'lineno': 24,
         'longrepr': '15'
     })
 
@@ -109,6 +114,8 @@ def test_spyderplugin_runtest_logreport_with_longrepr_tuple(plugin):
         'nodeid': 'foo.py::bar',
         'duration': 42,
         'sections': [],
+        'filename': 'foo.py',
+        'lineno': 24,
         'longrepr': ('ham', 'spam')
     })
 
@@ -123,6 +130,8 @@ def test_spyderplugin_runtest_logreport_passes_wasxfail(plugin):
         'nodeid': 'foo.py::bar',
         'duration': 42,
         'sections': [],
+        'filename': 'foo.py',
+        'lineno': 24,
         'wasxfail': ''
     })
 
@@ -144,10 +153,11 @@ def test_spyderplugin_runtest_logreport_passes_message(plugin):
         'nodeid': 'foo.py::bar',
         'duration': 42,
         'sections': [],
+        'filename': 'foo.py',
+        'lineno': 24,
         'longrepr': 'text',
         'message': 'msg'
     })
-
 
 def test_spyderplugin_runtest_logreport_ignores_teardown_passed(plugin):
     report = standard_logreport()
@@ -203,6 +213,8 @@ def test_pytestworker_integration(monkeypatch, tmpdir):
     assert args[3][0][0]['outcome'] == 'passed'
     assert args[3][0][0]['nodeid'] == 'test_foo.py::test_ok'
     assert args[3][0][0]['sections'] == []
+    assert args[3][0][0]['filename'] == 'test_foo.py'
+    assert args[3][0][0]['lineno'] == 0
     assert 'duration' in args[3][0][0]
 
     assert args[4][0][0]['event'] == 'starttest'
@@ -213,6 +225,8 @@ def test_pytestworker_integration(monkeypatch, tmpdir):
     assert args[5][0][0]['outcome'] == 'failed'
     assert args[5][0][0]['nodeid'] == 'test_foo.py::test_fail'
     assert args[5][0][0]['sections'] == []
+    assert args[5][0][0]['filename'] == 'test_foo.py'
+    assert args[5][0][0]['lineno'] == 1
     assert 'duration' in args[5][0][0]
 
     assert args[6][0][0]['event'] == 'finished'

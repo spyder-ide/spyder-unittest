@@ -73,13 +73,14 @@ class SpyderPlugin():
         """Called by py.test when a (phase of a) test is completed."""
         if report.when in ['setup', 'teardown'] and report.outcome == 'passed':
             return
-        # print(report.__dict__)
         data = {'event': 'logreport',
                 'when': report.when,
                 'outcome': report.outcome,
                 'nodeid': report.nodeid,
                 'sections': report.sections,
-                'duration': report.duration}
+                'duration': report.duration,
+                'filename': report.location[0],
+                'lineno': report.location[1]}
         if report.longrepr:
             if isinstance(report.longrepr, tuple):
                 data['longrepr'] = report.longrepr

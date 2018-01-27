@@ -12,8 +12,9 @@ from collections import Counter
 from qtpy import PYQT4
 from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal
 from qtpy.QtGui import QBrush, QColor, QFont
-from qtpy.QtWidgets import QTreeView
+from qtpy.QtWidgets import QMenu, QTreeView
 from spyder.config.base import get_translation
+from spyder.utils.qthelpers import create_action
 
 # Local imports
 from spyder_unittest.backend.abbreviator import Abbreviator
@@ -43,7 +44,16 @@ TOPLEVEL_ID = 2 ** 32 - 1
 
 
 class TestDataView(QTreeView):
-    """Tree widget displaying test results."""
+    """
+    Tree widget displaying test results.
+
+    Signals
+    -------
+    sig_edit_goto(str, int): Emitted if editor should go to some position.
+        Arguments are file name and line number (zero-based).
+    """
+
+    sig_edit_goto = Signal(str, int)
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -51,6 +61,8 @@ class TestDataView(QTreeView):
         self.header().setDefaultAlignment(Qt.AlignCenter)
         self.setItemsExpandable(True)
         self.setSortingEnabled(False)
+        self.setExpandsOnDoubleClick(False)
+        self.doubleClicked.connect(self.go_to_test_definition)
 
     def reset(self):
         """
@@ -81,6 +93,58 @@ class TestDataView(QTreeView):
             bottomRight = bottomRight.parent()
         self.spanFirstColumn(topLeft.row(), bottomRight.row())
 
+    def contextMenuEvent(self, event):
+        """Called when user requests a context menu."""
+        index = self.indexAt(event.pos())
+        index = self.make_index_canonical(index)
+        if not index:
+            return  # do nothing if no item under mouse position
+        contextMenu = self.build_context_menu(index)
+        contextMenu.exec_(event.globalPos())
+
+    def go_to_test_definition(self, index):
+        """Ask editor to go to definition of test corresponding to index."""
+        index = self.make_index_canonical(index)
+        filename, lineno = self.model().data(index, Qt.UserRole)
+        if filename is not None:
+            if lineno is None:
+                lineno = 0
+            self.sig_edit_goto.emit(filename, lineno)
+
+    def make_index_canonical(self, index):
+        """
+        Convert given index to canonical index for the same test.
+
+        For every test, the canonical index points to the item on the top level
+        in the first column corresponding to the given position. If the given
+        index is invalid, then return None.
+        """
+        if not index.isValid():
+            return None
+        while index.parent().isValid():  # find top-level node
+            index = index.parent()
+        index = index.sibling(index.row(), 0)  # go to first column
+        return index
+
+    def build_context_menu(self, index):
+        """Build context menu for test item that given index points to."""
+        contextMenu = QMenu(self)
+        if self.isExpanded(index):
+            menuItem = create_action(self, _('Collapse'),
+                                     triggered=lambda: self.collapse(index))
+        else:
+            menuItem = create_action(self, _('Expand'),
+                                     triggered=lambda: self.expand(index))
+            menuItem.setEnabled(self.model().hasChildren(index))
+        contextMenu.addAction(menuItem)
+        menuItem = create_action(
+                self, _('Go to definition'),
+                triggered=lambda: self.go_to_test_definition(index))
+        test_location = self.model().data(index, Qt.UserRole)
+        menuItem.setEnabled(test_location[0] is not None)
+        contextMenu.addAction(menuItem)
+        return contextMenu
+
     def resizeColumns(self):
         """Resize column to fit their contents."""
         for col in range(self.model().columnCount()):
@@ -105,13 +169,6 @@ class TestDataView(QTreeView):
             index = model.index(row, 0)
             for i in range(model.rowCount(index)):
                 self.setFirstColumnSpanned(i, index, True)
-
-    # Not yet implemented ...
-    # def item_activated(self, item):
-    #     """Called if user clicks on item."""
-    #     COL_POS = 0  # Position is not displayed but set as Qt.UserRole
-    #     filename, line_no = item.data(COL_POS, Qt.UserRole)
-    #     self.parent().edit_goto.emit(filename, line_no, '')
 
 
 class TestDataModel(QAbstractItemModel):
@@ -227,7 +284,8 @@ class TestDataModel(QAbstractItemModel):
         If `role` is `DisplayRole`, then return string to display.
         If `role` is `TooltipRole`, then return string for tool tip.
         If `role` is `FontRole`, then return monospace font for level-2 items.
-        If `role` is `BackgroundRole`, then return background color
+        If `role` is `BackgroundRole`, then return background color.
+        If `role` is `UserRole`, then return location of test as (file, line)
         """
         if not index.isValid():
             return None
@@ -256,6 +314,10 @@ class TestDataModel(QAbstractItemModel):
             if id == TOPLEVEL_ID:
                 testresult = self.testresults[row]
                 return COLORS[testresult.category]
+        elif role == Qt.UserRole:
+            if id == TOPLEVEL_ID:
+                testresult = self.testresults[row]
+                return (testresult.filename, testresult.lineno)
         else:
             return None
 

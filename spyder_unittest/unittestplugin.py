@@ -139,6 +139,16 @@ class UnitTestPlugin(SpyderPluginWidget):
         project_conf.set(self.CONF_SECTION, 'framework', test_config.framework)
         project_conf.set(self.CONF_SECTION, 'wdir', test_config.wdir)
 
+    def goto_in_editor(self, filename, lineno):
+        """
+        Go to specified line in editor.
+
+        This function is called when the unittest widget emits `sig_edit_goto`.
+        Note that the line number in the signal is zero based (the first line
+        is line 0), but the editor expects a one-based line number.
+        """
+        self.main.editor.load(filename, lineno + 1, '')
+
 # ----- SpyderPluginWidget API --------------------------------------------
 
     def get_plugin_title(self):
@@ -179,6 +189,7 @@ class UnitTestPlugin(SpyderPluginWidget):
         self.main.projects.sig_project_closed.connect(
             self.handle_project_change)
         self.unittestwidget.sig_newconfig.connect(self.save_config)
+        self.unittestwidget.sig_edit_goto.connect(self.goto_in_editor)
 
         # Add plugin as dockwidget to main window
         self.main.add_dockwidget(self)

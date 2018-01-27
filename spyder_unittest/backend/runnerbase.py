@@ -34,7 +34,7 @@ class TestResult:
     """Class representing the result of running a single test."""
 
     def __init__(self, category, status, name, message='', time=None,
-                 extra_text=''):
+                 extra_text='', filename=None, lineno=None):
         """
         Construct a test result.
 
@@ -46,6 +46,8 @@ class TestResult:
         message : str
         time : float or None
         extra_text : str
+        filename : str or None
+        lineno : int or None
         """
         self.category = category
         self.status = status
@@ -57,6 +59,8 @@ class TestResult:
             self.extra_text = extra_text.split("\n")
         else:
             self.extra_text = []
+        self.filename = filename
+        self.lineno = lineno
 
     def __eq__(self, other):
         """Test for equality."""

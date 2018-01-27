@@ -6,12 +6,112 @@
 """Tests for unittestgui.py."""
 
 # Third party imports
-from qtpy.QtCore import Qt
+from qtpy.QtCore import QModelIndex, QPoint, Qt
+from qtpy.QtGui import QContextMenuEvent
+import pytest
 
 # Local imports
 from spyder_unittest.backend.runnerbase import Category, TestResult
-from spyder_unittest.widgets.datatree import COLORS, TestDataModel
+from spyder_unittest.widgets.datatree import (COLORS, TestDataModel,
+                                              TestDataView)
 
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock  # Python 2
+
+
+@pytest.fixture
+def view_and_model(qtbot):
+    view = TestDataView()
+    model = TestDataModel()
+    res = [TestResult(Category.OK, 'status', 'foo.bar'),
+           TestResult(Category.FAIL, 'error', 'foo.bar', 'kadoom', 0,
+                      'crash!\nboom!', filename='ham.py', lineno=42)]
+    model.testresults = res
+    view.setModel(model)
+    return view, model
+
+def test_contextMenuEvent_calls_exec(view_and_model, monkeypatch):
+    # test that a menu is displayed when clicking on an item
+    mock_exec = Mock()
+    monkeypatch.setattr('spyder_unittest.widgets.datatree.QMenu.exec_', mock_exec)
+    view, model = view_and_model
+    pos = view.visualRect(model.index(0, 0)).center()
+    event = QContextMenuEvent(QContextMenuEvent.Mouse, pos)
+    view.contextMenuEvent(event)
+    assert mock_exec.called
+
+    # test that no menu is displayed when clicking below the bottom item
+    mock_exec.reset_mock()
+    pos = view.visualRect(model.index(1, 0)).bottomRight()
+    pos += QPoint(0, 1)
+    event = QContextMenuEvent(QContextMenuEvent.Mouse, pos)
+    view.contextMenuEvent(event)
+    assert not mock_exec.called
+
+def test_go_to_test_definition_with_invalid_target(view_and_model, qtbot):
+    view, model = view_and_model
+    with qtbot.assertNotEmitted(view.sig_edit_goto):
+        view.go_to_test_definition(model.index(0, 0))
+
+def test_go_to_test_definition_with_valid_target(view_and_model, qtbot):
+    view, model = view_and_model
+    with qtbot.waitSignal(view.sig_edit_goto) as blocker:
+        view.go_to_test_definition(model.index(1, 0))
+    assert blocker.args == ['ham.py', 42]
+
+def test_go_to_test_definition_with_lineno_none(view_and_model, qtbot):
+    view, model = view_and_model
+    res = model.testresults
+    res[1].lineno = None
+    model.testresults = res
+    with qtbot.waitSignal(view.sig_edit_goto) as blocker:
+        view.go_to_test_definition(model.index(1, 0))
+    assert blocker.args == ['ham.py', 0]
+
+def test_make_index_canonical_with_index_in_column2(view_and_model):
+    view, model = view_and_model
+    index = model.index(1, 2)
+    res = view.make_index_canonical(index)
+    assert res == model.index(1, 0)
+
+def test_make_index_canonical_with_level2_index(view_and_model):
+    view, model = view_and_model
+    index = model.index(1, 0, model.index(1, 0))
+    res = view.make_index_canonical(index)
+    assert res == model.index(1, 0)
+
+def test_make_index_canonical_with_invalid_index(view_and_model):
+    view, model = view_and_model
+    index = QModelIndex()
+    res = view.make_index_canonical(index)
+    assert res is None
+
+def test_build_context_menu(view_and_model):
+    view, model = view_and_model
+    menu = view.build_context_menu(model.index(0, 0))
+    assert menu.actions()[0].text() == 'Expand'
+    assert menu.actions()[1].text() == 'Go to definition'
+
+def test_build_context_menu_with_disabled_entries(view_and_model):
+    view, model = view_and_model
+    menu = view.build_context_menu(model.index(0, 0))
+    assert menu.actions()[0].isEnabled() == False
+    assert menu.actions()[1].isEnabled() == False
+
+def test_build_context_menu_with_enabled_entries(view_and_model):
+    view, model = view_and_model
+    menu = view.build_context_menu(model.index(1, 0))
+    assert menu.actions()[0].isEnabled() == True
+    assert menu.actions()[1].isEnabled() == True
+
+def test_build_context_menu_with_expanded_entry(view_and_model):
+    view, model = view_and_model
+    view.expand(model.index(1, 0))
+    menu = view.build_context_menu(model.index(1, 0))
+    assert menu.actions()[0].text() == 'Collapse'
+    assert menu.actions()[0].isEnabled() == True
 
 def test_testdatamodel_using_qtmodeltester(qtmodeltester):
     model = TestDataModel()
@@ -21,7 +121,6 @@ def test_testdatamodel_using_qtmodeltester(qtmodeltester):
     model.testresults = res
     qtmodeltester.check(model)
 
-
 def test_testdatamodel_shows_abbreviated_name_in_table(qtbot):
     model = TestDataModel()
     res = TestResult(Category.OK, 'status', 'foo.bar', '', 0, '')
@@ -29,14 +128,12 @@ def test_testdatamodel_shows_abbreviated_name_in_table(qtbot):
     index = model.index(0, 1)
     assert model.data(index, Qt.DisplayRole) == 'f.bar'
 
-
 def test_testdatamodel_shows_full_name_in_tooltip(qtbot):
     model = TestDataModel()
     res = TestResult(Category.OK, 'status', 'foo.bar', '', 0, '')
     model.testresults = [res]
     index = model.index(0, 1)
     assert model.data(index, Qt.ToolTipRole) == 'foo.bar'
-
 
 def test_testdatamodel_data_background():
     model = TestDataModel()
@@ -48,6 +145,13 @@ def test_testdatamodel_data_background():
     index = model.index(1, 2)
     assert model.data(index, Qt.BackgroundRole) == COLORS[Category.FAIL]
 
+def test_testdatamodel_data_userrole():
+    model = TestDataModel()
+    res = [TestResult(Category.OK, 'status', 'foo.bar', filename='somefile',
+                      lineno=42)]
+    model.testresults = res
+    index = model.index(0, 0)
+    assert model.data(index, Qt.UserRole) == ('somefile', 42)
 
 def test_testdatamodel_add_tests(qtbot):
     def check_args1(parent, begin, end):
