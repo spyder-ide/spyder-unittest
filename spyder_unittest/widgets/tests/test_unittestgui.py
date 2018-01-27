@@ -120,9 +120,9 @@ def test_run_tests_starts_testrunner(qtbot):
     widget.framework_registry.create_runner = Mock(return_value=mockRunner)
     config = Config(wdir=None, framework='ham')
     widget.run_tests(config)
-    widget.framework_registry.create_runner.assert_called_once()
+    widget.framework_registry.create_runner.call_count == 1
     widget.framework_registry.create_runner.call_args[0][0] == 'ham'
-    mockRunner.start.assert_called_once()
+    mockRunner.start.call_count == 1
 
 def test_run_tests_with_pre_test_hook_returning_true(qtbot):
     widget = UnitTestWidget(None)
@@ -130,8 +130,8 @@ def test_run_tests_with_pre_test_hook_returning_true(qtbot):
     widget.framework_registry.create_runner = Mock(return_value=mockRunner)
     widget.pre_test_hook =  Mock(return_value=True)
     widget.run_tests(Config())
-    widget.pre_test_hook.assert_called_once()
-    mockRunner.start.assert_called_once()
+    widget.pre_test_hook.call_count == 1
+    mockRunner.start.call_count == 1
 
 def test_run_tests_with_pre_test_hook_returning_false(qtbot):
     widget = UnitTestWidget(None)
@@ -139,8 +139,8 @@ def test_run_tests_with_pre_test_hook_returning_false(qtbot):
     widget.framework_registry.create_runner = Mock(return_value=mockRunner)
     widget.pre_test_hook =  Mock(return_value=False)
     widget.run_tests(Config())
-    widget.pre_test_hook.assert_called_once()
-    mockRunner.start.assert_not_called()
+    widget.pre_test_hook.call_count == 1
+    mockRunner.start.call_count == 0
 
 @pytest.mark.parametrize('framework', ['py.test', 'nose'])
 def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
