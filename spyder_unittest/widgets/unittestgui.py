@@ -53,6 +53,9 @@ class UnitTestWidget(QWidget):
         Default choice of working directory.
     framework_registry : FrameworkRegistry
         Registry of supported testing frameworks.
+    pre_test_hook : function returning bool or None
+        If set, contains function to run before running tests; abort the test
+        run if hook returns False.
     pythonpath : list of str
         Directories to be added to the Python path when running tests.
     testrunner : TestRunner or None
@@ -83,6 +86,7 @@ class UnitTestWidget(QWidget):
         self.config = None
         self.pythonpath = None
         self.default_wdir = None
+        self.pre_test_hook = None
         self.testrunner = None
         self.output = None
         self.testdataview = TestDataView(self)
@@ -218,6 +222,11 @@ class UnitTestWidget(QWidget):
         """
         Run unit tests.
 
+        First, run `self.pre_test_hook` if it is set, and abort if its return
+        value is `False`.
+
+        Then, run the unit tests.
+
         The process's output is consumed by `read_output()`.
         When the process finishes, the `finish` signal is emitted.
 
@@ -227,6 +236,10 @@ class UnitTestWidget(QWidget):
             configuration for unit tests. If None, use `self.config`.
             In either case, configuration should be valid.
         """
+        if self.pre_test_hook:
+            if self.pre_test_hook() is False:
+                return
+
         if config is None:
             config = self.config
         pythonpath = self.pythonpath

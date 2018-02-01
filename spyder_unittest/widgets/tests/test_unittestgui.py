@@ -114,9 +114,37 @@ def test_unittestwidget_set_message(qtbot):
     widget.set_status_label('xxx')
     widget.status_label.setText.assert_called_once_with('<b>xxx</b>')
 
+def test_run_tests_starts_testrunner(qtbot):
+    widget = UnitTestWidget(None)
+    mockRunner = Mock()
+    widget.framework_registry.create_runner = Mock(return_value=mockRunner)
+    config = Config(wdir=None, framework='ham')
+    widget.run_tests(config)
+    widget.framework_registry.create_runner.call_count == 1
+    widget.framework_registry.create_runner.call_args[0][0] == 'ham'
+    mockRunner.start.call_count == 1
+
+def test_run_tests_with_pre_test_hook_returning_true(qtbot):
+    widget = UnitTestWidget(None)
+    mockRunner = Mock()
+    widget.framework_registry.create_runner = Mock(return_value=mockRunner)
+    widget.pre_test_hook =  Mock(return_value=True)
+    widget.run_tests(Config())
+    widget.pre_test_hook.call_count == 1
+    mockRunner.start.call_count == 1
+
+def test_run_tests_with_pre_test_hook_returning_false(qtbot):
+    widget = UnitTestWidget(None)
+    mockRunner = Mock()
+    widget.framework_registry.create_runner = Mock(return_value=mockRunner)
+    widget.pre_test_hook =  Mock(return_value=False)
+    widget.run_tests(Config())
+    widget.pre_test_hook.call_count == 1
+    mockRunner.start.call_count == 0
+
 @pytest.mark.parametrize('framework', ['py.test', 'nose'])
 def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
-    """Basic check."""
+    """Basic integration test."""
     os.chdir(tmpdir.strpath)
     testfilename = tmpdir.join('test_foo.py').strpath
 
