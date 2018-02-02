@@ -60,7 +60,11 @@ class TestDataView(QTreeView):
         QTreeView.__init__(self, parent)
         self.header().setDefaultAlignment(Qt.AlignCenter)
         self.setItemsExpandable(True)
-        self.setSortingEnabled(False)
+        self.setSortingEnabled(True)
+        self.header().setSortIndicatorShown(False)
+        self.header().sortIndicatorChanged.connect(self.sortByColumn)
+        self.header().sortIndicatorChanged.connect(
+                lambda col, order: self.header().setSortIndicatorShown(True))
         self.setExpandsOnDoubleClick(False)
         self.doubleClicked.connect(self.go_to_test_definition)
 
@@ -352,6 +356,10 @@ class TestDataModel(QAbstractItemModel):
             return len(HEADERS)
         else:
             return 1
+
+    def sort(self, column, order):
+        """Sort model by column in order."""
+        print('in sort(): column =', column, 'order =', order)
 
     def summary(self):
         """Return summary for current results."""
