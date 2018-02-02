@@ -52,14 +52,16 @@ def test_spyderplugin_test_collectreport_with_failure(plugin):
 
 def test_spyderplugin_test_itemcollected(plugin):
     testitem = EmptyClass()
-    testitem.name = 'foo'
+    testitem.name = 'bar'
     testitem.parent = EmptyClass()
-    testitem.parent.name = 'bar.py'
+    testitem.parent.name = 'foo.py'
+    testitem.parent.parent = EmptyClass
+    testitem.parent.parent.name = 'notused'
+    testitem.parent.parent.parent = None
     plugin.pytest_itemcollected(testitem)
     plugin.writer.write.assert_called_once_with({
         'event': 'collected',
-        'name': 'foo',
-        'module': 'bar.py'
+        'nodeid': 'foo.py::bar'
     })
 
 def standard_logreport():
@@ -198,12 +200,10 @@ def test_pytestworker_integration(monkeypatch, tmpdir):
     args = mock_writer.write.call_args_list
 
     assert args[0][0][0]['event'] == 'collected'
-    assert args[0][0][0]['name'] == 'test_ok'
-    assert args[0][0][0]['module'] == 'test_foo.py'
+    assert args[0][0][0]['nodeid'] == 'test_foo.py::test_ok'
 
     assert args[1][0][0]['event'] == 'collected'
-    assert args[1][0][0]['name'] == 'test_fail'
-    assert args[1][0][0]['module'] == 'test_foo.py'
+    assert args[1][0][0]['nodeid'] == 'test_foo.py::test_fail'
 
     assert args[2][0][0]['event'] == 'starttest'
     assert args[2][0][0]['nodeid'] == 'test_foo.py::test_ok'

@@ -86,15 +86,8 @@ def test_pytestrunner_read_output(monkeypatch):
 
 def test_pytestrunner_process_output_with_collected(qtbot):
     runner = PyTestRunner(None)
-    output = [{
-        'event': 'collected',
-        'module': 'spam.py',
-        'name': 'ham'
-    }, {
-        'event': 'collected',
-        'module': 'eggs.py',
-        'name': 'bacon'
-    }]
+    output = [{'event': 'collected', 'nodeid': 'spam.py::ham'},
+              {'event': 'collected', 'nodeid': 'eggs.py::bacon'}]
     with qtbot.waitSignal(runner.sig_collected) as blocker:
         runner.process_output(output)
     expected = ['spam.ham', 'eggs.bacon']
