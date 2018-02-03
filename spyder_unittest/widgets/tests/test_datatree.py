@@ -208,14 +208,14 @@ def test_testdatamodel_sort_by_status_ascending(qtbot):
     model.testresults = STANDARD_TESTRESULTS.copy()
     with qtbot.waitSignal(model.dataChanged):
         model.sort(0, Qt.AscendingOrder)
-    expected = [STANDARD_TESTRESULTS[k] for k in [0, 2, 1]]
+    expected = [STANDARD_TESTRESULTS[k] for k in [2, 1, 0]]
     assert model.testresults == expected
 
 def test_testdatamodel_sort_by_status_descending():
     model = TestDataModel()
     model.testresults = STANDARD_TESTRESULTS.copy()
     model.sort(0, Qt.DescendingOrder)
-    expected = [STANDARD_TESTRESULTS[k] for k in [1, 2, 0]]
+    expected = [STANDARD_TESTRESULTS[k] for k in [0, 1, 2]]
     assert model.testresults == expected
 
 def test_testdatamodel_sort_by_name():

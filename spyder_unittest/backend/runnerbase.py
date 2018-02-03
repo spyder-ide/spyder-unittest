@@ -24,8 +24,8 @@ except ImportError:  # Python 2
 class Category:
     """Enum type representing category of test result."""
 
-    OK = 1
-    FAIL = 2
+    FAIL = 1
+    OK = 2
     SKIP = 3
     PENDING = 4
 
