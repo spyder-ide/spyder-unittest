@@ -7,6 +7,7 @@
 
 # Standard library imports
 from collections import Counter
+from operator import attrgetter
 
 # Third party imports
 from qtpy import PYQT4
@@ -358,8 +359,22 @@ class TestDataModel(QAbstractItemModel):
             return 1
 
     def sort(self, column, order):
-        """Sort model by column in order."""
-        print('in sort(): column =', column, 'order =', order)
+        """Sort model by `column` in `order`."""
+        def key_time(result):
+            return result.time or -1
+
+        reverse = order == Qt.DescendingOrder
+        if column == STATUS_COLUMN:
+            self.testresults.sort(key=attrgetter('category', 'status'),
+                                  reverse=reverse)
+        elif column == NAME_COLUMN:
+            self.testresults.sort(key=attrgetter('name'), reverse=reverse)
+        elif column == MESSAGE_COLUMN:
+            self.testresults.sort(key=attrgetter('message'), reverse=reverse)
+        elif column == TIME_COLUMN:
+            self.testresults.sort(key=key_time, reverse=reverse)
+        self.dataChanged.emit(self.index(0, 0),
+                              self.index(len(self.testresults), len(HEADERS)))
 
     def summary(self):
         """Return summary for current results."""
