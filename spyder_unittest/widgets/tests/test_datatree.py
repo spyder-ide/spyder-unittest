@@ -25,11 +25,12 @@ except ImportError:
 def view_and_model(qtbot):
     view = TestDataView()
     model = TestDataModel()
+    # setModel() before populating testresults because setModel() does a sort
+    view.setModel(model)
     res = [TestResult(Category.OK, 'status', 'foo.bar'),
            TestResult(Category.FAIL, 'error', 'foo.bar', 'kadoom', 0,
                       'crash!\nboom!', filename='ham.py', lineno=42)]
     model.testresults = res
-    view.setModel(model)
     return view, model
 
 def test_contextMenuEvent_calls_exec(view_and_model, monkeypatch):
@@ -196,3 +197,44 @@ def test_testdatamodel_replace_tests(qtbot):
                            raising=True):
         model.update_testresults([result2])
     assert model.testresults == [result2]
+
+STANDARD_TESTRESULTS = [
+    TestResult(Category.OK, 'status', 'foo.bar', time=2),
+    TestResult(Category.FAIL, 'failure', 'fu.baz', 'kaboom',time=1),
+    TestResult(Category.FAIL, 'error', 'fu.bar', 'boom')]
+
+def test_testdatamodel_sort_by_status_ascending(qtbot):
+    model = TestDataModel()
+    model.testresults = STANDARD_TESTRESULTS[:]
+    with qtbot.waitSignal(model.dataChanged):
+        model.sort(0, Qt.AscendingOrder)
+    expected = [STANDARD_TESTRESULTS[k] for k in [2, 1, 0]]
+    assert model.testresults == expected
+
+def test_testdatamodel_sort_by_status_descending():
+    model = TestDataModel()
+    model.testresults = STANDARD_TESTRESULTS[:]
+    model.sort(0, Qt.DescendingOrder)
+    expected = [STANDARD_TESTRESULTS[k] for k in [0, 1, 2]]
+    assert model.testresults == expected
+
+def test_testdatamodel_sort_by_name():
+    model = TestDataModel()
+    model.testresults = STANDARD_TESTRESULTS[:]
+    model.sort(1, Qt.AscendingOrder)
+    expected = [STANDARD_TESTRESULTS[k] for k in [0, 2, 1]]
+    assert model.testresults == expected
+
+def test_testdatamodel_sort_by_message():
+    model = TestDataModel()
+    model.testresults = STANDARD_TESTRESULTS[:]
+    model.sort(2, Qt.AscendingOrder)
+    expected = [STANDARD_TESTRESULTS[k] for k in [0, 2, 1]]
+    assert model.testresults == expected
+
+def test_testdatamodel_sort_by_time():
+    model = TestDataModel()
+    model.testresults = STANDARD_TESTRESULTS[:]
+    model.sort(3, Qt.AscendingOrder)
+    expected = [STANDARD_TESTRESULTS[k] for k in [2, 1, 0]]
+    assert model.testresults == expected

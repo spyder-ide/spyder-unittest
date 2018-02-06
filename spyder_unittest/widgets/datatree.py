@@ -7,6 +7,7 @@
 
 # Standard library imports
 from collections import Counter
+from operator import attrgetter
 
 # Third party imports
 from qtpy import PYQT4
@@ -60,7 +61,11 @@ class TestDataView(QTreeView):
         QTreeView.__init__(self, parent)
         self.header().setDefaultAlignment(Qt.AlignCenter)
         self.setItemsExpandable(True)
-        self.setSortingEnabled(False)
+        self.setSortingEnabled(True)
+        self.header().setSortIndicatorShown(False)
+        self.header().sortIndicatorChanged.connect(self.sortByColumn)
+        self.header().sortIndicatorChanged.connect(
+                lambda col, order: self.header().setSortIndicatorShown(True))
         self.setExpandsOnDoubleClick(False)
         self.doubleClicked.connect(self.go_to_test_definition)
 
@@ -352,6 +357,24 @@ class TestDataModel(QAbstractItemModel):
             return len(HEADERS)
         else:
             return 1
+
+    def sort(self, column, order):
+        """Sort model by `column` in `order`."""
+        def key_time(result):
+            return result.time or -1
+
+        reverse = order == Qt.DescendingOrder
+        if column == STATUS_COLUMN:
+            self.testresults.sort(key=attrgetter('category', 'status'),
+                                  reverse=reverse)
+        elif column == NAME_COLUMN:
+            self.testresults.sort(key=attrgetter('name'), reverse=reverse)
+        elif column == MESSAGE_COLUMN:
+            self.testresults.sort(key=attrgetter('message'), reverse=reverse)
+        elif column == TIME_COLUMN:
+            self.testresults.sort(key=key_time, reverse=reverse)
+        self.dataChanged.emit(self.index(0, 0),
+                              self.index(len(self.testresults), len(HEADERS)))
 
     def summary(self):
         """Return summary for current results."""
