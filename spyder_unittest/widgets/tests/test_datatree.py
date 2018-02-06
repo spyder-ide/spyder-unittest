@@ -142,6 +142,7 @@ def test_testdatamodel_shows_time(qtmodeltester):
     model.testresults = [res]
     index = model.index(0, 3)
     assert model.data(index, Qt.DisplayRole) == '1.23'
+    assert model.data(index, Qt.TextAlignmentRole) == Qt.AlignRight
 
 def test_testdatamodel_data_background():
     model = TestDataModel()

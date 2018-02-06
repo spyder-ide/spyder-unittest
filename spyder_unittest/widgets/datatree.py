@@ -290,7 +290,8 @@ class TestDataModel(QAbstractItemModel):
         If `role` is `TooltipRole`, then return string for tool tip.
         If `role` is `FontRole`, then return monospace font for level-2 items.
         If `role` is `BackgroundRole`, then return background color.
-        If `role` is `UserRole`, then return location of test as (file, line)
+        If `role` is `TextAlignmentRole`, then return right-aligned for time.
+        If `role` is `UserRole`, then return location of test as (file, line).
         """
         if not index.isValid():
             return None
@@ -319,6 +320,9 @@ class TestDataModel(QAbstractItemModel):
             if id == TOPLEVEL_ID:
                 testresult = self.testresults[row]
                 return COLORS[testresult.category]
+        elif role == Qt.TextAlignmentRole:
+            if id == TOPLEVEL_ID and column == TIME_COLUMN:
+                return Qt.AlignRight
         elif role == Qt.UserRole:
             if id == TOPLEVEL_ID:
                 testresult = self.testresults[row]
