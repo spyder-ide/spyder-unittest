@@ -136,6 +136,13 @@ def test_testdatamodel_shows_full_name_in_tooltip(qtbot):
     index = model.index(0, 1)
     assert model.data(index, Qt.ToolTipRole) == 'foo.bar'
 
+def test_testdatamodel_shows_time(qtmodeltester):
+    model = TestDataModel()
+    res = TestResult(Category.OK, 'status', 'foo.bar', time=0.0012345)
+    model.testresults = [res]
+    index = model.index(0, 3)
+    assert model.data(index, Qt.DisplayRole) == '1.23'
+
 def test_testdatamodel_data_background():
     model = TestDataModel()
     res = [TestResult(Category.OK, 'status', 'foo.bar'),
