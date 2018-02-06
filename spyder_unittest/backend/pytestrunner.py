@@ -58,10 +58,11 @@ class PyTestRunner(RunnerBase):
 
         for result_item in output:
             if result_item['event'] == 'collected':
-                collected_list.append(logreport_collected_to_str(result_item))
+                testname = convert_nodeid_to_testname(result_item['nodeid'])
+                collected_list.append(testname)
             elif result_item['event'] == 'collecterror':
-                collecterror_list.append(
-                        logreport_collecterror_to_tuple(result_item))
+                tupl = logreport_collecterror_to_tuple(result_item)
+                collecterror_list.append(tupl)
             elif result_item['event'] == 'starttest':
                 starttest_list.append(logreport_starttest_to_str(result_item))
             elif result_item['event'] == 'logreport':
@@ -104,12 +105,6 @@ def convert_nodeid_to_testname(nodeid):
     module, name = nodeid.split('::', 1)
     module = normalize_module_name(module)
     return '{}.{}'.format(module, name)
-
-
-def logreport_collected_to_str(report):
-    """Convert a 'collected' logreport to a str."""
-    module = normalize_module_name(report['module'])
-    return '{}.{}'.format(module, report['name'])
 
 
 def logreport_collecterror_to_tuple(report):
