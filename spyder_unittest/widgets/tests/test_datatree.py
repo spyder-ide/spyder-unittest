@@ -144,6 +144,18 @@ def test_testdatamodel_shows_time(qtmodeltester):
     assert model.data(index, Qt.DisplayRole) == '1.23'
     assert model.data(index, Qt.TextAlignmentRole) == Qt.AlignRight
 
+def test_testdatamodel_shows_time_when_zero(qtmodeltester):
+    model = TestDataModel()
+    res = TestResult(Category.OK, 'status', 'foo.bar', time=0)
+    model.testresults = [res]
+    assert model.data(model.index(0, 3), Qt.DisplayRole) == '0.00'
+
+def test_testdatamodel_shows_time_when_blank(qtmodeltester):
+    model = TestDataModel()
+    res = TestResult(Category.OK, 'status', 'foo.bar')
+    model.testresults = [res]
+    assert model.data(model.index(0, 3), Qt.DisplayRole) == ''
+
 def test_testdatamodel_data_background():
     model = TestDataModel()
     res = [TestResult(Category.OK, 'status', 'foo.bar'),

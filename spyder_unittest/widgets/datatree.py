@@ -309,7 +309,7 @@ class TestDataModel(QAbstractItemModel):
                 return self.testresults[row].message
             elif column == TIME_COLUMN:
                 time = self.testresults[row].time
-                return '{:.2f}'.format(time * 1e3) if time else ''
+                return '' if time is None else '{:.2f}'.format(time * 1e3)
         elif role == Qt.ToolTipRole:
             if id == TOPLEVEL_ID and column == NAME_COLUMN:
                 return self.testresults[row].name
