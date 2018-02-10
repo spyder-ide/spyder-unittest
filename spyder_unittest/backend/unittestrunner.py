@@ -57,7 +57,7 @@ class UnittestRunner(RunnerBase):
                     cat = Category.SKIP
                 name = '{}.{}'.format(data[1], data[0])
                 tr = TestResult(category=cat, status=data[2], name=name,
-                                message=data[3], time=0, extra_text='')
+                                message=data[3])
                 res.append(tr)
                 line_index += 1
                 test_index = -1
