@@ -224,7 +224,7 @@ class RunnerBase(QObject):
         locale_codec = QTextCodec.codecForLocale()
         return to_text_string(locale_codec.toUnicode(qbytearray.data()))
 
-    def kill_if_running(self):
-        """Kill testing process if it is running."""
+    def stop_if_running(self):
+        """Stop testing process if it is running."""
         if self.process and self.process.state() == QProcess.Running:
             self.process.kill()

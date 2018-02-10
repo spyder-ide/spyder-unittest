@@ -265,9 +265,9 @@ class UnitTestWidget(QWidget):
 
     def set_running_state(self, state):
         """
-        Change start/kill button according to whether tests are running.
+        Change start/stop button according to whether tests are running.
 
-        If tests are running, then display a kill button, otherwise display
+        If tests are running, then display a stop button, otherwise display
         a start button.
 
         Parameters
@@ -282,10 +282,10 @@ class UnitTestWidget(QWidget):
             pass
         if state:
             button.setIcon(ima.icon('stop'))
-            button.setText(_('Kill'))
-            button.setToolTip(_('Kill current test process'))
+            button.setText(_('Stop'))
+            button.setToolTip(_('Stop current test process'))
             if self.testrunner:
-                button.clicked.connect(self.testrunner.kill_if_running)
+                button.clicked.connect(self.testrunner.stop_if_running)
         else:
             button.setIcon(ima.icon('run'))
             button.setText(_("Run tests"))
