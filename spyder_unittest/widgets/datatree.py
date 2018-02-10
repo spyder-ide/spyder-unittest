@@ -29,7 +29,7 @@ except KeyError as error:
 
 COLORS = {
     Category.OK: QBrush(QColor("#C1FFBA")),
-    Category.FAIL: QBrush(QColor("#FF0000")),
+    Category.FAIL: QBrush(QColor("#FF5050")),
     Category.SKIP: QBrush(QColor("#C5C5C5")),
     Category.PENDING: QBrush(QColor("#C5C5C5"))
 }
