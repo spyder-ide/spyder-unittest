@@ -7,6 +7,7 @@
 
 # Standard library imports
 import os
+import os.path as osp
 
 # Local imports
 from spyder_unittest.backend.jsonstream import JSONStreamReader
@@ -32,6 +33,7 @@ class PyTestRunner(RunnerBase):
 
     def start(self, config, pythonpath):
         """Start process which will run the unit test suite."""
+        self.config = config
         self.reader = JSONStreamReader()
         self.output = ''
         RunnerBase.start(self, config, pythonpath)
@@ -66,7 +68,8 @@ class PyTestRunner(RunnerBase):
             elif result_item['event'] == 'starttest':
                 starttest_list.append(logreport_starttest_to_str(result_item))
             elif result_item['event'] == 'logreport':
-                result_list.append(logreport_to_testresult(result_item))
+                testresult = logreport_to_testresult(result_item, self.config)
+                result_list.append(testresult)
             elif result_item['event'] == 'finished':
                 self.output = result_item['stdout']
 
@@ -118,7 +121,7 @@ def logreport_starttest_to_str(report):
     return convert_nodeid_to_testname(report['nodeid'])
 
 
-def logreport_to_testresult(report):
+def logreport_to_testresult(report, config):
     """Convert a logreport sent by test process to a TestResult."""
     if report['outcome'] == 'passed':
         cat = Category.OK
@@ -142,7 +145,8 @@ def logreport_to_testresult(report):
         for (heading, text) in report['sections']:
             extra_text += '----- {} -----\n'.format(heading)
             extra_text += text
+    filename = osp.join(config.wdir, report['filename'])
     result = TestResult(cat, status, testname, message=message,
                         time=duration, extra_text=extra_text,
-                        filename=report['filename'], lineno=report['lineno'])
+                        filename=filename, lineno=report['lineno'])
     return result

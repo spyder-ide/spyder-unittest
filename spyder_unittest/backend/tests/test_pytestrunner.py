@@ -7,6 +7,7 @@
 
 # Standard library imports
 import os
+import os.path as osp
 
 # Third party imports
 from qtpy.QtCore import QByteArray
@@ -127,18 +128,19 @@ def standard_logreport_output():
 
 def test_pytestrunner_process_output_with_logreport_passed(qtbot):
     runner = PyTestRunner(None)
+    runner.config = Config(wdir='ham')
     output = [standard_logreport_output()]
     with qtbot.waitSignal(runner.sig_testresult) as blocker:
         runner.process_output(output)
     expected = [TestResult(Category.OK, 'ok', 'foo.bar', time=42,
-                           filename='foo.py', lineno=24)]
+                           filename=osp.join('ham', 'foo.py'), lineno=24)]
     assert blocker.args == [expected]
 
 def test_logreport_to_testresult_passed():
     report = standard_logreport_output()
     expected = TestResult(Category.OK, 'ok', 'foo.bar', time=42,
-                          filename='foo.py', lineno=24)
-    assert logreport_to_testresult(report) == expected
+                          filename=osp.join('ham', 'foo.py'), lineno=24)
+    assert logreport_to_testresult(report, Config(wdir='ham')) == expected
 
 def test_logreport_to_testresult_failed():
     report = standard_logreport_output()
@@ -147,8 +149,8 @@ def test_logreport_to_testresult_failed():
     report['longrepr'] = 'exception text'
     expected = TestResult(Category.FAIL, 'failure', 'foo.bar',
                           message='msg', time=42, extra_text='exception text',
-                          filename='foo.py', lineno=24)
-    assert logreport_to_testresult(report) == expected
+                          filename=osp.join('ham', 'foo.py'), lineno=24)
+    assert logreport_to_testresult(report, Config(wdir='ham')) == expected
 
 def test_logreport_to_testresult_skipped():
     report = standard_logreport_output()
@@ -156,9 +158,9 @@ def test_logreport_to_testresult_skipped():
     report['outcome'] = 'skipped'
     report['longrepr'] = ['file', 24, 'skipmsg']
     expected = TestResult(Category.SKIP, 'skipped', 'foo.bar',
-                          time=42, extra_text='skipmsg', filename='foo.py',
-                          lineno=24)
-    assert logreport_to_testresult(report) == expected
+                          time=42, extra_text='skipmsg',
+                          filename=osp.join('ham', 'foo.py'), lineno=24)
+    assert logreport_to_testresult(report, Config(wdir='ham')) == expected
 
 def test_logreport_to_testresult_xfail():
     report = standard_logreport_output()
@@ -168,15 +170,15 @@ def test_logreport_to_testresult_xfail():
     report['wasxfail'] = ''
     expected = TestResult(Category.SKIP, 'skipped', 'foo.bar',
                           message='msg', time=42, extra_text='exception text',
-                          filename='foo.py', lineno=24)
-    assert logreport_to_testresult(report) == expected
+                          filename=osp.join('ham', 'foo.py'), lineno=24)
+    assert logreport_to_testresult(report, Config(wdir='ham')) == expected
 
 def test_logreport_to_testresult_xpass():
     report = standard_logreport_output()
     report['wasxfail'] = ''
     expected = TestResult(Category.OK, 'ok', 'foo.bar', time=42,
-                          filename='foo.py', lineno=24)
-    assert logreport_to_testresult(report) == expected
+                          filename=osp.join('ham', 'foo.py'), lineno=24)
+    assert logreport_to_testresult(report, Config(wdir='ham')) == expected
 
 def test_logreport_to_testresult_with_output():
     report = standard_logreport_output()
@@ -185,5 +187,6 @@ def test_logreport_to_testresult_with_output():
     txt = ('----- Captured stdout call -----\nham\n'
            '----- Captured stderr call -----\nspam\n')
     expected = TestResult(Category.OK, 'ok', 'foo.bar', time=42,
-                          extra_text=txt, filename='foo.py', lineno=24)
-    assert logreport_to_testresult(report) == expected
+                          extra_text=txt, filename=osp.join('ham', 'foo.py'),
+                          lineno=24)
+    assert logreport_to_testresult(report, Config(wdir='ham')) == expected
