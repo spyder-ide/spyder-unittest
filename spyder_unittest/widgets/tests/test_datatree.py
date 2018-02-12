@@ -226,7 +226,7 @@ STANDARD_TESTRESULTS = [
 def test_testdatamodel_sort_by_status_ascending(qtbot):
     model = TestDataModel()
     model.testresults = STANDARD_TESTRESULTS[:]
-    with qtbot.waitSignal(model.dataChanged):
+    with qtbot.waitSignal(model.modelReset):
         model.sort(0, Qt.AscendingOrder)
     expected = [STANDARD_TESTRESULTS[k] for k in [2, 1, 0]]
     assert model.testresults == expected
