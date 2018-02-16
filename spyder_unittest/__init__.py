@@ -8,5 +8,5 @@
 # Local imports
 from .unittestplugin import UnitTestPlugin as PLUGIN_CLASS
 
-__version__ = '0.3.0'
+__version__ = '0.4.dev0'
 PLUGIN_CLASS
