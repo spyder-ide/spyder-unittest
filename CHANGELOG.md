@@ -1,5 +1,55 @@
 # History of changes
 
+## Version 0.3.0 (2018/02/16)
+
+This version includes improved support of `py.test` (test results are displayed as they come in, double clicking on a test result opens the test in the editor) as well as various other improvements.
+
+### Issues Closed
+
+* [Issue 106](https://github.com/spyder-ide/spyder-unittest/issues/106) - After sorting, test details are lost ([PR 110](https://github.com/spyder-ide/spyder-unittest/pull/110))
+* [Issue 103](https://github.com/spyder-ide/spyder-unittest/issues/103) - "Go to" not working unless working directory is correctly set ([PR 109](https://github.com/spyder-ide/spyder-unittest/pull/109))
+* [Issue 98](https://github.com/spyder-ide/spyder-unittest/issues/98) - Running unittest tests within py.test results in error ([PR 102](https://github.com/spyder-ide/spyder-unittest/pull/102))
+* [Issue 96](https://github.com/spyder-ide/spyder-unittest/issues/96) - Use new colors for passed and failed tests ([PR 108](https://github.com/spyder-ide/spyder-unittest/pull/108))
+* [Issue 94](https://github.com/spyder-ide/spyder-unittest/issues/94) - Enable sorting in table of test results ([PR 104](https://github.com/spyder-ide/spyder-unittest/pull/104))
+* [Issue 93](https://github.com/spyder-ide/spyder-unittest/issues/93) - Handle errors in py.test's collection phase ([PR 99](https://github.com/spyder-ide/spyder-unittest/pull/99))
+* [Issue 92](https://github.com/spyder-ide/spyder-unittest/issues/92) - Retitle "Kill" (tests) button to "Stop" ([PR 107](https://github.com/spyder-ide/spyder-unittest/pull/107))
+* [Issue 89](https://github.com/spyder-ide/spyder-unittest/issues/89) - Write tests for UnitTestPlugin ([PR 95](https://github.com/spyder-ide/spyder-unittest/pull/95))
+* [Issue 87](https://github.com/spyder-ide/spyder-unittest/issues/87) - Don't display test time when using unittest ([PR 105](https://github.com/spyder-ide/spyder-unittest/pull/105))
+* [Issue 86](https://github.com/spyder-ide/spyder-unittest/issues/86) - Use sensible precision when displaying test times ([PR 105](https://github.com/spyder-ide/spyder-unittest/pull/105))
+* [Issue 83](https://github.com/spyder-ide/spyder-unittest/issues/83) - Changes for compatibility with new undocking behavior of Spyder ([PR 84](https://github.com/spyder-ide/spyder-unittest/pull/84))
+* [Issue 77](https://github.com/spyder-ide/spyder-unittest/issues/77) - Be smarter about abbreviating test names
+* [Issue 71](https://github.com/spyder-ide/spyder-unittest/issues/71) - Save before running tests (?) ([PR 101](https://github.com/spyder-ide/spyder-unittest/pull/101))
+* [Issue 50](https://github.com/spyder-ide/spyder-unittest/issues/50) - Use py.test's API to run tests ([PR 91](https://github.com/spyder-ide/spyder-unittest/pull/91))
+* [Issue 43](https://github.com/spyder-ide/spyder-unittest/issues/43) - Save selected test framework ([PR 90](https://github.com/spyder-ide/spyder-unittest/pull/90))
+* [Issue 31](https://github.com/spyder-ide/spyder-unittest/issues/31) - Add issues/PRs templates ([PR 111](https://github.com/spyder-ide/spyder-unittest/pull/111))
+* [Issue 13](https://github.com/spyder-ide/spyder-unittest/issues/13) - Display test results as they come in ([PR 91](https://github.com/spyder-ide/spyder-unittest/pull/91))
+* [Issue 12](https://github.com/spyder-ide/spyder-unittest/issues/12) - Double clicking on test name should take you somewhere useful ([PR 100](https://github.com/spyder-ide/spyder-unittest/pull/100))
+
+In this release 18 issues were closed.
+
+### Pull Requests Merged
+
+* [PR 111](https://github.com/spyder-ide/spyder-unittest/pull/111) - Update docs for new release ([31](https://github.com/spyder-ide/spyder-unittest/issues/31))
+* [PR 110](https://github.com/spyder-ide/spyder-unittest/pull/110) - Emit modelReset after sorting test results ([106](https://github.com/spyder-ide/spyder-unittest/issues/106))
+* [PR 109](https://github.com/spyder-ide/spyder-unittest/pull/109) - Store full path to file containing test in TestResult ([103](https://github.com/spyder-ide/spyder-unittest/issues/103))
+* [PR 108](https://github.com/spyder-ide/spyder-unittest/pull/108) - Use paler shade of red as background for failing tests ([96](https://github.com/spyder-ide/spyder-unittest/issues/96))
+* [PR 107](https://github.com/spyder-ide/spyder-unittest/pull/107) - Relabel 'Kill' button ([92](https://github.com/spyder-ide/spyder-unittest/issues/92))
+* [PR 105](https://github.com/spyder-ide/spyder-unittest/pull/105) - Improve display of test times ([87](https://github.com/spyder-ide/spyder-unittest/issues/87), [86](https://github.com/spyder-ide/spyder-unittest/issues/86))
+* [PR 104](https://github.com/spyder-ide/spyder-unittest/pull/104) - Allow user to sort tests ([94](https://github.com/spyder-ide/spyder-unittest/issues/94))
+* [PR 102](https://github.com/spyder-ide/spyder-unittest/pull/102) - Use nodeid when collecting tests using py.test ([98](https://github.com/spyder-ide/spyder-unittest/issues/98))
+* [PR 101](https://github.com/spyder-ide/spyder-unittest/pull/101) - Save all files before running tests ([71](https://github.com/spyder-ide/spyder-unittest/issues/71))
+* [PR 100](https://github.com/spyder-ide/spyder-unittest/pull/100) - Implement go to test definition for py.test ([12](https://github.com/spyder-ide/spyder-unittest/issues/12))
+* [PR 99](https://github.com/spyder-ide/spyder-unittest/pull/99) - Handle errors encountered when py.test collect tests ([93](https://github.com/spyder-ide/spyder-unittest/issues/93))
+* [PR 97](https://github.com/spyder-ide/spyder-unittest/pull/97) - Abbreviate module names when displaying test names
+* [PR 95](https://github.com/spyder-ide/spyder-unittest/pull/95) - Add unit tests for plugin ([89](https://github.com/spyder-ide/spyder-unittest/issues/89))
+* [PR 91](https://github.com/spyder-ide/spyder-unittest/pull/91) - Display py.test results as they come in ([50](https://github.com/spyder-ide/spyder-unittest/issues/50), [13](https://github.com/spyder-ide/spyder-unittest/issues/13))
+* [PR 90](https://github.com/spyder-ide/spyder-unittest/pull/90) - Load and save configuration for tests ([43](https://github.com/spyder-ide/spyder-unittest/issues/43))
+* [PR 85](https://github.com/spyder-ide/spyder-unittest/pull/85) - Remove PySide from CI scripts and remove Scrutinizer
+* [PR 84](https://github.com/spyder-ide/spyder-unittest/pull/84) - PR: Show undock action ([83](https://github.com/spyder-ide/spyder-unittest/issues/83))
+
+In this release 17 pull requests were closed.
+
+
 ## Version 0.2.0 (2017/08/20)
 
 The main change in this version is that it adds support for tests written 
@@ -30,6 +80,7 @@ In this release 7 issues were closed.
 * [PR 67](https://github.com/spyder-ide/spyder-unittest/pull/67) - Install the tests alongside the module
 
 In this release 9 pull requests were closed.
+
 
 ## Version 0.1.2 (2017/03/04)
 
