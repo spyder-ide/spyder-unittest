@@ -367,6 +367,7 @@ class TestDataModel(QAbstractItemModel):
         def key_time(result):
             return result.time or -1
 
+        self.beginResetModel()
         reverse = order == Qt.DescendingOrder
         if column == STATUS_COLUMN:
             self.testresults.sort(key=attrgetter('category', 'status'),
@@ -377,8 +378,7 @@ class TestDataModel(QAbstractItemModel):
             self.testresults.sort(key=attrgetter('message'), reverse=reverse)
         elif column == TIME_COLUMN:
             self.testresults.sort(key=key_time, reverse=reverse)
-        self.dataChanged.emit(self.index(0, 0),
-                              self.index(len(self.testresults), len(HEADERS)))
+        self.endResetModel()
 
     def summary(self):
         """Return summary for current results."""
