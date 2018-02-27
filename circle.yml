@@ -13,14 +13,14 @@ machine:
     COVERALLS_REPO_TOKEN: c5Qt1n27dLFCAIESYVkuCmVpUU8doney1
     # Environment variables used by astropy helpers
     TRAVIS_OS_NAME: "linux"
-    CONDA_DEPENDENCIES: "lxml mock nose pytest"
+    CONDA_DEPENDENCIES: "lxml mock nose pytest zmq"
     PIP_DEPENDENCIES: "coveralls pytest-qt"
 
 dependencies:
   override:
     # First convert PY_VERSIONS to an array and then select the python version based on the CIRCLE_NODE_INDEX
     - export PY_VERSIONS=($PY_VERSIONS) &&
-      export TRAVIS_PYTHON_VERSION=${PY_VERSIONS[$CIRCLE_NODE_INDEX]} && 
+      export TRAVIS_PYTHON_VERSION=${PY_VERSIONS[$CIRCLE_NODE_INDEX]} &&
       echo -e "PYTHON = $TRAVIS_PYTHON_VERSION \n============" &&
       git clone git://github.com/astropy/ci-helpers.git &&
       source ci-helpers/travis/setup_conda_$TRAVIS_OS_NAME.sh &&
