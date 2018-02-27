@@ -13,7 +13,7 @@ machine:
     COVERALLS_REPO_TOKEN: c5Qt1n27dLFCAIESYVkuCmVpUU8doney1
     # Environment variables used by astropy helpers
     TRAVIS_OS_NAME: "linux"
-    CONDA_DEPENDENCIES: "lxml mock nose pytest zmq"
+    CONDA_DEPENDENCIES: "lxml mock nose pytest pyzmq"
     PIP_DEPENDENCIES: "coveralls pytest-qt"
 
 dependencies:
