@@ -12,8 +12,8 @@ import os
 import pytest
 
 # Local imports
-from spyder_unittest.backend.jsonstream import JSONStreamWriter
 from spyder_unittest.backend.pytestworker import SpyderPlugin, main
+from spyder_unittest.backend.zmqstream import ZmqStreamWriter
 
 try:
     from unittest.mock import call, create_autospec, Mock
@@ -27,7 +27,7 @@ class EmptyClass:
 
 @pytest.fixture
 def plugin():
-    mock_writer = create_autospec(JSONStreamWriter)
+    mock_writer = create_autospec(ZmqStreamWriter)
     return SpyderPlugin(mock_writer)
 
 def test_spyderplugin_test_collectreport_with_success(plugin):
@@ -167,22 +167,6 @@ def test_spyderplugin_runtest_logreport_ignores_teardown_passed(plugin):
     plugin.pytest_runtest_logreport(report)
     plugin.writer.write.assert_not_called()
 
-def test_main_captures_stdout_and_stderr(monkeypatch):
-    def mock_main(args, plugins):
-        print('output')
-    monkeypatch.setattr(
-        'spyder_unittest.backend.pytestworker.pytest.main', mock_main)
-
-    mock_writer = create_autospec(JSONStreamWriter)
-    MockJSONStreamWriter = Mock(return_value=mock_writer)
-    monkeypatch.setattr(
-        'spyder_unittest.backend.pytestworker.JSONStreamWriter',
-        MockJSONStreamWriter)
-
-    main(None)
-    mock_writer.write.assert_called_once_with({
-            'event': 'finished', 'stdout': 'output\n'})
-
 def test_pytestworker_integration(monkeypatch, tmpdir):
     os.chdir(tmpdir.strpath)
     testfilename = tmpdir.join('test_foo.py').strpath
@@ -190,12 +174,12 @@ def test_pytestworker_integration(monkeypatch, tmpdir):
         f.write("def test_ok(): assert 1+1 == 2\n"
                 "def test_fail(): assert 1+1 == 3\n")
 
-    mock_writer = create_autospec(JSONStreamWriter)
-    MockJSONStreamWriter = Mock(return_value=mock_writer)
+    mock_writer = create_autospec(ZmqStreamWriter)
+    MockZmqStreamWriter = Mock(return_value=mock_writer)
     monkeypatch.setattr(
-        'spyder_unittest.backend.pytestworker.JSONStreamWriter',
-        MockJSONStreamWriter)
-    main([testfilename])
+        'spyder_unittest.backend.pytestworker.ZmqStreamWriter',
+        MockZmqStreamWriter)
+    main(['mockscriptname', '42', testfilename])
 
     args = mock_writer.write.call_args_list
 
@@ -228,6 +212,3 @@ def test_pytestworker_integration(monkeypatch, tmpdir):
     assert args[5][0][0]['filename'] == 'test_foo.py'
     assert args[5][0][0]['lineno'] == 1
     assert 'duration' in args[5][0][0]
-
-    assert args[6][0][0]['event'] == 'finished'
-    assert 'pytest' in args[6][0][0]['stdout']

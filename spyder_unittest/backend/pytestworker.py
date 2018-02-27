@@ -12,30 +12,29 @@ PyTestRunner can read them.
 """
 
 # Standard library imports
-import io
 import sys
 
 # Third party imports
 import pytest
 
 # Local imports
-from spyder_unittest.backend.jsonstream import JSONStreamWriter
+from spyder_unittest.backend.zmqstream import ZmqStreamWriter
 
 
-class StdoutBuffer(io.TextIOWrapper):
-    """
-    Wrapper for binary stream which accepts both text and binary strings.
+class FileStub():
+    """Stub for ZmqStreamWriter which instead writes to a file."""
 
-    Source: https://stackoverflow.com/a/19344871
-    """
+    def __init__(self, filename):
+        """Constructor; connect to specified filename."""
+        self.file = open(filename, 'w')
 
-    def write(self, string):
-        """Write text or binary string to underlying stream."""
-        try:
-            return super(StdoutBuffer, self).write(string)
-        except TypeError:
-            # redirect encoded byte strings directly to buffer
-            return super(StdoutBuffer, self).buffer.write(string)
+    def write(self, obj):
+        """Write Python object to file."""
+        self.file.write(str(obj) + '\n')
+
+    def close(self):
+        """Close file."""
+        self.file.close()
 
 
 class SpyderPlugin():
@@ -99,18 +98,13 @@ class SpyderPlugin():
 
 def main(args):
     """Run py.test with the Spyder plugin."""
-    old_stdout = sys.stdout
-    stdout_buffer = StdoutBuffer(io.BytesIO(), sys.stdout.encoding)
-    sys.stdout = stdout_buffer
-
-    writer = JSONStreamWriter(old_stdout)
-    pytest.main(args, plugins=[SpyderPlugin(writer)])
-
-    stdout_buffer.seek(0)
-    data = {'event': 'finished', 'stdout': stdout_buffer.read()}
-    writer.write(data)
-    sys.stdout = old_stdout
+    if args[1] == 'file':
+        writer = FileStub('pytestworker.log')
+    else:
+        writer = ZmqStreamWriter(int(args[1]))
+    pytest.main(args[2:], plugins=[SpyderPlugin(writer)])
+    writer.close()
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main(sys.argv)
