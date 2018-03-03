@@ -25,6 +25,7 @@ requirements:
     - lxml
     - python
     - spyder >=3
+    - pyzmq
 
 test:
   imports:

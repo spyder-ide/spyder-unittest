@@ -10,8 +10,8 @@ import os
 import os.path as osp
 
 # Local imports
-from spyder_unittest.backend.jsonstream import JSONStreamReader
 from spyder_unittest.backend.runnerbase import Category, RunnerBase, TestResult
+from spyder_unittest.backend.zmqstream import ZmqStreamReader
 
 
 class PyTestRunner(RunnerBase):
@@ -23,26 +23,14 @@ class PyTestRunner(RunnerBase):
     def create_argument_list(self):
         """Create argument list for testing process."""
         pyfile = os.path.join(os.path.dirname(__file__), 'pytestworker.py')
-        return [pyfile]
-
-    def _prepare_process(self, config, pythonpath):
-        """Prepare and return process for running the unit test suite."""
-        process = RunnerBase._prepare_process(self, config, pythonpath)
-        process.readyReadStandardOutput.connect(self.read_output)
-        return process
+        return [pyfile, str(self.reader.port)]
 
     def start(self, config, pythonpath):
         """Start process which will run the unit test suite."""
         self.config = config
-        self.reader = JSONStreamReader()
-        self.output = ''
+        self.reader = ZmqStreamReader()
+        self.reader.sig_received.connect(self.process_output)
         RunnerBase.start(self, config, pythonpath)
-
-    def read_output(self):
-        """Called when test process emits output."""
-        output = self.read_all_process_output()
-        result = self.reader.consume(output)
-        self.process_output(result)
 
     def process_output(self, output):
         """
@@ -88,7 +76,9 @@ class PyTestRunner(RunnerBase):
 
         This function emits `sig_finished`.
         """
-        self.sig_finished.emit(None, self.output)
+        self.reader.close()
+        output = self.read_all_process_output()
+        self.sig_finished.emit(None, output)
 
 
 def normalize_module_name(name):
@@ -137,7 +127,7 @@ def logreport_to_testresult(report, config):
     message = report['message'] if 'message' in report else ''
     if 'longrepr' not in report:
         extra_text = ''
-    elif isinstance(report['longrepr'], list):
+    elif isinstance(report['longrepr'], tuple):
         extra_text = report['longrepr'][2]
     else:
         extra_text = report['longrepr']

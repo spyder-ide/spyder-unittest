@@ -17,7 +17,7 @@ env:
     - TEST_CI="True"
     - TEST_CI_APP="True"
     # Environment variables used by astropy helpers
-    - CONDA_DEPENDENCIES="lxml mock nose pytest spyder"
+    - CONDA_DEPENDENCIES="lxml mock nose pytest spyder pyzmq"
     - PIP_DEPENDENCIES="coveralls pytest-qt"
 
   matrix:

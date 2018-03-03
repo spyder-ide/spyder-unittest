@@ -45,11 +45,12 @@ def test_pytestrunner_start(monkeypatch):
     monkeypatch.setattr('spyder_unittest.backend.runnerbase.os.remove',
                         mock_remove)
 
-    MockJSONStreamReader = Mock()
+    MockZMQStreamReader = Mock()
     monkeypatch.setattr(
-        'spyder_unittest.backend.pytestrunner.JSONStreamReader',
-        MockJSONStreamReader)
-    mock_reader = MockJSONStreamReader()
+        'spyder_unittest.backend.pytestrunner.ZmqStreamReader',
+        MockZMQStreamReader)
+    mock_reader = MockZMQStreamReader()
+    mock_reader.port = 42
 
     runner = PyTestRunner(None, 'results')
     config = Config('py.test', 'wdir')
@@ -63,7 +64,7 @@ def test_pytestrunner_start(monkeypatch):
     workerfile = os.path.abspath(
         os.path.join(os.path.dirname(__file__), os.pardir, 'pytestworker.py'))
     mock_process.start.assert_called_once_with(
-        get_python_executable(), [workerfile])
+            get_python_executable(), [workerfile, '42'])
 
     mock_environment.insert.assert_any_call('VAR', 'VALUE')
     # mock_environment.insert.assert_any_call('PYTHONPATH', 'pythondir:old')
@@ -71,19 +72,6 @@ def test_pytestrunner_start(monkeypatch):
     mock_remove.called_once_with('results')
 
     assert runner.reader is mock_reader
-
-def test_pytestrunner_read_output(monkeypatch):
-    runner = PyTestRunner(None)
-    runner.process = Mock()
-    qbytearray = QByteArray(b'encoded')
-    runner.process.readAllStandardOutput = Mock(return_value=qbytearray)
-    runner.reader = Mock()
-    runner.reader.consume = Mock(return_value='decoded')
-    runner.process_output = Mock()
-
-    runner.read_output()
-    assert runner.reader.consume.called_once_with('encoded')
-    assert runner.process_output.called_once_with('decoded')
 
 def test_pytestrunner_process_output_with_collected(qtbot):
     runner = PyTestRunner(None)
@@ -156,7 +144,7 @@ def test_logreport_to_testresult_skipped():
     report = standard_logreport_output()
     report['when'] = 'setup'
     report['outcome'] = 'skipped'
-    report['longrepr'] = ['file', 24, 'skipmsg']
+    report['longrepr'] = ('file', 24, 'skipmsg')
     expected = TestResult(Category.SKIP, 'skipped', 'foo.bar',
                           time=42, extra_text='skipmsg',
                           filename=osp.join('ham', 'foo.py'), lineno=24)
