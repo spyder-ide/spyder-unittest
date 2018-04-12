@@ -4,10 +4,10 @@
 # Licensed under the terms of the MIT License
 # (see LICENSE.txt for details)
 """
-Script for running py.test tests.
+Script for running pytest tests.
 
 This script is meant to be run in a separate process by a PyTestRunner.
-It runs tests via the py.test framework and prints the results so that the
+It runs tests via the pytest framework and prints the results so that the
 PyTestRunner can read them.
 """
 
@@ -45,7 +45,7 @@ class SpyderPlugin():
         self.writer = writer
 
     def pytest_collectreport(self, report):
-        """Called by py.test after collecting tests from a file."""
+        """Called by pytest after collecting tests from a file."""
         if report.outcome == 'failed':
             self.writer.write({
                     'event': 'collecterror',
@@ -54,7 +54,7 @@ class SpyderPlugin():
             })
 
     def pytest_itemcollected(self, item):
-        """Called by py.test when a test item is collected."""
+        """Called by pytest when a test item is collected."""
         nodeid = item.name
         x = item.parent
         while x.parent:
@@ -66,14 +66,14 @@ class SpyderPlugin():
         })
 
     def pytest_runtest_logstart(self, nodeid, location):
-        """Called by py.test before running a test."""
+        """Called by pytest before running a test."""
         self.writer.write({
             'event': 'starttest',
             'nodeid': nodeid
         })
 
     def pytest_runtest_logreport(self, report):
-        """Called by py.test when a (phase of a) test is completed."""
+        """Called by pytest when a (phase of a) test is completed."""
         if report.when in ['setup', 'teardown'] and report.outcome == 'passed':
             return
         data = {'event': 'logreport',
@@ -97,7 +97,7 @@ class SpyderPlugin():
 
 
 def main(args):
-    """Run py.test with the Spyder plugin."""
+    """Run pytest with the Spyder plugin."""
     if args[1] == 'file':
         writer = FileStub('pytestworker.log')
     else:

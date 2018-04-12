@@ -377,7 +377,7 @@ def test():
 
     # set wdir to .../spyder_unittest
     wdir = osp.abspath(osp.join(osp.dirname(__file__), osp.pardir))
-    widget.config = Config('py.test', wdir)
+    widget.config = Config('pytest', wdir)
 
     # add wdir's parent to python path, so that `import spyder_unittest` works
     rootdir = osp.abspath(osp.join(wdir, osp.pardir))

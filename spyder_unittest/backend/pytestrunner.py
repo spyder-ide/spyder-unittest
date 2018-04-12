@@ -3,7 +3,7 @@
 # Copyright © 2013 Spyder Project Contributors
 # Licensed under the terms of the MIT License
 # (see LICENSE.txt for details)
-"""Support for py.test framework."""
+"""Support for pytest framework."""
 
 # Standard library imports
 import os
@@ -15,10 +15,10 @@ from spyder_unittest.backend.zmqstream import ZmqStreamReader
 
 
 class PyTestRunner(RunnerBase):
-    """Class for running tests within py.test framework."""
+    """Class for running tests within pytest framework."""
 
     module = 'pytest'
-    name = 'py.test'
+    name = 'pytest'
 
     def create_argument_list(self):
         """Create argument list for testing process."""

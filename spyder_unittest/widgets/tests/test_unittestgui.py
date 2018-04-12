@@ -150,7 +150,7 @@ def test_run_tests_with_pre_test_hook_returning_false(qtbot):
     widget.pre_test_hook.call_count == 1
     mockRunner.start.call_count == 0
 
-@pytest.mark.parametrize('framework', ['py.test', 'nose'])
+@pytest.mark.parametrize('framework', ['pytest', 'nose'])
 def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
     """Basic integration test."""
     os.chdir(tmpdir.strpath)
