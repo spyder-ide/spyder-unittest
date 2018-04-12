@@ -1,5 +1,7 @@
 # spyder-unittest
 
+Copyright © 2014–2018 Spyder Project Contributors
+
 [![license](https://img.shields.io/pypi/l/spyder-unittest.svg)](./LICENSE)
 [![pypi version](https://img.shields.io/pypi/v/spyder-unittest.svg)](https://pypi.python.org/pypi/spyder-unittest)
 [![Join the chat at https://gitter.im/spyder-ide/public](https://badges.gitter.im/spyder-ide/spyder.svg)](https://gitter.im/spyder-ide/public)
