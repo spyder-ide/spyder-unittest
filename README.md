@@ -4,9 +4,9 @@ Copyright © 2014–2018 Spyder Project Contributors
 
 [![license](https://img.shields.io/pypi/l/spyder-unittest.svg)](./LICENSE)
 [![pypi version](https://img.shields.io/pypi/v/spyder-unittest.svg)](https://pypi.python.org/pypi/spyder-unittest)
+[![conda version](https://img.shields.io/conda/v/spyder-ide/spyder-unittest.svg)](https://www.anaconda.com/download/)
+[![download count](https://img.shields.io/conda/d/spyder-ide/spyder-unittest.svg)](https://www.anaconda.com/download/)
 [![Join the chat at https://gitter.im/spyder-ide/public](https://badges.gitter.im/spyder-ide/spyder.svg)](https://gitter.im/spyder-ide/public)
-[![OpenCollective Backers](https://opencollective.com/spyder/backers/badge.svg?color=blue)](#backers)
-[![OpenCollective Sponsors](https://opencollective.com/spyder/sponsors/badge.svg?color=blue)](#sponsors)
 
 [![Build Status](https://travis-ci.org/spyder-ide/spyder-unittest.svg?branch=master)](https://travis-ci.org/spyder-ide/spyder-unittest)
 [![Build status](https://ci.appveyor.com/api/projects/status/d9wa6whp1fpq4uii?svg=true)](https://ci.appveyor.com/project/spyder-ide/spyder-unittest)
@@ -24,7 +24,7 @@ stopped funding Spyder development, after doing so for the past 18
 months. Therefore, without additional funds, development will shift to
 maintaining Spyder 3 at a slower pace than before, while working
 toward an eventual Spyder 4 feature release sometime in the future.
-At the moment we do not plan to spend much effort on the development of 
+At the moment we do not plan to spend much effort on the development of
 Spyder plugins, such as this one.
 
 However, with your contribution of effort and funding, we will be able to
@@ -68,14 +68,14 @@ you can use the plugin.
 ## Usage
 
 The plugin adds an item `Run unit tests` to the `Run` menu in Spyder.
-Click on this to run the unit tests. After you specify the testing framework 
-and the directory under which the tests are stored, the tests are run. 
-The `Unit testing` window pane (displayed at the top of this file) will pop up 
+Click on this to run the unit tests. After you specify the testing framework
+and the directory under which the tests are stored, the tests are run.
+The `Unit testing` window pane (displayed at the top of this file) will pop up
 with the results. If you are using `py.test`, you can double-click on a test
 to view it in the editor.
 
 If you want to run tests in a different directory or switch testing
-frameworks, click `Configure` in the Options menu (cogwheel icon), 
+frameworks, click `Configure` in the Options menu (cogwheel icon),
 which is located in the upper right corner of the `Unit testing` pane.
 
 ## Feedback
@@ -98,8 +98,8 @@ The plugin has the following dependencies:
   and/or [nose](https://nose.readthedocs.io)
 
 In order to run the tests distributed with this plugin, you need
-[nose](https://nose.readthedocs.io), [py.test](https://pytest.org) 
-and [pytest-qt](https://github.com/pytest-dev/pytest-qt). If you use Python 2, 
+[nose](https://nose.readthedocs.io), [py.test](https://pytest.org)
+and [pytest-qt](https://github.com/pytest-dev/pytest-qt). If you use Python 2,
 you also need [mock](https://github.com/testing-cabal/mock).
 
 You are very welcome to submit code contributations in the form of pull
@@ -113,16 +113,9 @@ locally and run them before submitting the code.
 
 ## Contributing
 
-Everyone is welcome to contribute!
+Everyone is welcome to contribute! The document [Contributing to Spyder](
+https://github.com/spyder-ide/spyder/blob/master/CONTRIBUTING.md)
+also applies to the unittest plugin.
 
-## Backers
-
-Support us with a monthly donation and help us continue our activities.
-
-[![Backers](https://opencollective.com/spyder/backers.svg)](https://opencollective.com/spyder#support)
-
-## Sponsors
-
-Become a sponsor to get your logo on our README on Github.
-
-[![Sponsors](https://opencollective.com/spyder/sponsors.svg)](https://opencollective.com/spyder#support)
+We are grateful to the entire Spyder community for their support, without which
+this plugin and the whole of Spyder would be a lot less awesome.
