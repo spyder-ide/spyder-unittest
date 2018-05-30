@@ -50,7 +50,7 @@ class SpyderPlugin():
             self.writer.write({
                     'event': 'collecterror',
                     'nodeid': report.nodeid,
-                    'longrepr': report.longrepr.longrepr
+                    'longrepr': str(report.longrepr)
             })
 
     def pytest_itemcollected(self, item):
