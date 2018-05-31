@@ -47,6 +47,14 @@ def test_unittestwidget_set_config_does_not_emit_when_invalid(qtbot):
         widget.config = config
     assert widget.config == config
 
+def test_unittestwidget_config_with_unknown_framework_invalid(qtbot):
+    """Check that if the framework in the config is not known,
+    config_is_valid() returns False"""
+    widget = UnitTestWidget(None)
+    qtbot.addWidget(widget)
+    config = Config(wdir=os.getcwd(), framework='unknown framework')
+    assert widget.config_is_valid(config) == False
+
 def test_unittestwidget_process_finished_updates_results(qtbot):
     widget = UnitTestWidget(None)
     widget.testdatamodel = Mock()

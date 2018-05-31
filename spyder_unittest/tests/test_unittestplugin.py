@@ -105,10 +105,10 @@ def test_plugin_config(plugin, tmpdir, qtbot):
     assert plugin.unittestwidget.config is None
 
     # Set config and test that this is recorded in config file
-    config = Config(framework='ham', wdir=str(tmpdir))
+    config = Config(framework='unittest', wdir=str(tmpdir))
     with qtbot.waitSignal(plugin.unittestwidget.sig_newconfig):
         plugin.unittestwidget.config = config
-    assert 'framework = ham' in config_file_path.read().splitlines()
+    assert 'framework = unittest' in config_file_path.read().splitlines()
 
     # Close project and test that config is empty
     plugin.main.projects.get_active_project = lambda: None

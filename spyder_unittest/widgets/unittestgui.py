@@ -204,7 +204,9 @@ class UnitTestWidget(QWidget):
         """
         if config is None:
             config = self.config
-        return (config and config.framework and osp.isdir(config.wdir))
+        return (config and config.framework
+                and config.framework in self.framework_registry.frameworks
+                and osp.isdir(config.wdir))
 
     def maybe_configure_and_start(self):
         """
