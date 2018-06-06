@@ -53,7 +53,7 @@ def test_pytestrunner_start(monkeypatch):
     mock_reader.port = 42
 
     runner = PyTestRunner(None, 'results')
-    config = Config('py.test', 'wdir')
+    config = Config('pytest', 'wdir')
     runner.start(config, ['pythondir'])
 
     mock_process.setWorkingDirectory.assert_called_once_with('wdir')

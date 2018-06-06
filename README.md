@@ -51,8 +51,8 @@ Spyder-unittest is a plugin for Spyder that integrates popular unit test
 frameworks. It allows you to run tests and view the results.
 
 The plugin supports the `unittest` framework in the Python
-standard library and the `py.test` and `nose` testing frameworks.
-Support for `py.test` is most complete at the moment.
+standard library and the `pytest` and `nose` testing frameworks.
+Support for `pytest` is most complete at the moment.
 
 ## Installation
 
@@ -71,7 +71,7 @@ The plugin adds an item `Run unit tests` to the `Run` menu in Spyder.
 Click on this to run the unit tests. After you specify the testing framework
 and the directory under which the tests are stored, the tests are run.
 The `Unit testing` window pane (displayed at the top of this file) will pop up
-with the results. If you are using `py.test`, you can double-click on a test
+with the results. If you are using `pytest`, you can double-click on a test
 to view it in the editor.
 
 If you want to run tests in a different directory or switch testing
@@ -94,11 +94,11 @@ The plugin has the following dependencies:
 
 * [spyder](https://github.com/spyder-ide/spyder) (obviously), at least version 3.0
 * [lxml](http://lxml.de/)
-* the testing framework that you will be using: [py.test](https://pytest.org)
+* the testing framework that you will be using: [pytest](https://pytest.org)
   and/or [nose](https://nose.readthedocs.io)
 
 In order to run the tests distributed with this plugin, you need
-[nose](https://nose.readthedocs.io), [py.test](https://pytest.org)
+[nose](https://nose.readthedocs.io), [pytest](https://pytest.org)
 and [pytest-qt](https://github.com/pytest-dev/pytest-qt). If you use Python 2,
 you also need [mock](https://github.com/testing-cabal/mock).
 

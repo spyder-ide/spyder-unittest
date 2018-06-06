@@ -47,6 +47,14 @@ def test_unittestwidget_set_config_does_not_emit_when_invalid(qtbot):
         widget.config = config
     assert widget.config == config
 
+def test_unittestwidget_config_with_unknown_framework_invalid(qtbot):
+    """Check that if the framework in the config is not known,
+    config_is_valid() returns False"""
+    widget = UnitTestWidget(None)
+    qtbot.addWidget(widget)
+    config = Config(wdir=os.getcwd(), framework='unknown framework')
+    assert widget.config_is_valid(config) == False
+
 def test_unittestwidget_process_finished_updates_results(qtbot):
     widget = UnitTestWidget(None)
     widget.testdatamodel = Mock()
@@ -142,7 +150,7 @@ def test_run_tests_with_pre_test_hook_returning_false(qtbot):
     widget.pre_test_hook.call_count == 1
     mockRunner.start.call_count == 0
 
-@pytest.mark.parametrize('framework', ['py.test', 'nose'])
+@pytest.mark.parametrize('framework', ['pytest', 'nose'])
 def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
     """Basic integration test."""
     os.chdir(tmpdir.strpath)

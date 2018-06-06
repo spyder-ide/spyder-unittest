@@ -157,6 +157,6 @@ def ask_for_config(frameworks, config, parent=None):
 
 if __name__ == '__main__':
     app = QApplication([])
-    frameworks = ['nose', 'py.test', 'unittest']
+    frameworks = ['nose', 'pytest', 'unittest']
     config = Config(framework=None, wdir=getcwd())
     print(ask_for_config(frameworks, config))
