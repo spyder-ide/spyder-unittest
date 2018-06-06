@@ -16,9 +16,9 @@ from spyder_unittest.backend.pytestworker import SpyderPlugin, main
 from spyder_unittest.backend.zmqstream import ZmqStreamWriter
 
 try:
-    from unittest.mock import call, create_autospec, Mock
+    from unittest.mock import call, create_autospec, MagicMock, Mock
 except ImportError:
-    from mock import call, create_autospec, Mock  # Python 2
+    from mock import call, create_autospec, MagicMock, Mock  # Python 2
 
 
 class EmptyClass:
@@ -41,8 +41,8 @@ def test_spyderplugin_test_collectreport_with_failure(plugin):
     report = EmptyClass()
     report.outcome = 'failed'
     report.nodeid = 'foo.py::bar'
-    report.longrepr = EmptyClass()
-    report.longrepr.longrepr = 'message'
+    report.longrepr = MagicMock()
+    report.longrepr.__str__.return_value = 'message'
     plugin.pytest_collectreport(report)
     plugin.writer.write.assert_called_once_with({
         'event': 'collecterror',
