@@ -23,7 +23,7 @@ from spyder_unittest.backend.runnerbase import Category
 
 try:
     _ = get_translation("unittest", dirname="spyder_unittest")
-except KeyError as error:
+except KeyError:
     import gettext
     _ = gettext.gettext
 

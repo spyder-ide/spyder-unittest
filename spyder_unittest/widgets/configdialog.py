@@ -25,7 +25,7 @@ from spyder.utils import icon_manager as ima
 
 try:
     _ = get_translation("unittest", dirname="spyder_unittest")
-except KeyError as error:
+except KeyError:
     import gettext
     _ = gettext.gettext
 
