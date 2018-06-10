@@ -33,7 +33,7 @@ from spyder_unittest.widgets.datatree import TestDataModel, TestDataView
 # This is needed for testing this module as a stand alone script
 try:
     _ = get_translation("unittest", dirname="spyder_unittest")
-except KeyError as error:
+except KeyError:
     import gettext
     _ = gettext.gettext
 
