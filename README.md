@@ -96,3 +96,27 @@ also applies to the unittest plugin.
 
 We are grateful to the entire Spyder community for their support, without which
 this plugin and the whole of Spyder would be a lot less awesome.
+
+
+## More information
+
+[Main Website](https://www.spyder-ide.org/)
+
+[Download Spyder (with Anaconda)](https://www.anaconda.com/download/)
+
+[Spyder Github](https://github.com/spyder-ide/spyder)
+
+[Troubleshooting Guide and FAQ](
+https://github.com/spyder-ide/spyder/wiki/Troubleshooting-Guide-and-FAQ)
+
+[Development Wiki](https://github.com/spyder-ide/spyder/wiki/Dev:-Index)
+
+[Gitter Chatroom](https://gitter.im/spyder-ide/public)
+
+[Google Group](https://groups.google.com/group/spyderlib)
+
+[@Spyder_IDE on Twitter](https://twitter.com/spyder_ide)
+
+[@SpyderIDE on Facebook](https://www.facebook.com/SpyderIDE/)
+
+[Support Spyder on OpenCollective](https://opencollective.com/spyder/)
