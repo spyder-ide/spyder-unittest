@@ -5,7 +5,7 @@
 [![conda version](https://img.shields.io/conda/v/spyder-ide/spyder-unittest.svg)](https://www.anaconda.com/download/)
 [![download count](https://img.shields.io/conda/d/spyder-ide/spyder-unittest.svg)](https://www.anaconda.com/download/)
 [![OpenCollective Backers](https://opencollective.com/spyder/backers/badge.svg?color=blue)](#backers)
-[![Join the chat at https://gitter.im/spyder-ide/public](https://badges.gitter.im/spyder-ide/spyder.svg)](https://gitter.im/spyder-ide/public)  
+[![Join the chat at https://gitter.im/spyder-ide/public](https://badges.gitter.im/spyder-ide/spyder.svg)](https://gitter.im/spyder-ide/public)<br>
 [![PyPI status](https://img.shields.io/pypi/status/spyder-unittest.svg)](https://github.com/spyder-ide/spyder-unittest)
 [![Build Status](https://travis-ci.org/spyder-ide/spyder-unittest.svg?branch=master)](https://travis-ci.org/spyder-ide/spyder-unittest)
 [![Build status](https://ci.appveyor.com/api/projects/status/d9wa6whp1fpq4uii?svg=true)](https://ci.appveyor.com/project/spyder-ide/spyder-unittest)
@@ -35,8 +35,8 @@ so it can be installed with the following commands:
 * Using Anaconda: `conda install -c spyder-ide spyder-unittest`
 * Using pip: `pip install spyder-unittest`
 
-All dependencies will be automatically installed. You have to restart Spyder before
-you can use the plugin.
+All dependencies will be automatically installed.
+You have to restart Spyder before you can use the plugin.
 
 
 ## Usage
@@ -57,7 +57,9 @@ which is located in the upper right corner of the `Unit testing` pane.
 
 Bug reports, feature requests and other ideas are more than welcome on the
 [issue tracker](https://github.com/spyder-ide/spyder-unittest/issues).
-You may use <http://groups.google.com/group/spyderlib> for general discussion.
+Use the [Spyder Google Group](https://groups.google.com/group/spyderlib)
+or our [Gitter Chatroom](https://gitter.im/spyder-ide/public)
+for general discussion.
 
 
 ## Development
