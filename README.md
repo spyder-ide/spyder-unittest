@@ -1,6 +1,4 @@
-# spyder-unittest
-
-Copyright © 2014–2018 Spyder Project Contributors
+# Spyder-Unittest
 
 [![license](https://img.shields.io/pypi/l/spyder-unittest.svg)](./LICENSE)
 [![pypi version](https://img.shields.io/pypi/v/spyder-unittest.svg)](https://pypi.python.org/pypi/spyder-unittest)
@@ -13,17 +11,20 @@ Copyright © 2014–2018 Spyder Project Contributors
 [![CircleCI](https://circleci.com/gh/spyder-ide/spyder-unittest/tree/master.svg?style=shield)](https://circleci.com/gh/spyder-ide/spyder-unittest/tree/master)
 [![Coverage Status](https://coveralls.io/repos/github/spyder-ide/spyder-unittest/badge.svg?branch=master)](https://coveralls.io/github/spyder-ide/spyder-unittest?branch=master)
 
-![Screenshot of spyder-unittest plugin](./screenshot.png)
+*Copyright © 2014–2018 Spyder Project Contributors*
+
+![Screenshot of spyder-unittest plugin showing test results](./screenshot.png)
 
 
 ## Description
 
-Spyder-unittest is a plugin for Spyder that integrates popular unit test
-frameworks. It allows you to run tests and view the results.
+Spyder-unittest is a plugin that integrates popular unit test frameworks
+with Spyder, allowing you to run test suites and view the results in the IDE.
 
-The plugin supports the `unittest` framework in the Python
-standard library and the `pytest` and `nose` testing frameworks.
+The plugin supports the `unittest` module in the Python standard library
+as well as the `pytest` and `nose` testing frameworks.
 Support for `pytest` is most complete at the moment.
+
 
 ## Installation
 
@@ -35,6 +36,7 @@ so it can be installed with the following commands:
 
 All dependencies will be automatically installed. You have to restart Spyder before
 you can use the plugin.
+
 
 ## Usage
 
@@ -49,11 +51,13 @@ If you want to run tests in a different directory or switch testing
 frameworks, click `Configure` in the Options menu (cogwheel icon),
 which is located in the upper right corner of the `Unit testing` pane.
 
+
 ## Feedback
 
 Bug reports, feature requests and other ideas are more than welcome on the
 [issue tracker](https://github.com/spyder-ide/spyder-unittest/issues).
 You may use <http://groups.google.com/group/spyderlib> for general discussion.
+
 
 ## Development
 
@@ -73,7 +77,7 @@ In order to run the tests distributed with this plugin, you need
 and [pytest-qt](https://github.com/pytest-dev/pytest-qt). If you use Python 2,
 you also need [mock](https://github.com/testing-cabal/mock).
 
-You are very welcome to submit code contributations in the form of pull
+You are very welcome to submit code contributions in the form of pull
 requests to the
 [issue tracker](https://github.com/spyder-ide/spyder-unittest/issues).
 GitHub is configured to run pull requests automatically against the test suite
@@ -81,6 +85,7 @@ and against several automatic style checkers using
 [ciocheck](https://github.com/ContinuumIO/ciocheck).
 The style checkers can be rather finicky so you may want to install ciocheck
 locally and run them before submitting the code.
+
 
 ## Contributing
 
