@@ -8,13 +8,13 @@ This version fixes some bugs and also includes some cosmetic changes.
 
 * [Issue 117](https://github.com/spyder-ide/spyder-unittest/issues/117) - Rename "py.test" to "pytest" throughout ([PR 119](https://github.com/spyder-ide/spyder-unittest/pull/119))
 * [Issue 113](https://github.com/spyder-ide/spyder-unittest/issues/113) - NameError in test file causes internal error ([PR 118](https://github.com/spyder-ide/spyder-unittest/pull/118))
-* [Issue 112](https://github.com/spyder-ide/spyder-unittest/issues/112) - Plugin confused by tests writing to sys.__stdout__ ([PR 114](https://github.com/spyder-ide/spyder-unittest/pull/114))
+* [Issue 112](https://github.com/spyder-ide/spyder-unittest/issues/112) - Plugin confused by tests writing to `sys.__stdout__` ([PR 114](https://github.com/spyder-ide/spyder-unittest/pull/114))
 
 In this release 3 issues were closed.
 
 ### Pull Requests Merged
 
-* [PR 121](https://github.com/spyder-ide/spyder-unittest/pull/121) - PR: Update readme to remove funding appeal, harmonize with other readmes and minor fixes ([](a few obvious bugs/typos in the text. You can preview the full changes live over on [my repo](https://github.com/CAM-Gerlach/spyder-unittest/blob/update-readme/issues/))
+* [PR 121](https://github.com/spyder-ide/spyder-unittest/pull/121) - PR: Update readme to remove funding appeal, harmonize with other readmes and minor fixes
 * [PR 120](https://github.com/spyder-ide/spyder-unittest/pull/120) - Remove unused variables when initializing localization
 * [PR 119](https://github.com/spyder-ide/spyder-unittest/pull/119) - Replace 'py.test' by 'pytest' ([117](https://github.com/spyder-ide/spyder-unittest/issues/117))
 * [PR 118](https://github.com/spyder-ide/spyder-unittest/pull/118) - Use str() to convert pytest's longrepr to a string ([113](https://github.com/spyder-ide/spyder-unittest/issues/113))
