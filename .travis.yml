@@ -45,11 +45,9 @@ install:
   # Use Astropy ci helpers for initial setup
   - git clone git://github.com/astropy/ci-helpers.git
   - source ci-helpers/travis/setup_conda_$TRAVIS_OS_NAME.sh
-  - $CONDA_INSTALL ciocheck -c spyder-ide
   - python setup.py develop
   - spyder --reset
   - spyder
 
 script:
-  - ciocheck spyder_unittest --disable-tests
-  - pytest spyder_unittest --cov=spyder_unittest
+  - pytest spyder_unittest
