@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: spyder-unittest\n"
-"POT-Creation-Date: 2019-12-07 18:40-0500\n"
-"PO-Revision-Date: 2019-12-08 23:46\n"
+"POT-Creation-Date: 2019-12-09 10:16-0500\n"
+"PO-Revision-Date: 2019-12-09 23:53\n"
 "Last-Translator: Gonzalo Peña-Castellanos (goanpeca)\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -16,206 +16,166 @@ msgstr ""
 "X-Crowdin-File: /master/spyder_unittest/locale/spyder_unittest.pot\n"
 "Language: es_ES\n"
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/backend/noserunner.py:86
+#: spyder_unittest/backend/noserunner.py:86
 msgid "Captured stdout"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/backend/noserunner.py:88
+#: spyder_unittest/backend/noserunner.py:88
 msgid "Captured stderr"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/unittestplugin.py:156
+#: spyder_unittest/unittestplugin.py:156
 msgid "Unit testing"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/unittestplugin.py:200
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:294
+#: spyder_unittest/unittestplugin.py:200
+#: spyder_unittest/widgets/unittestgui.py:294
 msgid "Run unit tests"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/configdialog.py:61
+#: spyder_unittest/widgets/configdialog.py:61
 msgid "Configure tests"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/configdialog.py:65
+#: spyder_unittest/widgets/configdialog.py:65
 msgid "Test framework"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/configdialog.py:74
+#: spyder_unittest/widgets/configdialog.py:74
 msgid "not available"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/configdialog.py:83
+#: spyder_unittest/widgets/configdialog.py:83
 msgid "Directory from which to run tests"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/configdialog.py:89
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/configdialog.py:125
+#: spyder_unittest/widgets/configdialog.py:89
+#: spyder_unittest/widgets/configdialog.py:125
 msgid "Select directory"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:42
+#: spyder_unittest/widgets/datatree.py:42
 msgid "Message"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:42
+#: spyder_unittest/widgets/datatree.py:42
 msgid "Name"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:42
+#: spyder_unittest/widgets/datatree.py:42
 msgid "Status"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:42
+#: spyder_unittest/widgets/datatree.py:42
 msgid "Time (ms)"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:138
+#: spyder_unittest/widgets/datatree.py:138
 msgid "Collapse"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:141
+#: spyder_unittest/widgets/datatree.py:141
 msgid "Expand"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:146
+#: spyder_unittest/widgets/datatree.py:146
 msgid "Go to definition"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:386
+#: spyder_unittest/widgets/datatree.py:386
 msgid "test"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:386
+#: spyder_unittest/widgets/datatree.py:386
 msgid "tests"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:390
+#: spyder_unittest/widgets/datatree.py:390
 msgid "No results to show."
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:395
+#: spyder_unittest/widgets/datatree.py:395
 msgid "collected {}"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:396
+#: spyder_unittest/widgets/datatree.py:396
 msgid "{} failed"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:397
+#: spyder_unittest/widgets/datatree.py:397
 msgid ", {} passed"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:399
+#: spyder_unittest/widgets/datatree.py:399
 msgid ", {} other"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/datatree.py:401
+#: spyder_unittest/widgets/datatree.py:401
 msgid ", {} pending"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:153
+#: spyder_unittest/widgets/unittestgui.py:153
 msgid "Configure ..."
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:158
+#: spyder_unittest/widgets/unittestgui.py:158
 msgid "Show output"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:163
+#: spyder_unittest/widgets/unittestgui.py:163
 msgid "Collapse all"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:168
+#: spyder_unittest/widgets/unittestgui.py:168
 msgid "Expand all"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:181
+#: spyder_unittest/widgets/unittestgui.py:181
 msgid "Unit testing output"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:263
+#: spyder_unittest/widgets/unittestgui.py:263
 msgid "Error"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:263
+#: spyder_unittest/widgets/unittestgui.py:263
 msgid "Process failed to start"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:266
+#: spyder_unittest/widgets/unittestgui.py:266
 msgid "<b>Running tests ...<b>"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:287
+#: spyder_unittest/widgets/unittestgui.py:287
 msgid "Stop"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:288
+#: spyder_unittest/widgets/unittestgui.py:288
 msgid "Stop current test process"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:293
+#: spyder_unittest/widgets/unittestgui.py:293
 msgid "Run tests"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:326
+#: spyder_unittest/widgets/unittestgui.py:326
 msgid "not run"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:333
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:339
+#: spyder_unittest/widgets/unittestgui.py:333
+#: spyder_unittest/widgets/unittestgui.py:339
 msgid "pending"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:340
+#: spyder_unittest/widgets/unittestgui.py:340
 msgid "running"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:346
+#: spyder_unittest/widgets/unittestgui.py:346
 msgid "failure"
 msgstr ""
 
-#:
-#: /Users/gpena-castellanos/develop/quansight/spyder-unittest/spyder_unittest/widgets/unittestgui.py:347
+#: spyder_unittest/widgets/unittestgui.py:347
 msgid "collection error"
 msgstr ""
 
