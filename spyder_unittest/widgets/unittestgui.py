@@ -19,7 +19,7 @@ from qtpy.QtWidgets import (QHBoxLayout, QLabel, QMenu, QMessageBox,
 from spyder.config.base import get_conf_path, get_translation
 from spyder.utils import icon_manager as ima
 from spyder.utils.qthelpers import create_action, create_toolbutton
-from spyder.widgets.variableexplorer.texteditor import TextEditor
+from spyder.plugins.variableexplorer.widgets.texteditor import TextEditor
 
 # Local imports
 from spyder_unittest.backend.frameworkregistry import FrameworkRegistry

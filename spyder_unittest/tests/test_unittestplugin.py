@@ -7,6 +7,7 @@
 
 # Third party imports
 import pytest
+from spyder.plugins.projects.projecttypes import EmptyProject
 
 # Local imports
 from spyder_unittest.unittestplugin import UnitTestPlugin
@@ -18,10 +19,16 @@ except ImportError:
     from mock import Mock  # Python 2
 
 
+class PluginForTesting(UnitTestPlugin):
+    CONF_FILE = False
+
+    def __init__(self, parent):
+        UnitTestPlugin.__init__(self, parent)
+
 @pytest.fixture
 def plugin(qtbot):
     """Set up the unittest plugin."""
-    res = UnitTestPlugin(None)
+    res = PluginForTesting(None)
     qtbot.addWidget(res)
     res.main = Mock()
     res.main.get_spyder_pythonpath = lambda: 'fakepythonpath'
@@ -70,9 +77,7 @@ def test_plugin_wdir(plugin, monkeypatch, tmpdir):
     assert plugin.unittestwidget.default_wdir == 'fakecwd'
 
     # Test after opening project, default_wdir is set to project dir
-    project = Mock()
-    project.CONF = {}
-    project.root_path = str(tmpdir)
+    project = EmptyProject(str(tmpdir))
     plugin.main.projects.get_active_project = lambda: project
     plugin.main.projects.get_active_project_path = lambda: project.root_path
     plugin.handle_project_change()
@@ -87,14 +92,12 @@ def test_plugin_wdir(plugin, monkeypatch, tmpdir):
 
 def test_plugin_config(plugin, tmpdir, qtbot):
     # Test config file does not exist and config is empty
-    config_file_path = tmpdir.join('.spyproject', 'unittest.ini')
+    config_file_path = tmpdir.join('.spyproject', 'config', 'unittest.ini')
     assert not config_file_path.check()
     assert plugin.unittestwidget.config is None
 
     # Open project
-    project = Mock()
-    project.CONF = {}
-    project.root_path = str(tmpdir)
+    project = EmptyProject(str(tmpdir))
     plugin.main.projects.get_active_project = lambda: project
     plugin.main.projects.get_active_project_path = lambda: project.root_path
     plugin.handle_project_change()
