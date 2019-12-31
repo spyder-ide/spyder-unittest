@@ -27,3 +27,8 @@ conda install -q -y -c spyder-ide --file requirements/conda.txt
 
 # Install test ones
 conda install -q -y -c spyder-ide --file requirements/tests.txt
+
+# Install plugin itself
+# (necessary because plugin starts python in different directories and expects
+# to import the plugin; specifically, in test_run_tests_and_display_results)
+pip install --no-deps -e .
