@@ -52,12 +52,7 @@ def test_spyderplugin_test_collectreport_with_failure(plugin):
 
 def test_spyderplugin_test_itemcollected(plugin):
     testitem = EmptyClass()
-    testitem.name = 'bar'
-    testitem.parent = EmptyClass()
-    testitem.parent.name = 'foo.py'
-    testitem.parent.parent = EmptyClass
-    testitem.parent.parent.name = 'notused'
-    testitem.parent.parent.parent = None
+    testitem.nodeid = 'foo.py::bar'
     plugin.pytest_itemcollected(testitem)
     plugin.writer.write.assert_called_once_with({
         'event': 'collected',

@@ -55,14 +55,9 @@ class SpyderPlugin():
 
     def pytest_itemcollected(self, item):
         """Called by pytest when a test item is collected."""
-        nodeid = item.name
-        x = item.parent
-        while x.parent:
-            nodeid = x.name + '::' + nodeid
-            x = x.parent
         self.writer.write({
             'event': 'collected',
-            'nodeid': nodeid
+            'nodeid': item.nodeid
         })
 
     def pytest_runtest_logstart(self, nodeid, location):
