@@ -5,14 +5,16 @@
 # (see LICENSE.txt for details)
 """Unit testing Plugin."""
 
+# Standard library imports
+import os.path as osp
+
 # Third party imports
 from qtpy.QtWidgets import QVBoxLayout
+from spyder.api.plugins import SpyderPluginWidget
 from spyder.config.base import get_translation
-from spyder.plugins import SpyderPluginWidget
 from spyder.py3compat import getcwd
 from spyder.utils import icon_manager as ima
 from spyder.utils.qthelpers import create_action
-from spyder.widgets.projects.config import ProjectConfig
 
 # Local imports
 from spyder_unittest.widgets.configdialog import Config
@@ -26,6 +28,7 @@ class UnitTestPlugin(SpyderPluginWidget):
 
     CONF_SECTION = 'unittest'
     CONF_DEFAULTS = [(CONF_SECTION, {'framework': '', 'wdir': ''})]
+    CONF_NAMEMAP = {CONF_SECTION: [(CONF_SECTION, ['framework', 'wdir'])]}
     CONF_VERSION = '0.1.0'
 
     def __init__(self, parent):
@@ -36,28 +39,15 @@ class UnitTestPlugin(SpyderPluginWidget):
         `self.register_plugin()`.
         """
         SpyderPluginWidget.__init__(self, parent)
-        self.main = parent  # Spyder 3 compatibility
 
-        # Create unit test widget. For compatibility with Spyder 3.x
-        # here we check if the plugin has the attributes
-        # 'options_button' and 'options_menu'. See issue 83
-        if hasattr(self, 'options_button') and hasattr(self, 'options_menu'):
-            # Works with Spyder 4.x
-            self.unittestwidget = UnitTestWidget(
-                self.main,
-                options_button=self.options_button,
-                options_menu=self.options_menu)
-        else:
-            # Works with Spyder 3.x
-            self.unittestwidget = UnitTestWidget(self.main)
-
-        # Add unit test widget in dockwindow
+        # Create unit test widget and add to dockwindow
+        self.unittestwidget = UnitTestWidget(
+            self.main,
+            options_button=self.options_button,
+            options_menu=self._options_menu)
         layout = QVBoxLayout()
         layout.addWidget(self.unittestwidget)
         self.setLayout(layout)
-
-        # Initialize plugin
-        self.initialize_plugin()
 
     def update_pythonpath(self):
         """
@@ -101,27 +91,33 @@ class UnitTestPlugin(SpyderPluginWidget):
         then use it. If it is not valid (e.g., because the user never
         configured testing for this project) or no project is opened, then
         invalidate the current test configuration.
+
+        If necessary, patch the project preferences to include this plugin's
+        config options.
         """
         project = self.main.projects.get_active_project()
         if not project:
             self.unittestwidget.set_config_without_emit(None)
             return
 
-        try:
-            project_conf = project.CONF[self.CONF_SECTION]
-        except KeyError:
-            project_conf = ProjectConfig(
+        if self.CONF_SECTION not in project.config._name_map:
+            project.config._name_map = project.config._name_map.copy()
+            project.config._name_map.update(self.CONF_NAMEMAP)
+
+        if self.CONF_SECTION not in project.config._configs_map:
+            config_class = project.config.get_config_class()
+            path = osp.join(project.root_path, '.spyproject', 'config')
+            conf = config_class(
                 name=self.CONF_SECTION,
-                root_path=project.root_path,
-                filename=self.CONF_SECTION + '.ini',
                 defaults=self.CONF_DEFAULTS,
+                path=path,
                 load=True,
                 version=self.CONF_VERSION)
-            project.CONF[self.CONF_SECTION] = project_conf
+            project.config._configs_map[self.CONF_SECTION] = conf
 
         new_config = Config(
-            framework=project_conf.get(self.CONF_SECTION, 'framework'),
-            wdir=project_conf.get(self.CONF_SECTION, 'wdir'))
+            framework=project.get_option(self.CONF_SECTION, 'framework'),
+            wdir=project.get_option(self.CONF_SECTION, 'wdir'))
         if not self.unittestwidget.config_is_valid(new_config):
             new_config = None
         self.unittestwidget.set_config_without_emit(new_config)
@@ -135,9 +131,9 @@ class UnitTestPlugin(SpyderPluginWidget):
         project = self.main.projects.get_active_project()
         if not project:
             return
-        project_conf = project.CONF[self.CONF_SECTION]
-        project_conf.set(self.CONF_SECTION, 'framework', test_config.framework)
-        project_conf.set(self.CONF_SECTION, 'wdir', test_config.wdir)
+        project.set_option(self.CONF_SECTION, 'framework',
+                           test_config.framework)
+        project.set_option(self.CONF_SECTION, 'wdir', test_config.wdir)
 
     def goto_in_editor(self, filename, lineno):
         """
@@ -174,6 +170,8 @@ class UnitTestPlugin(SpyderPluginWidget):
 
     def register_plugin(self):
         """Register plugin in Spyder's main window."""
+        super(UnitTestPlugin, self).register_plugin()
+
         # Get information from Spyder proper into plugin
         self.update_pythonpath()
         self.update_default_wdir()
@@ -191,9 +189,6 @@ class UnitTestPlugin(SpyderPluginWidget):
         self.unittestwidget.sig_newconfig.connect(self.save_config)
         self.unittestwidget.sig_edit_goto.connect(self.goto_in_editor)
 
-        # Add plugin as dockwidget to main window
-        self.main.add_dockwidget(self)
-
         # Create action and add it to Spyder's menu
         unittesting_act = create_action(
             self,
@@ -209,11 +204,8 @@ class UnitTestPlugin(SpyderPluginWidget):
 
     def refresh_plugin(self):
         """Refresh unit testing widget."""
-        # For compatibility with Spyder 3.x here we check if the plugin
-        # has the attributes 'options_button' and 'options_menu'. See issue 83
-        if hasattr(self, 'options_button') and hasattr(self, 'options_menu'):
-            self.options_menu.clear()
-            self.get_plugin_actions()
+        self._options_menu.clear()
+        self.get_plugin_actions()
 
     def closing_plugin(self, cancelable=False):
         """Perform actions before parent main window is closed."""
@@ -232,8 +224,6 @@ class UnitTestPlugin(SpyderPluginWidget):
         not valid (or not set), then ask the user to configure. Then
         run the tests.
         """
-        if self.dockwidget and not self.ismaximized:
-            self.dockwidget.setVisible(True)
-            self.dockwidget.setFocus()
-            self.dockwidget.raise_()
+        if self.dockwidget:
+            self.switch_to_plugin()
         self.unittestwidget.maybe_configure_and_start()

@@ -1,0 +1,7 @@
+coveralls >=1.8
+flaky
+nose
+pytest
+pytest-cov
+pytest-mock
+pytest-qt
