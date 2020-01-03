@@ -48,19 +48,21 @@ class UnittestRunner(RunnerBase):
         line_index = 0
 
         while lines[line_index]:
-            data = self.try_parse_result(lines[line_index])
+            data = self.try_parse_result(lines, line_index)
             if data:
-                if data[2] == 'ok':
+                line_index = data[0]
+                if data[3] == 'ok':
                     cat = Category.OK
-                elif data[2] == 'FAIL' or data[2] == 'ERROR':
+                elif data[3] == 'FAIL' or data[3] == 'ERROR':
                     cat = Category.FAIL
                 else:
                     cat = Category.SKIP
-                name = '{}.{}'.format(data[1], data[0])
-                tr = TestResult(category=cat, status=data[2], name=name,
-                                message=data[3])
+                name = '{}.{}'.format(data[2], data[1])
+                tr = TestResult(category=cat, status=data[3], name=name,
+                                message=data[4])
                 res.append(tr)
-            line_index += 1
+            else:
+                line_index += 1
 
         line_index += 1
         while not (lines[line_index]
@@ -77,27 +79,36 @@ class UnittestRunner(RunnerBase):
 
         return res
 
-    def try_parse_result(self, line):
+    def try_parse_result(self, lines, line_index):
         """
-        Try to parse a line of text as a test result.
+        Try to parse one or more lines of text as a test result.
 
         Returns
         -------
-        tuple of str or None
-            If line represents a test result, then return a tuple with four
-            strings: the name of the test function, the name of the test class,
-            the test result, and the reason (if no reason is given, the fourth
-            string is empty). Otherwise, return None.
+        (int, str, str, str, str) or None
+            If a test result is parsed successfully then return a tuple with
+            the line index of the first line after the test result, the name
+            of the test function, the name of the test class, the test result,
+            and the reason (if no reason is given, the fourth string is empty).
+            Otherwise, return None.
         """
-        regexp = (r'([^\d\W]\w*) \(([^\d\W][\w.]*)\) \.\.\. '
-                  '(ok|FAIL|ERROR|skipped|expected failure|unexpected success)'
-                  "( '([^']*)')?\Z")
-        match = re.match(regexp, line)
+        regexp = r'([^\d\W]\w*) \(([^\d\W][\w.]*)\)'
+        match = re.match(regexp, lines[line_index])
         if match:
-            msg = match.groups()[4] or ''
-            return match.groups()[:3] + (msg, )
+            function_name = match.group(1)
+            class_name = match.group(2)
         else:
             return None
+        while lines[line_index]:
+            regexp = (r' \.\.\. (ok|FAIL|ERROR|skipped|expected failure|'
+                      r"unexpected success)( '([^']*)')?\Z")
+            match = re.search(regexp, lines[line_index])
+            if match:
+                result = match.group(1)
+                msg = match.group(3) or ''
+                return (line_index + 1, function_name, class_name, result, msg)
+            line_index += 1
+        return None
 
     def try_parse_exception_block(self, lines, line_index):
         """
@@ -117,9 +128,12 @@ class UnittestRunner(RunnerBase):
         match = re.match(regexp, lines[line_index + 1])
         if not match:
             return None
-        if not all(char == '-' for char in lines[line_index + 2]):
-            return None
-        line_index += 3
+        line_index += 1
+        while not all(char == '-' for char in lines[line_index]):
+            if not lines[line_index]:
+                return None
+            line_index += 1
+        line_index += 1
         exception_text = []
         while lines[line_index]:
             exception_text.append(lines[line_index] + '\n')
