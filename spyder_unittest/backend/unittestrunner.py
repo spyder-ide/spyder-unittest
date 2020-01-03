@@ -36,6 +36,8 @@ class UnittestRunner(RunnerBase):
         """
         Read and parse output from unittest module.
 
+        Any parsing errors are silently ignored.
+
         Returns
         -------
         list of TestResult
@@ -44,9 +46,8 @@ class UnittestRunner(RunnerBase):
         res = []
         lines = output.splitlines()
         line_index = 0
-        test_index = None
 
-        while line_index < len(lines):
+        while lines[line_index]:
             data = self.try_parse_result(lines[line_index])
             if data:
                 if data[2] == 'ok':
@@ -59,25 +60,19 @@ class UnittestRunner(RunnerBase):
                 tr = TestResult(category=cat, status=data[2], name=name,
                                 message=data[3])
                 res.append(tr)
-                line_index += 1
-                test_index = -1
-                continue
+            line_index += 1
 
-            data = self.try_parse_exception_header(lines, line_index)
+        line_index += 1
+        while not (lines[line_index]
+                   and all(c == '-' for c in lines[line_index])):
+            data = self.try_parse_exception_block(lines, line_index)
             if data:
                 line_index = data[0]
                 test_index = next(
                     i for i, tr in enumerate(res)
                     if tr.name == '{}.{}'.format(data[2], data[1]))
-
-            data = self.try_parse_footer(lines, line_index)
-            if data:
-                line_index = data
-                test_index = -1
-                continue
-
-            if test_index is not None:
-                res[test_index].extra_text.append(lines[line_index] + '\n')
+                res[test_index].extra_text = data[3]
+            else:
                 line_index += 1
 
         return res
@@ -104,44 +99,29 @@ class UnittestRunner(RunnerBase):
         else:
             return None
 
-    def try_parse_exception_header(self, lines, line_index):
+    def try_parse_exception_block(self, lines, line_index):
         """
-        Try to parse the header of an exception in unittest output.
+        Try to parse a block detailing an exception in unittest output.
 
         Returns
         -------
-        (int, str, str) or None
-            If an exception header is parsed successfully, then return a tuple
-            with the new line index, the name of the test function, and the
-            name of the test class. Otherwise, return None.
+        (int, str, str, list of str) or None
+            If an exception block is parsed successfully, then return a tuple
+            with the line index of the first line after the block, the name of
+            the test function, the name of the test class, and the text of the
+            exception. Otherwise, return None.
         """
-        if lines[line_index] != '':
-            return None
-        if not all(char == '=' for char in lines[line_index + 1]):
+        if not all(char == '=' for char in lines[line_index]):
             return None
         regexp = r'\w+: ([^\d\W]\w*) \(([^\d\W][\w.]*)\)\Z'
-        match = re.match(regexp, lines[line_index + 2])
+        match = re.match(regexp, lines[line_index + 1])
         if not match:
             return None
-        if not all(char == '-' for char in lines[line_index + 3]):
+        if not all(char == '-' for char in lines[line_index + 2]):
             return None
-        return (line_index + 4, ) + match.groups()
-
-    def try_parse_footer(self, lines, line_index):
-        """
-        Try to parse footer of unittest output.
-
-        Returns
-        -------
-        int or None
-            New line index if footer is parsed successfully, None otherwise
-        """
-        if lines[line_index] != '':
-            return None
-        if not all(char == '-' for char in lines[line_index + 1]):
-            return None
-        if not re.match(r'^Ran [\d]+ tests? in', lines[line_index + 2]):
-            return None
-        if lines[line_index + 3] != '':
-            return None
-        return line_index + 5
+        line_index += 3
+        exception_text = []
+        while lines[line_index]:
+            exception_text.append(lines[line_index] + '\n')
+            line_index += 1
+        return (line_index, match.group(1), match.group(2), exception_text)

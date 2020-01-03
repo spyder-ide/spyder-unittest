@@ -10,10 +10,15 @@ from spyder_unittest.backend.runnerbase import Category
 from spyder_unittest.backend.unittestrunner import UnittestRunner
 
 
-def test_unittestrunner_load_data():
+def test_unittestrunner_load_data_with_two_tests():
     output = """test_isupper (teststringmethods.TestStringMethods) ... ok
 test_split (teststringmethods.TestStringMethods) ... ok
-extra text\n"""
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.012s
+
+OK
+"""
     runner = UnittestRunner(None)
     res = runner.load_data(output)
     assert len(res) == 2
@@ -28,10 +33,10 @@ extra text\n"""
     assert res[1].status == 'ok'
     assert res[1].name == 'teststringmethods.TestStringMethods.test_split'
     assert res[1].message == ''
-    assert res[1].extra_text == ['extra text\n']
+    assert res[1].extra_text == []
 
 
-def test_unittestrunner_load_data_removes_footer():
+def test_unittestrunner_load_data_with_one_test():
     output = """test1 (test_foo.Bar) ... ok
 
 ----------------------------------------------------------------------
@@ -59,6 +64,11 @@ Traceback (most recent call last):
   File "/somepath/test_foo.py", line 5, in test1
     self.assertEqual(1, 2)
 AssertionError: 1 != 2
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.012s
+
+FAILED (failures=1)
 """
     runner = UnittestRunner(None)
     res = runner.load_data(output)
