@@ -78,7 +78,7 @@ FAILED (failures=1)
     assert res[0].status == 'FAIL'
     assert res[0].name == 'test_foo.Bar.test1'
     assert res[0].extra_text[0].startswith('Traceback')
-    assert res[0].extra_text[-1].endswith('AssertionError: 1 != 2\n')
+    assert res[0].extra_text[-1].endswith('AssertionError: 1 != 2')
 
     assert res[1].category == Category.OK
     assert res[1].status == 'ok'
@@ -137,7 +137,7 @@ FAILED (failures=1)
     assert res[0].status == 'FAIL'
     assert res[0].name == 'test_foo.Bar.test1'
     assert res[0].extra_text[0].startswith('Traceback')
-    assert res[0].extra_text[-1].endswith('AssertionError: 1 != 2\n')
+    assert res[0].extra_text[-1].endswith('AssertionError: 1 != 2')
 
 
 def test_try_parse_header_with_ok():

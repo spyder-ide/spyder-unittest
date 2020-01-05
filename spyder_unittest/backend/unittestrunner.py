@@ -136,6 +136,6 @@ class UnittestRunner(RunnerBase):
         line_index += 1
         exception_text = []
         while lines[line_index]:
-            exception_text.append(lines[line_index] + '\n')
+            exception_text.append(lines[line_index])
             line_index += 1
         return (line_index, match.group(1), match.group(2), exception_text)
