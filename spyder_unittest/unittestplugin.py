@@ -12,6 +12,7 @@ import os.path as osp
 from qtpy.QtWidgets import QVBoxLayout
 from spyder.api.plugins import SpyderPluginWidget
 from spyder.config.base import get_translation
+from spyder.config.gui import is_dark_interface
 from spyder.py3compat import getcwd
 from spyder.utils import icon_manager as ima
 from spyder.utils.qthelpers import create_action
@@ -175,6 +176,7 @@ class UnitTestPlugin(SpyderPluginWidget):
         # Get information from Spyder proper into plugin
         self.update_pythonpath()
         self.update_default_wdir()
+        self.unittestwidget.use_dark_interface(is_dark_interface())
 
         # Connect to relevant signals
         self.main.sig_pythonpath_changed.connect(self.update_pythonpath)

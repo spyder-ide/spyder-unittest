@@ -34,6 +34,13 @@ COLORS = {
     Category.PENDING: QBrush(QColor("#C5C5C5"))
 }
 
+COLORS_DARK = {
+    Category.OK: QBrush(QColor("#008000")),
+    Category.FAIL: QBrush(QColor("#C6001E")),
+    Category.SKIP: QBrush(QColor("#505050")),
+    Category.PENDING: QBrush(QColor("#505050"))
+}
+
 STATUS_COLUMN = 0
 NAME_COLUMN = 1
 MESSAGE_COLUMN = 2
@@ -188,6 +195,11 @@ class TestDataModel(QAbstractItemModel):
     a tuple (row, column, id). The id is TOPLEVEL_ID for top-level items.
     For level-2 items, the id is the index of the test in `self.testresults`.
 
+    Attributes
+    ----------
+    is_dark_interface : bool
+        Whether to use colours appropriate for a dark user interface.
+
     Signals
     -------
     sig_summary(str)
@@ -200,6 +212,7 @@ class TestDataModel(QAbstractItemModel):
         """Constructor."""
         QAbstractItemModel.__init__(self, parent)
         self.abbreviator = Abbreviator()
+        self.is_dark_interface = False
         self.testresults = []
         try:
             self.monospace_font = parent.window().editor.get_plugin_font()
@@ -319,7 +332,10 @@ class TestDataModel(QAbstractItemModel):
         elif role == Qt.BackgroundRole:
             if id == TOPLEVEL_ID:
                 testresult = self.testresults[row]
-                return COLORS[testresult.category]
+                if self.is_dark_interface:
+                    return COLORS_DARK[testresult.category]
+                else:
+                    return COLORS[testresult.category]
         elif role == Qt.TextAlignmentRole:
             if id == TOPLEVEL_ID and column == TIME_COLUMN:
                 return Qt.AlignRight
