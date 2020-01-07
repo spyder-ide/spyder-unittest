@@ -1,5 +1,27 @@
 # History of changes
 
+## Version 0.4.0 (2020/01/07)
+
+This release updates the plugin to be used with Spyder 4 and fixes some bugs.
+
+### Issues Closed
+
+* [Issue 133](https://github.com/spyder-ide/spyder-unittest/issues/133) - Colours make text hard to read when run in dark mode ([PR 135](https://github.com/spyder-ide/spyder-unittest/pull/135))
+* [Issue 129](https://github.com/spyder-ide/spyder-unittest/issues/129) - Docstrings in test functions confuse unittest's output parser ([PR 134](https://github.com/spyder-ide/spyder-unittest/pull/134))
+* [Issue 128](https://github.com/spyder-ide/spyder-unittest/issues/128) - KeyError: 'test not found' ([PR 132](https://github.com/spyder-ide/spyder-unittest/pull/132))
+
+In this release 3 issues were closed.
+
+### Pull Requests Merged
+
+* [PR 135](https://github.com/spyder-ide/spyder-unittest/pull/135) - PR: Use appropriate colours when Spyder is in dark mode ([133](https://github.com/spyder-ide/spyder-unittest/issues/133))
+* [PR 134](https://github.com/spyder-ide/spyder-unittest/pull/134) - PR: Allow for unittest tests to have docstrings ([129](https://github.com/spyder-ide/spyder-unittest/issues/129))
+* [PR 132](https://github.com/spyder-ide/spyder-unittest/pull/132) - PR: Use nodeid provided by pytest in itemcollected hook ([128](https://github.com/spyder-ide/spyder-unittest/issues/128))
+* [PR 131](https://github.com/spyder-ide/spyder-unittest/pull/131) - PR: Compatibility fixes for Spyder 4
+
+In this release 4 pull requests were closed.
+
+
 ## Version 0.3.1 (2018/06/15)
 
 This version fixes some bugs and also includes some cosmetic changes.
