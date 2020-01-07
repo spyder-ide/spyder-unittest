@@ -36,6 +36,8 @@ class UnittestRunner(RunnerBase):
         """
         Read and parse output from unittest module.
 
+        Any parsing errors are silently ignored.
+
         Returns
         -------
         list of TestResult
@@ -44,104 +46,96 @@ class UnittestRunner(RunnerBase):
         res = []
         lines = output.splitlines()
         line_index = 0
-        test_index = None
 
-        while line_index < len(lines):
-            data = self.try_parse_result(lines[line_index])
+        while lines[line_index]:
+            data = self.try_parse_result(lines, line_index)
             if data:
-                if data[2] == 'ok':
+                line_index = data[0]
+                if data[3] == 'ok':
                     cat = Category.OK
-                elif data[2] == 'FAIL' or data[2] == 'ERROR':
+                elif data[3] == 'FAIL' or data[3] == 'ERROR':
                     cat = Category.FAIL
                 else:
                     cat = Category.SKIP
-                name = '{}.{}'.format(data[1], data[0])
-                tr = TestResult(category=cat, status=data[2], name=name,
-                                message=data[3])
+                name = '{}.{}'.format(data[2], data[1])
+                tr = TestResult(category=cat, status=data[3], name=name,
+                                message=data[4])
                 res.append(tr)
+            else:
                 line_index += 1
-                test_index = -1
-                continue
 
-            data = self.try_parse_exception_header(lines, line_index)
+        line_index += 1
+        while not (lines[line_index]
+                   and all(c == '-' for c in lines[line_index])):
+            data = self.try_parse_exception_block(lines, line_index)
             if data:
                 line_index = data[0]
                 test_index = next(
                     i for i, tr in enumerate(res)
                     if tr.name == '{}.{}'.format(data[2], data[1]))
-
-            data = self.try_parse_footer(lines, line_index)
-            if data:
-                line_index = data
-                test_index = -1
-                continue
-
-            if test_index is not None:
-                res[test_index].extra_text.append(lines[line_index] + '\n')
+                res[test_index].extra_text = data[3]
+            else:
                 line_index += 1
 
         return res
 
-    def try_parse_result(self, line):
+    def try_parse_result(self, lines, line_index):
         """
-        Try to parse a line of text as a test result.
+        Try to parse one or more lines of text as a test result.
 
         Returns
         -------
-        tuple of str or None
-            If line represents a test result, then return a tuple with four
-            strings: the name of the test function, the name of the test class,
-            the test result, and the reason (if no reason is given, the fourth
-            string is empty). Otherwise, return None.
+        (int, str, str, str, str) or None
+            If a test result is parsed successfully then return a tuple with
+            the line index of the first line after the test result, the name
+            of the test function, the name of the test class, the test result,
+            and the reason (if no reason is given, the fourth string is empty).
+            Otherwise, return None.
         """
-        regexp = (r'([^\d\W]\w*) \(([^\d\W][\w.]*)\) \.\.\. '
-                  '(ok|FAIL|ERROR|skipped|expected failure|unexpected success)'
-                  "( '([^']*)')?\Z")
-        match = re.match(regexp, line)
+        regexp = r'([^\d\W]\w*) \(([^\d\W][\w.]*)\)'
+        match = re.match(regexp, lines[line_index])
         if match:
-            msg = match.groups()[4] or ''
-            return match.groups()[:3] + (msg, )
+            function_name = match.group(1)
+            class_name = match.group(2)
         else:
             return None
+        while lines[line_index]:
+            regexp = (r' \.\.\. (ok|FAIL|ERROR|skipped|expected failure|'
+                      r"unexpected success)( '([^']*)')?\Z")
+            match = re.search(regexp, lines[line_index])
+            if match:
+                result = match.group(1)
+                msg = match.group(3) or ''
+                return (line_index + 1, function_name, class_name, result, msg)
+            line_index += 1
+        return None
 
-    def try_parse_exception_header(self, lines, line_index):
+    def try_parse_exception_block(self, lines, line_index):
         """
-        Try to parse the header of an exception in unittest output.
+        Try to parse a block detailing an exception in unittest output.
 
         Returns
         -------
-        (int, str, str) or None
-            If an exception header is parsed successfully, then return a tuple
-            with the new line index, the name of the test function, and the
-            name of the test class. Otherwise, return None.
+        (int, str, str, list of str) or None
+            If an exception block is parsed successfully, then return a tuple
+            with the line index of the first line after the block, the name of
+            the test function, the name of the test class, and the text of the
+            exception. Otherwise, return None.
         """
-        if lines[line_index] != '':
-            return None
-        if not all(char == '=' for char in lines[line_index + 1]):
+        if not all(char == '=' for char in lines[line_index]):
             return None
         regexp = r'\w+: ([^\d\W]\w*) \(([^\d\W][\w.]*)\)\Z'
-        match = re.match(regexp, lines[line_index + 2])
+        match = re.match(regexp, lines[line_index + 1])
         if not match:
             return None
-        if not all(char == '-' for char in lines[line_index + 3]):
-            return None
-        return (line_index + 4, ) + match.groups()
-
-    def try_parse_footer(self, lines, line_index):
-        """
-        Try to parse footer of unittest output.
-
-        Returns
-        -------
-        int or None
-            New line index if footer is parsed successfully, None otherwise
-        """
-        if lines[line_index] != '':
-            return None
-        if not all(char == '-' for char in lines[line_index + 1]):
-            return None
-        if not re.match(r'^Ran [\d]+ tests? in', lines[line_index + 2]):
-            return None
-        if lines[line_index + 3] != '':
-            return None
-        return line_index + 5
+        line_index += 1
+        while not all(char == '-' for char in lines[line_index]):
+            if not lines[line_index]:
+                return None
+            line_index += 1
+        line_index += 1
+        exception_text = []
+        while lines[line_index]:
+            exception_text.append(lines[line_index])
+            line_index += 1
+        return (line_index, match.group(1), match.group(2), exception_text)
