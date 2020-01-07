@@ -88,6 +88,7 @@ class UnitTestWidget(QWidget):
         self.default_wdir = None
         self.pre_test_hook = None
         self.testrunner = None
+
         self.output = None
         self.testdataview = TestDataView(self)
         self.testdatamodel = TestDataModel(self)
@@ -145,6 +146,10 @@ class UnitTestWidget(QWidget):
     def set_config_without_emit(self, new_config):
         """Set test configuration but do not emit any signal."""
         self._config = new_config
+
+    def use_dark_interface(self, flag):
+        """Set whether widget should use colours appropriate for dark UI."""
+        self.testdatamodel.is_dark_interface = flag
 
     def create_actions(self):
         """Create the actions for the unittest widget."""

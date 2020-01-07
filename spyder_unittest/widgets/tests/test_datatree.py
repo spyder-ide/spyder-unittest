@@ -12,8 +12,8 @@ import pytest
 
 # Local imports
 from spyder_unittest.backend.runnerbase import Category, TestResult
-from spyder_unittest.widgets.datatree import (COLORS, TestDataModel,
-                                              TestDataView)
+from spyder_unittest.widgets.datatree import (COLORS, COLORS_DARK,
+                                              TestDataModel, TestDataView)
 
 try:
     from unittest.mock import Mock
@@ -156,15 +156,19 @@ def test_testdatamodel_shows_time_when_blank(qtmodeltester):
     model.testresults = [res]
     assert model.data(model.index(0, 3), Qt.DisplayRole) == ''
 
-def test_testdatamodel_data_background():
+@pytest.mark.parametrize('dark', [False, True])
+def test_testdatamodel_data_background(dark):
     model = TestDataModel()
+    if dark:
+        model.is_dark_interface = True
     res = [TestResult(Category.OK, 'status', 'foo.bar'),
            TestResult(Category.FAIL, 'error', 'foo.bar', 'kadoom')]
     model.testresults = res
     index = model.index(0, 0)
-    assert model.data(index, Qt.BackgroundRole) == COLORS[Category.OK]
+    colors = COLORS_DARK if dark else COLORS
+    assert model.data(index, Qt.BackgroundRole) == colors[Category.OK]
     index = model.index(1, 2)
-    assert model.data(index, Qt.BackgroundRole) == COLORS[Category.FAIL]
+    assert model.data(index, Qt.BackgroundRole) == colors[Category.FAIL]
 
 def test_testdatamodel_data_userrole():
     model = TestDataModel()
