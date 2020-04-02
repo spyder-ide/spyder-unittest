@@ -215,3 +215,23 @@ def test_run_tests_using_unittest_and_display_results(qtbot, tmpdir,
     assert model.index(1, 1).data(Qt.DisplayRole) == 't.M.test_ok'
     assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_ok'
     assert model.index(1, 2).data(Qt.DisplayRole) == ''
+    assert widget.status_label.text() == '<b>1 test failed, 1 passed</b>'
+
+def test_run_no_tests_using_unittest_and_display_results(qtbot, tmpdir,
+                                                         monkeypatch):
+    """Basic check."""
+    os.chdir(tmpdir.strpath)
+
+    MockQMessageBox = Mock()
+    monkeypatch.setattr('spyder_unittest.widgets.unittestgui.QMessageBox',
+                        MockQMessageBox)
+
+    widget = UnitTestWidget(None)
+    qtbot.addWidget(widget)
+    config = Config(wdir=tmpdir.strpath, framework='unittest')
+    with qtbot.waitSignal(widget.sig_finished, timeout=10000, raising=True):
+        widget.run_tests(config)
+
+    MockQMessageBox.assert_not_called()
+    assert widget.testdatamodel.rowCount() == 0
+    assert widget.status_label.text() == '<b>No results to show.</b>'
