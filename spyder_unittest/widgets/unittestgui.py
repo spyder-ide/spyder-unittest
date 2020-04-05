@@ -260,6 +260,7 @@ class UnitTestWidget(QWidget):
         self.testrunner.sig_collecterror.connect(self.tests_collect_error)
         self.testrunner.sig_starttest.connect(self.tests_started)
         self.testrunner.sig_testresult.connect(self.tests_yield_result)
+        self.testrunner.sig_stop.connect(self.tests_stopped)
 
         try:
             self.testrunner.start(config, pythonpath)
@@ -357,6 +358,10 @@ class UnitTestWidget(QWidget):
     def tests_yield_result(self, testresults):
         """Called when test results are received."""
         self.testdatamodel.update_testresults(testresults)
+
+    def tests_stopped(self):
+        """Called when tests are stopped"""
+        self.status_label.setText('')
 
     def set_status_label(self, msg):
         """

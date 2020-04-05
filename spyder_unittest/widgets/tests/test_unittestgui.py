@@ -9,7 +9,7 @@
 import os
 
 # Third party imports
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, QProcess
 import pytest
 
 # Local imports
@@ -223,3 +223,25 @@ def test_run_tests_using_unittest_and_display_results(qtbot, tmpdir,
     assert model.index(1, 1).data(Qt.DisplayRole) == 't.M.test_ok'
     assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_ok'
     assert model.index(1, 2).data(Qt.DisplayRole) == ''
+
+def test_stop_running_tests_before_testresult_is_received(qtbot, tmpdir):
+    os.chdir(tmpdir.strpath)
+    testfilename = tmpdir.join('test_foo.py').strpath
+
+    with open(testfilename, 'w') as f:
+        f.write("import unittest\n"
+                "import time\n"
+                "class MyTest(unittest.TestCase):\n"
+                "   def test_ok(self): \n"
+                "      time.sleep(3)\n"
+                "      self.assertTrue(True)\n")
+
+    widget = UnitTestWidget(None)
+    qtbot.addWidget(widget)
+    config = Config(wdir=tmpdir.strpath, framework='unittest')
+    widget.run_tests(config)
+    qtbot.waitUntil(lambda: widget.testrunner.process.state() == QProcess.Running)
+    widget.testrunner.stop_if_running()
+
+    assert widget.testdatamodel.rowCount() == 0
+    assert widget.status_label.text() == ''
