@@ -316,7 +316,7 @@ class UnitTestWidget(QWidget):
         self.set_running_state(False)
         self.testrunner = None
         self.log_action.setEnabled(bool(output))
-        if testresults:
+        if testresults is not None:
             self.testdatamodel.testresults = testresults
         self.replace_pending_with_not_run()
         self.sig_finished.emit()

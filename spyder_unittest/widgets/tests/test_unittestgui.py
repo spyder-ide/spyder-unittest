@@ -150,6 +150,14 @@ def test_run_tests_with_pre_test_hook_returning_false(qtbot):
     widget.pre_test_hook.call_count == 1
     mockRunner.start.call_count == 0
 
+@pytest.mark.parametrize('results,label',
+                         [([TestResult(Category.OK, 'ok', '')], '0 tests failed, 1 passed'),
+                          ([], 'No results to show.')])
+def test_unittestwidget_process_finished_updates_status_label(qtbot, results, label):
+    widget = UnitTestWidget(None)
+    widget.process_finished(results, 'output')
+    assert widget.status_label.text() == '<b>{}</b>'.format(label)
+
 @pytest.mark.parametrize('framework', ['pytest', 'nose'])
 def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
     """Basic integration test."""
