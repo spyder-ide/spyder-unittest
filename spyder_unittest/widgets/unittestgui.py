@@ -181,11 +181,12 @@ class UnitTestWidget(QWidget):
     def show_log(self):
         """Show output of testing process."""
         if self.output:
-            TextEditor(
+            te = TextEditor(
                 self.output,
                 title=_("Unit testing output"),
-                readonly=True,
-                size=(700, 500)).exec_()
+                readonly=True)
+            te.resize(700, 500)
+            te.exec_()
 
     def configure(self):
         """Configure tests."""
