@@ -185,7 +185,7 @@ class UnitTestWidget(QWidget):
                 self.output,
                 title=_("Unit testing output"),
                 readonly=True)
-            te.resize(700, 500)
+            te.show()
             te.exec_()
 
     def configure(self):
