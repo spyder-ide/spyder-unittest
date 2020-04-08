@@ -2,21 +2,21 @@
 
 ## Project information
 [![license](https://img.shields.io/pypi/l/spyder-unittest.svg)](./LICENSE)
-[![pypi version](https://img.shields.io/pypi/v/spyder-unittest.svg)](https://pypi.org/project/spyder-unittest/)
 [![conda version](https://img.shields.io/conda/v/spyder-ide/spyder-unittest.svg)](https://www.anaconda.com/download/)
 [![download count](https://img.shields.io/conda/d/spyder-ide/spyder-unittest.svg)](https://www.anaconda.com/download/)
+[![pypi version](https://img.shields.io/pypi/v/spyder-unittest.svg)](https://pypi.org/project/spyder-unittest/)
+[![Join the chat at https://gitter.im/spyder-ide/public](https://badges.gitter.im/spyder-ide/spyder.svg)](https://gitter.im/spyder-ide/public)
 [![OpenCollective Backers](https://opencollective.com/spyder/backers/badge.svg?color=blue)](#backers)
-[![Join the chat at https://gitter.im/spyder-ide/public](https://badges.gitter.im/spyder-ide/spyder.svg)](https://gitter.im/spyder-ide/public)<br>
-[![PyPI status](https://img.shields.io/pypi/status/spyder-unittest.svg)](https://github.com/spyder-ide/spyder-unittest)
+[![OpenCollective Sponsors](https://opencollective.com/spyder/sponsors/badge.svg?color=blue)](#sponsors)
 
 ## Build status
-[![Build Status](https://travis-ci.org/spyder-ide/spyder-unittest.svg?branch=master)](https://travis-ci.org/spyder-ide/spyder-unittest)
-[![Build status](https://ci.appveyor.com/api/projects/status/d9wa6whp1fpq4uii?svg=true)](https://ci.appveyor.com/project/spyder-ide/spyder-unittest)
-[![CircleCI](https://circleci.com/gh/spyder-ide/spyder-unittest/tree/master.svg?style=shield)](https://circleci.com/gh/spyder-ide/spyder-unittest/tree/master)
-[![Coverage Status](https://coveralls.io/repos/github/spyder-ide/spyder-unittest/badge.svg?branch=master)](https://coveralls.io/github/spyder-ide/spyder-unittest?branch=master)
+[![Windows status](https://github.com/spyder-ide/spyder-unittest/workflows/Windows%20tests/badge.svg)](https://github.com/spyder-ide/spyder-notebook/actions?query=workflow%3A%22Windows+tests%22)
+[![Linux status](https://github.com/spyder-ide/spyder-unittest/workflows/Linux%20tests/badge.svg)](https://github.com/spyder-ide/spyder-notebook/actions?query=workflow%3A%22Linux+tests%22)
+[![MacOS status](https://github.com/spyder-ide/spyder-unittest/workflows/Macos%20tests/badge.svg)](https://github.com/spyder-ide/spyder-notebook/actions?query=workflow%3A%22Macos+tests%22)
+[![codecov](https://codecov.io/gh/spyder-ide/spyder-unittest/branch/master/graph/badge.svg)](https://codecov.io/gh/spyder-ide/spyder-notebook/branch/master)
 [![Crowdin](https://badges.crowdin.net/spyder-unittest/localized.svg)](https://crowdin.com/project/spyder-unittest)
 
-*Copyright © 2014–2018 Spyder Project Contributors*
+*Copyright © 2014 Spyder Project Contributors*
 
 ![Screenshot of spyder-unittest plugin showing test results](./screenshot.png)
 
@@ -73,7 +73,7 @@ and running `pip install .`, possibly with the `--editable` flag.
 
 The plugin has the following dependencies:
 
-* [spyder](https://github.com/spyder-ide/spyder) (obviously), at least version 3.0
+* [spyder](https://github.com/spyder-ide/spyder) (obviously), at least version 4.0
 * [lxml](http://lxml.de/)
 * the testing framework that you will be using: [pytest](https://pytest.org)
   and/or [nose](https://nose.readthedocs.io)
