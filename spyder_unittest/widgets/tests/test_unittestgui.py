@@ -224,6 +224,28 @@ def test_run_tests_using_unittest_and_display_results(qtbot, tmpdir,
     assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_ok'
     assert model.index(1, 2).data(Qt.DisplayRole) == ''
 
+@pytest.mark.parametrize('framework', ['unittest', 'pytest', 'nose'])
+def test_run_with_no_tests_discovered_and_display_results(qtbot, tmpdir,
+                                                          monkeypatch, framework):
+    """Basic integration test."""
+    os.chdir(tmpdir.strpath)
+    testfilename = tmpdir.join('test_foo.py').strpath
+
+    MockQMessageBox = Mock()
+    monkeypatch.setattr('spyder_unittest.widgets.unittestgui.QMessageBox',
+                        MockQMessageBox)
+
+    widget = UnitTestWidget(None)
+    qtbot.addWidget(widget)
+    config = Config(wdir=tmpdir.strpath, framework=framework)
+    with qtbot.waitSignal(widget.sig_finished, timeout=10000, raising=True):
+        widget.run_tests(config)
+
+    MockQMessageBox.assert_not_called()
+    model = widget.testdatamodel
+    assert model.rowCount() == 0
+    assert widget.status_label.text() == '<b>No results to show.</b>'
+
 def test_stop_running_tests_before_testresult_is_received(qtbot, tmpdir):
     os.chdir(tmpdir.strpath)
     testfilename = tmpdir.join('test_foo.py').strpath
