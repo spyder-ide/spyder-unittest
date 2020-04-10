@@ -261,6 +261,7 @@ class UnitTestWidget(QWidget):
         self.testrunner.sig_collecterror.connect(self.tests_collect_error)
         self.testrunner.sig_starttest.connect(self.tests_started)
         self.testrunner.sig_testresult.connect(self.tests_yield_result)
+        self.testrunner.sig_stop.connect(self.tests_stopped)
 
         try:
             self.testrunner.start(config, pythonpath)
@@ -317,7 +318,7 @@ class UnitTestWidget(QWidget):
         self.set_running_state(False)
         self.testrunner = None
         self.log_action.setEnabled(bool(output))
-        if testresults:
+        if testresults is not None:
             self.testdatamodel.testresults = testresults
         self.replace_pending_with_not_run()
         self.sig_finished.emit()
@@ -358,6 +359,10 @@ class UnitTestWidget(QWidget):
     def tests_yield_result(self, testresults):
         """Called when test results are received."""
         self.testdatamodel.update_testresults(testresults)
+
+    def tests_stopped(self):
+        """Called when tests are stopped"""
+        self.status_label.setText('')
 
     def set_status_label(self, msg):
         """

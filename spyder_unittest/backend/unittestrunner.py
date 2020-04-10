@@ -47,35 +47,38 @@ class UnittestRunner(RunnerBase):
         lines = output.splitlines()
         line_index = 0
 
-        while lines[line_index]:
-            data = self.try_parse_result(lines, line_index)
-            if data:
-                line_index = data[0]
-                if data[3] == 'ok':
-                    cat = Category.OK
-                elif data[3] == 'FAIL' or data[3] == 'ERROR':
-                    cat = Category.FAIL
+        try:
+            while lines[line_index]:
+                data = self.try_parse_result(lines, line_index)
+                if data:
+                    line_index = data[0]
+                    if data[3] == 'ok':
+                        cat = Category.OK
+                    elif data[3] == 'FAIL' or data[3] == 'ERROR':
+                        cat = Category.FAIL
+                    else:
+                        cat = Category.SKIP
+                    name = '{}.{}'.format(data[2], data[1])
+                    tr = TestResult(category=cat, status=data[3], name=name,
+                                    message=data[4])
+                    res.append(tr)
                 else:
-                    cat = Category.SKIP
-                name = '{}.{}'.format(data[2], data[1])
-                tr = TestResult(category=cat, status=data[3], name=name,
-                                message=data[4])
-                res.append(tr)
-            else:
-                line_index += 1
+                    line_index += 1
 
-        line_index += 1
-        while not (lines[line_index]
-                   and all(c == '-' for c in lines[line_index])):
-            data = self.try_parse_exception_block(lines, line_index)
-            if data:
-                line_index = data[0]
-                test_index = next(
-                    i for i, tr in enumerate(res)
-                    if tr.name == '{}.{}'.format(data[2], data[1]))
-                res[test_index].extra_text = data[3]
-            else:
-                line_index += 1
+            line_index += 1
+            while not (lines[line_index]
+                       and all(c == '-' for c in lines[line_index])):
+                data = self.try_parse_exception_block(lines, line_index)
+                if data:
+                    line_index = data[0]
+                    test_index = next(
+                        i for i, tr in enumerate(res)
+                        if tr.name == '{}.{}'.format(data[2], data[1]))
+                    res[test_index].extra_text = data[3]
+                else:
+                    line_index += 1
+        except IndexError:
+            pass
 
         return res
 

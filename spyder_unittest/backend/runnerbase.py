@@ -102,6 +102,8 @@ class RunnerBase(QObject):
     sig_finished(list of TestResult, str)
         Emitted when test process finishes. First argument contains the test
         results, second argument contains the output of the test process.
+    sig_stop()
+        Emitted when test process is being stopped.
     """
 
     sig_collected = Signal(object)
@@ -109,6 +111,7 @@ class RunnerBase(QObject):
     sig_starttest = Signal(object)
     sig_testresult = Signal(object)
     sig_finished = Signal(object, str)
+    sig_stop = Signal()
 
     def __init__(self, widget, resultfilename=None):
         """
@@ -228,3 +231,4 @@ class RunnerBase(QObject):
         """Stop testing process if it is running."""
         if self.process and self.process.state() == QProcess.Running:
             self.process.kill()
+            self.sig_stop.emit()
