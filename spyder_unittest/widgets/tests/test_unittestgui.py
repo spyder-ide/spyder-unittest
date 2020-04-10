@@ -229,7 +229,6 @@ def test_run_with_no_tests_discovered_and_display_results(qtbot, tmpdir,
                                                           monkeypatch, framework):
     """Basic integration test."""
     os.chdir(tmpdir.strpath)
-    testfilename = tmpdir.join('test_foo.py').strpath
 
     MockQMessageBox = Mock()
     monkeypatch.setattr('spyder_unittest.widgets.unittestgui.QMessageBox',
