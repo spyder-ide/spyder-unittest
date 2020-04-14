@@ -18,6 +18,15 @@ class UnittestRunner(RunnerBase):
     module = 'unittest'
     name = 'unittest'
 
+    def get_versions(self):
+        """
+        Return versions of framework and its plugins.
+
+        As 'unittest' is a built-in framework, we return the python version.
+        """
+        import platform
+        return ['unittest {}'.format(platform.python_version())]
+
     def create_argument_list(self):
         """Create argument list for testing process."""
         return ['-m', self.module, 'discover', '-v']

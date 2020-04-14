@@ -266,3 +266,30 @@ def test_stop_running_tests_before_testresult_is_received(qtbot, tmpdir):
 
     assert widget.testdatamodel.rowCount() == 0
     assert widget.status_label.text() == ''
+
+
+def test_show_versions(monkeypatch):
+    mockQMessageBox = Mock()
+    monkeypatch.setattr('spyder_unittest.widgets.unittestgui.QMessageBox',
+                        mockQMessageBox)
+    widget = UnitTestWidget(None)
+    monkeypatch.setattr(widget.framework_registry.frameworks['nose'],
+                        'is_installed', lambda: False)
+    monkeypatch.setattr(widget.framework_registry.frameworks['pytest'],
+                        'is_installed', lambda: True)
+    monkeypatch.setattr(widget.framework_registry.frameworks['unittest'],
+                        'is_installed', lambda: True)
+    monkeypatch.setattr(widget.framework_registry.frameworks['nose'],
+                        'get_versions', lambda _: [])
+    monkeypatch.setattr(widget.framework_registry.frameworks['pytest'],
+                        'get_versions',
+                        lambda _: ['pytest 1.2.3', '   plugin1 4.5.6',
+                                   '   plugin2 7.8.9'])
+    monkeypatch.setattr(widget.framework_registry.frameworks['unittest'],
+                        'get_versions', lambda _: ['unittest 1.2.3'])
+    widget.show_versions()
+    expected = ('Versions of frameworks and their installed plugins:\n\n'
+                'nose: not available\n\npytest 1.2.3\n   plugin1 4.5.6\n   '
+                'plugin2 7.8.9\n\nunittest 1.2.3')
+    mockQMessageBox.information.assert_called_with(widget, 'Dependencies',
+                                                   expected)
