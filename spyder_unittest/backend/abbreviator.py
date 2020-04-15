@@ -44,6 +44,7 @@ class Abbreviator:
         ---------
         name : str
         """
+        name = name.split('[', 1)[0]
         if '.' not in name:
             return
         len_abbrev = 1
@@ -70,10 +71,15 @@ class Abbreviator:
 
     def abbreviate(self, name):
         """Return abbreviation of name."""
+        if '[' in name:
+            name, parameters = name.split('[', 1)
+            parameters = '[' + parameters
+        else:
+            parameters = ''
         if '.' in name:
             start, rest = name.split('.', 1)
             res = (self.dic[start][0]
                    + '.' + self.dic[start][1].abbreviate(rest))
         else:
             res = name
-        return res
+        return res + parameters
