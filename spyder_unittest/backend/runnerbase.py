@@ -147,6 +147,20 @@ class RunnerBase(QObject):
         """
         return find_spec_or_loader(cls.module) is not None
 
+    def get_versions(self):
+        """
+        Return versions of framework and its installed plugins.
+
+        This function must only be called for installed frameworks.
+
+        Returns
+        -------
+        list of str
+            Strings with framework or plugin name, followed by
+            its version.
+        """
+        raise NotImplementedError
+
     def create_argument_list(self):
         """
         Create argument list for testing process (dummy).

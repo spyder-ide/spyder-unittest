@@ -178,3 +178,32 @@ def test_logreport_to_testresult_with_output():
                           extra_text=txt, filename=osp.join('ham', 'foo.py'),
                           lineno=24)
     assert logreport_to_testresult(report, Config(wdir='ham')) == expected
+
+
+def test_get_versions_without_plugins(monkeypatch):
+    import pytest
+    monkeypatch.setattr(pytest, '__version__', '1.2.3')
+    from _pytest.config import PytestPluginManager
+    monkeypatch.setattr(
+        PytestPluginManager,
+        'list_plugin_distinfo', lambda _: ())
+
+    runner = PyTestRunner(None)
+    assert runner.get_versions() == ['pytest 1.2.3']
+
+
+def test_get_versions_with_plugins(monkeypatch):
+    import pytest
+    import pkg_resources
+    monkeypatch.setattr(pytest, '__version__', '1.2.3')
+    dist1 = pkg_resources.Distribution(project_name='myPlugin1',
+                                       version='4.5.6')
+    dist2 = pkg_resources.Distribution(project_name='myPlugin2',
+                                       version='7.8.9')
+    from _pytest.config import PytestPluginManager
+    monkeypatch.setattr(
+        PytestPluginManager,
+        'list_plugin_distinfo', lambda _: (('1', dist1), ('2', dist2)))
+    runner = PyTestRunner(None)
+    assert runner.get_versions() == ['pytest 1.2.3', '   myPlugin1 4.5.6',
+                                     '   myPlugin2 7.8.9']

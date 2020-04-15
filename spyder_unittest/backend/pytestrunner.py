@@ -20,6 +20,26 @@ class PyTestRunner(RunnerBase):
     module = 'pytest'
     name = 'pytest'
 
+    def get_versions(self):
+        """Return versions of framework and its plugins."""
+        import pytest
+        versions = ['pytest {}'.format(pytest.__version__)]
+
+        class GetPluginVersionsPlugin():
+            def pytest_cmdline_main(self, config):
+                nonlocal versions
+                plugininfo = config.pluginmanager.list_plugin_distinfo()
+                if plugininfo:
+                    for plugin, dist in plugininfo:
+                        versions.append("   {} {}".format(dist.project_name,
+                                                          dist.version))
+
+        # --capture=sys needed on Windows to avoid
+        # ValueError: saved filedescriptor not valid anymore
+        pytest.main(['-V', '--capture=sys'],
+                    plugins=[GetPluginVersionsPlugin()])
+        return versions
+
     def create_argument_list(self):
         """Create argument list for testing process."""
         pyfile = os.path.join(os.path.dirname(__file__), 'pytestworker.py')

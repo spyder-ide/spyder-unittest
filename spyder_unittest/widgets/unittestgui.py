@@ -112,6 +112,7 @@ class UnitTestWidget(QWidget):
         self.options_menu.addAction(self.log_action)
         self.options_menu.addAction(self.collapse_action)
         self.options_menu.addAction(self.expand_action)
+        self.options_menu.addAction(self.versions_action)
 
         self.options_button = options_button or QToolButton(self)
         self.options_button.setIcon(ima.icon('tooloptions'))
@@ -173,9 +174,14 @@ class UnitTestWidget(QWidget):
             text=_('Expand all'),
             icon=ima.icon('expand'),
             triggered=self.testdataview.expandAll)
+        self.versions_action = create_action(
+            self,
+            text=_('Dependencies'),
+            icon=ima.icon('advanced'),
+            triggered=self.show_versions)
         return [
             self.config_action, self.log_action, self.collapse_action,
-            self.expand_action
+            self.expand_action, self.versions_action
         ]
 
     def show_log(self):
@@ -187,6 +193,17 @@ class UnitTestWidget(QWidget):
                 readonly=True)
             te.show()
             te.exec_()
+
+    def show_versions(self):
+        """Show versions of frameworks and their plugins"""
+        versions = [_('Versions of frameworks and their installed plugins:')]
+        for name, runner in sorted(self.framework_registry.frameworks.items()):
+            version = (runner.get_versions(self) if runner.is_installed()
+                       else None)
+            versions.append('\n'.join(version) if version else
+                            '{}: {}'.format(name, _('not available')))
+        QMessageBox.information(self, _('Dependencies'),
+                                _('\n\n'.join(versions)))
 
     def configure(self):
         """Configure tests."""
