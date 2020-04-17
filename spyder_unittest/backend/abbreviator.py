@@ -12,10 +12,10 @@ class Abbreviator:
 
     First, if the name contains brackets, the part in brackets starting at
     the first bracket is removed from the name. Then, all names are split
-    in components separated by full stop (like module names in Python).
+    in components separated by full stops (like module names in Python).
     Every component is abbreviated by the smallest prefix not shared by
     other names in the same directory, except for the last component which
-    is not changed. Finally, the part in bracket, which was removed at the
+    is not changed. Finally, the part in brackets, which was removed at the
     beginning, is appended to the abbreviated name.
 
     Attributes
