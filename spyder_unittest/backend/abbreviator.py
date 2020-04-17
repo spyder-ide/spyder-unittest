@@ -10,10 +10,13 @@ class Abbreviator:
     """
     Abbreviates names so that abbreviation identifies name uniquely.
 
-    First, all names are split in components separated by full stop (like
-    module names in Python). Every component is abbreviated by the smallest
-    prefix not shared by other names in the same directory, except for the
-    last component which is not changed.
+    First, if the name contains brackets, the part in brackets starting at
+    the first bracket is removed from the name. Then, all names are split
+    in components separated by full stops (like module names in Python).
+    Every component is abbreviated by the smallest prefix not shared by
+    other names in the same directory, except for the last component which
+    is not changed. Finally, the part in brackets, which was removed at the
+    beginning, is appended to the abbreviated name.
 
     Attributes
     ----------
@@ -44,6 +47,7 @@ class Abbreviator:
         ---------
         name : str
         """
+        name = name.split('[', 1)[0]
         if '.' not in name:
             return
         len_abbrev = 1
@@ -70,10 +74,15 @@ class Abbreviator:
 
     def abbreviate(self, name):
         """Return abbreviation of name."""
+        if '[' in name:
+            name, parameters = name.split('[', 1)
+            parameters = '[' + parameters
+        else:
+            parameters = ''
         if '.' in name:
             start, rest = name.split('.', 1)
             res = (self.dic[start][0]
                    + '.' + self.dic[start][1].abbreviate(rest))
         else:
             res = name
-        return res
+        return res + parameters

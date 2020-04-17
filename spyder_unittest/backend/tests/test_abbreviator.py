@@ -57,3 +57,13 @@ def test_abbreviator_with_multilevel():
     assert abb.abbreviate('ham.spam.bar') == 'h.s.bar'
     assert abb.abbreviate('eggs.ham.foo') == 'e.ham.foo'
     assert abb.abbreviate('eggs.hamspam.bar') == 'e.hams.bar'
+
+def test_abbreviator_with_one_word_and_parameters_with_dot():
+    abb = Abbreviator()
+    abb.add('ham[.]')
+    assert abb.abbreviate('ham[x.]') == 'ham[x.]'
+
+def test_abbreviator_with_one_word_with_two_components_and_parameters_with_dot():
+    abb = Abbreviator()
+    abb.add('ham.spam[.]')
+    assert abb.abbreviate('ham.spam[x.]') == 'h.spam[x.]'
