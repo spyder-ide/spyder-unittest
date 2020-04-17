@@ -287,7 +287,7 @@ class UnitTestWidget(QWidget):
                                  _("Error"), _("Process failed to start"))
         else:
             self.set_running_state(True)
-            self.status_label.setText(_('<b>Running tests ...<b>'))
+            self.set_status_label(_('Running tests ...'))
 
     def set_running_state(self, state):
         """
