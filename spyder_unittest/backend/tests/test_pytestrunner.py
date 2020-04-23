@@ -117,7 +117,7 @@ def standard_logreport_output():
 
 def test_pytestrunner_process_output_with_logreport_passed(qtbot):
     runner = PyTestRunner(None)
-    runner.config = Config(wdir='ham')
+    runner.rootdir = 'ham'
     output = [standard_logreport_output()]
     with qtbot.waitSignal(runner.sig_testresult) as blocker:
         runner.process_output(output)
@@ -148,7 +148,7 @@ def test_logreport_to_testresult_with_outcome_and_possible_error(outcome,
     report['witherror'] = witherror
     expected = TestResult(category, outcome, 'foo.bar', time=42,
                           filename=osp.join('ham', 'foo.py'), lineno=24)
-    assert logreport_to_testresult(report, Config(wdir='ham')) == expected
+    assert logreport_to_testresult(report, 'ham') == expected
 
 
 def test_logreport_to_testresult_with_message():
@@ -157,7 +157,7 @@ def test_logreport_to_testresult_with_message():
     expected = TestResult(Category.OK, 'passed', 'foo.bar', message='msg',
                           time=42, filename=osp.join('ham', 'foo.py'),
                           lineno=24)
-    assert logreport_to_testresult(report, Config(wdir='ham')) == expected
+    assert logreport_to_testresult(report, 'ham') == expected
 
 
 def test_logreport_to_testresult_with_extratext():
@@ -166,7 +166,7 @@ def test_logreport_to_testresult_with_extratext():
     expected = TestResult(Category.OK, 'passed', 'foo.bar', time=42,
                           extra_text='long msg',
                           filename=osp.join('ham', 'foo.py'), lineno=24)
-    assert logreport_to_testresult(report, Config(wdir='ham')) == expected
+    assert logreport_to_testresult(report, 'ham') == expected
 
 
 @pytest.mark.parametrize('longrepr,prefix', [
@@ -184,7 +184,7 @@ def test_logreport_to_testresult_with_output(longrepr, prefix):
     expected = TestResult(Category.OK, 'passed', 'foo.bar', time=42,
                           extra_text=txt, filename=osp.join('ham', 'foo.py'),
                           lineno=24)
-    assert logreport_to_testresult(report, Config(wdir='ham')) == expected
+    assert logreport_to_testresult(report, 'ham') == expected
 
 
 def test_get_versions_without_plugins(monkeypatch):

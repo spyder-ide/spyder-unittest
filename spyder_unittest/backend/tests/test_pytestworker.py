@@ -30,6 +30,16 @@ def plugin():
     mock_writer = create_autospec(ZmqStreamWriter)
     return SpyderPlugin(mock_writer)
 
+def test_spyderplugin_test_report_header(plugin):
+    import pathlib
+    config = EmptyClass()
+    config.rootdir = pathlib.PurePosixPath('/myRootDir')
+    plugin.pytest_report_header(config, None)
+    plugin.writer.write.assert_called_once_with({
+        'event': 'config',
+        'rootdir': '/myRootDir'
+    })
+
 
 @pytest.fixture
 def plugin_ini():
@@ -315,32 +325,33 @@ def test_pytestworker_integration(monkeypatch, tmpdir):
 
     args = mock_writer.write.call_args_list
 
-    assert args[0][0][0]['event'] == 'collected'
-    assert args[0][0][0]['nodeid'] == 'test_foo.py::test_ok'
+    assert args[0][0][0]['event'] == 'config'
+    assert 'rootdir' in args[0][0][0]
 
     assert args[1][0][0]['event'] == 'collected'
-    assert args[1][0][0]['nodeid'] == 'test_foo.py::test_fail'
+    assert args[1][0][0]['nodeid'] == 'test_foo.py::test_ok'
 
-    assert args[2][0][0]['event'] == 'starttest'
-    assert args[2][0][0]['nodeid'] == 'test_foo.py::test_ok'
+    assert args[2][0][0]['event'] == 'collected'
+    assert args[2][0][0]['nodeid'] == 'test_foo.py::test_fail'
 
-    assert args[3][0][0]['event'] == 'logreport'
-    assert args[3][0][0]['outcome'] == 'passed'
-    assert args[3][0][0]['witherror'] is False
+    assert args[3][0][0]['event'] == 'starttest'
     assert args[3][0][0]['nodeid'] == 'test_foo.py::test_ok'
-    assert args[3][0][0]['sections'] == []
-    assert args[3][0][0]['filename'] == 'test_foo.py'
-    assert args[3][0][0]['lineno'] == 0
-    assert 'duration' in args[3][0][0]
 
-    assert args[4][0][0]['event'] == 'starttest'
-    assert args[4][0][0]['nodeid'] == 'test_foo.py::test_fail'
+    assert args[4][0][0]['event'] == 'logreport'
+    assert args[4][0][0]['outcome'] == 'passed'
+    assert args[4][0][0]['nodeid'] == 'test_foo.py::test_ok'
+    assert args[4][0][0]['sections'] == []
+    assert args[4][0][0]['filename'] == 'test_foo.py'
+    assert args[4][0][0]['lineno'] == 0
+    assert 'duration' in args[4][0][0]
 
-    assert args[5][0][0]['event'] == 'logreport'
-    assert args[5][0][0]['outcome'] == 'failed'
-    assert args[5][0][0]['witherror'] is False
+    assert args[5][0][0]['event'] == 'starttest'
     assert args[5][0][0]['nodeid'] == 'test_foo.py::test_fail'
-    assert args[5][0][0]['sections'] == []
-    assert args[5][0][0]['filename'] == 'test_foo.py'
-    assert args[5][0][0]['lineno'] == 1
-    assert 'duration' in args[5][0][0]
+
+    assert args[6][0][0]['event'] == 'logreport'
+    assert args[6][0][0]['outcome'] == 'failed'
+    assert args[6][0][0]['nodeid'] == 'test_foo.py::test_fail'
+    assert args[6][0][0]['sections'] == []
+    assert args[6][0][0]['filename'] == 'test_foo.py'
+    assert args[6][0][0]['lineno'] == 1
+    assert 'duration' in args[6][0][0]
