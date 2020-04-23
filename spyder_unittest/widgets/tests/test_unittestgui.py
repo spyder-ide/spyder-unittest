@@ -181,11 +181,13 @@ def test_run_tests_and_display_results(qtbot, tmpdir, monkeypatch, framework):
     MockQMessageBox.assert_not_called()
     model = widget.testdatamodel
     assert model.rowCount() == 2
-    assert model.index(0, 0).data(Qt.DisplayRole) == 'ok'
+    assert model.index(0, 0).data(
+        Qt.DisplayRole) == 'ok' if framework == 'nose' else 'passed'
     assert model.index(0, 1).data(Qt.DisplayRole) == 't.test_ok'
     assert model.index(0, 1).data(Qt.ToolTipRole) == 'test_foo.test_ok'
     assert model.index(0, 2).data(Qt.DisplayRole) == ''
-    assert model.index(1, 0).data(Qt.DisplayRole) == 'failure'
+    assert model.index(1, 0).data(
+        Qt.DisplayRole) == 'failure' if framework == 'nose' else 'failed'
     assert model.index(1, 1).data(Qt.DisplayRole) == 't.test_fail'
     assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.test_fail'
 
