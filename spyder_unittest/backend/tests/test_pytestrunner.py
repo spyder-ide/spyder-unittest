@@ -35,6 +35,13 @@ def test_pytestrunner_start(monkeypatch):
     mock_process = MockQProcess()
     mock_process.systemEnvironment = lambda: ['VAR=VALUE', 'PYTHONPATH=old']
 
+    def mock_add_pathlist_to_PYTHONPATH(env, _):
+        env[1] = 'PYTHONPATH=pythondir:old'
+
+    monkeypatch.setattr(
+        'spyder_unittest.backend.runnerbase.add_pathlist_to_PYTHONPATH',
+        mock_add_pathlist_to_PYTHONPATH)
+
     MockEnvironment = Mock()
     monkeypatch.setattr(
         'spyder_unittest.backend.runnerbase.QProcessEnvironment',
@@ -67,8 +74,7 @@ def test_pytestrunner_start(monkeypatch):
             get_python_executable(), [workerfile, '42'])
 
     mock_environment.insert.assert_any_call('VAR', 'VALUE')
-    # mock_environment.insert.assert_any_call('PYTHONPATH', 'pythondir:old')
-    # TODO: Find out why above test fails
+    mock_environment.insert.assert_any_call('PYTHONPATH', 'pythondir:old')
     mock_remove.called_once_with('results')
 
     assert runner.reader is mock_reader
