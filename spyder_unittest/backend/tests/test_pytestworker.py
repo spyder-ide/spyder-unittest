@@ -180,6 +180,39 @@ def test_pytest_runtest_logreport_with_excinfo_longrepr(plugin_ini):
     plugin_ini.pytest_runtest_logreport(report)
     assert plugin_ini.longrepr == ['msg']
 
+@pytest.mark.parametrize('when,longrepr,expected',[
+    ('setup', [], ['ERROR at setup: msg']),
+    ('call', [], ['msg']),
+    ('teardown', ['prev msg'], ['prev msg', 'ERROR at teardown: msg'])
+])
+def test_pytest_runtest_logreport_error_in_setup_or_teardown_message(
+        plugin_ini, when, longrepr, expected):
+    report = standard_logreport()
+    report.when = when
+    report.outcome = 'failed'
+    report.longrepr = 'msg'
+    plugin_ini.longrepr = longrepr
+    plugin_ini.pytest_runtest_logreport(report)
+    assert plugin_ini.longrepr == expected
+
+
+def test_pytest_runtest_logreport_error_in_setup_or_teardown_multiple_messages(
+        plugin_ini):
+    class MockLongrepr:
+        def __init__(self):
+            self.reprcrash = EmptyClass()
+            self.reprcrash.message = 'msg'
+
+        def __str__(self):
+            return 'reprtraceback'
+
+    report = standard_logreport()
+    report.when = 'setup'
+    report.outcome = 'failed'
+    report.longrepr = MockLongrepr()
+    plugin_ini.pytest_runtest_logreport(report)
+    assert plugin_ini.longrepr == ['ERROR at setup: msg', 'reprtraceback']
+
 
 def test_pytest_runtest_logfinish_skipped(plugin_ini):
     nodeid = 'foo.py::bar'

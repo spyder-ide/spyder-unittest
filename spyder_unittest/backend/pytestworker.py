@@ -18,7 +18,14 @@ import sys
 import pytest
 
 # Local imports
+from spyder.config.base import get_translation
 from spyder_unittest.backend.zmqstream import ZmqStreamWriter
+
+try:
+    _ = get_translation("unittest", dirname="spyder_unittest")
+except KeyError:  # pragma: no cover
+    import gettext
+    _ = gettext.gettext
 
 
 class FileStub():
@@ -94,6 +101,7 @@ class SpyderPlugin():
                 report.wasxfail if report.wasxfail else 'wasxfail')
         self.sections = report.sections  # already accumulated over phases
         if report.longrepr:
+            first_msg_idx = len(self.longrepr)
             if hasattr(report.longrepr, 'reprcrash'):
                 self.longrepr.append(report.longrepr.reprcrash.message)
             if isinstance(report.longrepr, tuple):
@@ -102,6 +110,10 @@ class SpyderPlugin():
                 self.longrepr.append(report.longrepr)
             else:
                 self.longrepr.append(str(report.longrepr))
+            if report.outcome == 'failed' and report.when in (
+                    'setup', 'teardown'):
+                self.longrepr[first_msg_idx] = '{} {}: {}'.format(
+                    _('ERROR at'), report.when, self.longrepr[first_msg_idx])
 
     def pytest_runtest_logfinish(self, nodeid, location):
         """Called by pytest when the entire test is completed."""
