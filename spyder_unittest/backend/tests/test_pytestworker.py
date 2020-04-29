@@ -127,7 +127,7 @@ def test_pytest_runtest_logreport_skipped(plugin_ini):
 
 @pytest.mark.parametrize('xfail_msg,longrepr', [
     ('msg', 'msg'),
-    ('', 'wasxfail')
+    ('', 'WAS EXPECTED TO FAIL')
 ])
 def test_pytest_runtest_logreport_xfail(plugin_ini, xfail_msg, longrepr):
     report = standard_logreport()

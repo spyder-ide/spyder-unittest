@@ -97,8 +97,8 @@ class SpyderPlugin():
                 self.was_skipped = True
         if hasattr(report, 'wasxfail'):
             self.was_xfail = True
-            self.longrepr.append(
-                report.wasxfail if report.wasxfail else 'wasxfail')
+            self.longrepr.append(report.wasxfail if report.wasxfail else _(
+                'WAS EXPECTED TO FAIL'))
         self.sections = report.sections  # already accumulated over phases
         if report.longrepr:
             first_msg_idx = len(self.longrepr)
