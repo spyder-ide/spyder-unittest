@@ -78,8 +78,6 @@ class PyTestRunner(RunnerBase):
             elif result_item['event'] == 'logreport':
                 testresult = logreport_to_testresult(result_item, self.config)
                 result_list.append(testresult)
-            elif result_item['event'] == 'finished':
-                self.output = result_item['stdout']
 
         if collected_list:
             self.sig_collected.emit(collected_list)
