@@ -133,30 +133,23 @@ def logreport_starttest_to_str(report):
 
 def logreport_to_testresult(report, config):
     """Convert a logreport sent by test process to a TestResult."""
-    if report['outcome'] == 'passed':
-        cat = Category.OK
-        status = 'ok'
-    elif report['outcome'] == 'failed':
+    status = report['outcome']
+    if report['outcome'] in ('failed', 'xpassed') or report['witherror']:
         cat = Category.FAIL
-        status = 'failure'
+    elif report['outcome'] in ('passed', 'xfailed'):
+        cat = Category.OK
     else:
         cat = Category.SKIP
-        status = report['outcome']
     testname = convert_nodeid_to_testname(report['nodeid'])
-    duration = report['duration']
-    message = report['message'] if 'message' in report else ''
-    if 'longrepr' not in report:
-        extra_text = ''
-    elif isinstance(report['longrepr'], tuple):
-        extra_text = report['longrepr'][2]
-    else:
-        extra_text = report['longrepr']
+    message = report.get('message', '')
+    extra_text = report.get('longrepr', '')
     if 'sections' in report:
+        if extra_text:
+            extra_text +=  '\n'
         for (heading, text) in report['sections']:
-            extra_text += '----- {} -----\n'.format(heading)
-            extra_text += text
+            extra_text += '----- {} -----\n{}'.format(heading, text)
     filename = osp.join(config.wdir, report['filename'])
     result = TestResult(cat, status, testname, message=message,
-                        time=duration, extra_text=extra_text,
+                        time=report['duration'], extra_text=extra_text,
                         filename=filename, lineno=report['lineno'])
     return result

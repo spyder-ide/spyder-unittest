@@ -10,6 +10,7 @@ import os
 import os.path as osp
 
 # Third party imports
+import pytest
 from qtpy.QtCore import QByteArray
 from spyder.utils.misc import get_python_executable
 
@@ -106,8 +107,8 @@ def test_pytestrunner_process_output_with_starttest(qtbot):
 def standard_logreport_output():
     return {
         'event': 'logreport',
-        'when': 'call',
         'outcome': 'passed',
+        'witherror': False,
         'nodeid': 'foo.py::bar',
         'filename': 'foo.py',
         'lineno': 24,
@@ -120,61 +121,67 @@ def test_pytestrunner_process_output_with_logreport_passed(qtbot):
     output = [standard_logreport_output()]
     with qtbot.waitSignal(runner.sig_testresult) as blocker:
         runner.process_output(output)
-    expected = [TestResult(Category.OK, 'ok', 'foo.bar', time=42,
+    expected = [TestResult(Category.OK, 'passed', 'foo.bar', time=42,
                            filename=osp.join('ham', 'foo.py'), lineno=24)]
     assert blocker.args == [expected]
 
-def test_logreport_to_testresult_passed():
+
+@pytest.mark.parametrize('outcome,witherror,category', [
+    ('passed', True, Category.FAIL),
+    ('passed', False, Category.OK),
+    ('failed', True, Category.FAIL),
+    ('failed', False, Category.FAIL),
+    # ('skipped', True, this is not possible)
+    ('skipped', False, Category.SKIP),
+    ('xfailed', True, Category.FAIL),
+    ('xfailed', False, Category.OK),
+    ('xpassed', True, Category.FAIL),
+    ('xpassed', False, Category.FAIL),
+    ('---', True, Category.FAIL)
+    # ('---', False, this is not possible)
+])
+def test_logreport_to_testresult_with_outcome_and_possible_error(outcome,
+                                                                 witherror,
+                                                                 category):
     report = standard_logreport_output()
-    expected = TestResult(Category.OK, 'ok', 'foo.bar', time=42,
+    report['outcome'] = outcome
+    report['witherror'] = witherror
+    expected = TestResult(category, outcome, 'foo.bar', time=42,
                           filename=osp.join('ham', 'foo.py'), lineno=24)
     assert logreport_to_testresult(report, Config(wdir='ham')) == expected
 
-def test_logreport_to_testresult_failed():
+
+def test_logreport_to_testresult_with_message():
     report = standard_logreport_output()
-    report['outcome'] = 'failed'
     report['message'] = 'msg'
-    report['longrepr'] = 'exception text'
-    expected = TestResult(Category.FAIL, 'failure', 'foo.bar',
-                          message='msg', time=42, extra_text='exception text',
+    expected = TestResult(Category.OK, 'passed', 'foo.bar', message='msg',
+                          time=42, filename=osp.join('ham', 'foo.py'),
+                          lineno=24)
+    assert logreport_to_testresult(report, Config(wdir='ham')) == expected
+
+
+def test_logreport_to_testresult_with_extratext():
+    report = standard_logreport_output()
+    report['longrepr'] = 'long msg'
+    expected = TestResult(Category.OK, 'passed', 'foo.bar', time=42,
+                          extra_text='long msg',
                           filename=osp.join('ham', 'foo.py'), lineno=24)
     assert logreport_to_testresult(report, Config(wdir='ham')) == expected
 
-def test_logreport_to_testresult_skipped():
-    report = standard_logreport_output()
-    report['when'] = 'setup'
-    report['outcome'] = 'skipped'
-    report['longrepr'] = ('file', 24, 'skipmsg')
-    expected = TestResult(Category.SKIP, 'skipped', 'foo.bar',
-                          time=42, extra_text='skipmsg',
-                          filename=osp.join('ham', 'foo.py'), lineno=24)
-    assert logreport_to_testresult(report, Config(wdir='ham')) == expected
 
-def test_logreport_to_testresult_xfail():
+@pytest.mark.parametrize('longrepr,prefix', [
+    ('', ''),
+    ('msg', '\n')
+])
+def test_logreport_to_testresult_with_output(longrepr, prefix):
     report = standard_logreport_output()
-    report['outcome'] = 'skipped'
-    report['message'] = 'msg'
-    report['longrepr'] = 'exception text'
-    report['wasxfail'] = ''
-    expected = TestResult(Category.SKIP, 'skipped', 'foo.bar',
-                          message='msg', time=42, extra_text='exception text',
-                          filename=osp.join('ham', 'foo.py'), lineno=24)
-    assert logreport_to_testresult(report, Config(wdir='ham')) == expected
-
-def test_logreport_to_testresult_xpass():
-    report = standard_logreport_output()
-    report['wasxfail'] = ''
-    expected = TestResult(Category.OK, 'ok', 'foo.bar', time=42,
-                          filename=osp.join('ham', 'foo.py'), lineno=24)
-    assert logreport_to_testresult(report, Config(wdir='ham')) == expected
-
-def test_logreport_to_testresult_with_output():
-    report = standard_logreport_output()
+    report['longrepr'] = longrepr
     report['sections'] = [['Captured stdout call', 'ham\n'],
                           ['Captured stderr call', 'spam\n']]
-    txt = ('----- Captured stdout call -----\nham\n'
+    txt = (longrepr + prefix +
+           '----- Captured stdout call -----\nham\n'
            '----- Captured stderr call -----\nspam\n')
-    expected = TestResult(Category.OK, 'ok', 'foo.bar', time=42,
+    expected = TestResult(Category.OK, 'passed', 'foo.bar', time=42,
                           extra_text=txt, filename=osp.join('ham', 'foo.py'),
                           lineno=24)
     assert logreport_to_testresult(report, Config(wdir='ham')) == expected

@@ -18,7 +18,14 @@ import sys
 import pytest
 
 # Local imports
+from spyder.config.base import get_translation
 from spyder_unittest.backend.zmqstream import ZmqStreamWriter
+
+try:
+    _ = get_translation("unittest", dirname="spyder_unittest")
+except KeyError:  # pragma: no cover
+    import gettext
+    _ = gettext.gettext
 
 
 class FileStub():
@@ -44,6 +51,16 @@ class SpyderPlugin():
         """Constructor."""
         self.writer = writer
 
+    def initialize_logreport(self):
+        """Reset accumulator variables."""
+        self.status = '---'
+        self.duration = 0
+        self.longrepr = []
+        self.sections = []
+        self.had_error = False
+        self.was_skipped = False
+        self.was_xfail = False
+
     def pytest_collectreport(self, report):
         """Called by pytest after collecting tests from a file."""
         if report.outcome == 'failed':
@@ -66,30 +83,61 @@ class SpyderPlugin():
             'event': 'starttest',
             'nodeid': nodeid
         })
+        self.initialize_logreport()
 
     def pytest_runtest_logreport(self, report):
-        """Called by pytest when a (phase of a) test is completed."""
-        if report.when in ['setup', 'teardown'] and report.outcome == 'passed':
-            return
-        data = {'event': 'logreport',
-                'when': report.when,
-                'outcome': report.outcome,
-                'nodeid': report.nodeid,
-                'sections': report.sections,
-                'duration': report.duration,
-                'filename': report.location[0],
-                'lineno': report.location[1]}
-        if report.longrepr:
-            if isinstance(report.longrepr, tuple):
-                data['longrepr'] = report.longrepr
-            else:
-                data['longrepr'] = str(report.longrepr)
+        """Called by pytest when a phase of a test is completed."""
+        if report.when == 'call':
+            self.status = report.outcome
+            self.duration = report.duration
+        else:
+            if report.outcome == 'failed':
+                self.had_error = True
+            elif report.outcome == 'skipped':
+                self.was_skipped = True
         if hasattr(report, 'wasxfail'):
-            data['wasxfail'] = report.wasxfail
-        if hasattr(report.longrepr, 'reprcrash'):
-            data['message'] = report.longrepr.reprcrash.message
-        self.writer.write(data)
+            self.was_xfail = True
+            self.longrepr.append(report.wasxfail if report.wasxfail else _(
+                'WAS EXPECTED TO FAIL'))
+        self.sections = report.sections  # already accumulated over phases
+        if report.longrepr:
+            first_msg_idx = len(self.longrepr)
+            if hasattr(report.longrepr, 'reprcrash'):
+                self.longrepr.append(report.longrepr.reprcrash.message)
+            if isinstance(report.longrepr, tuple):
+                self.longrepr.append(report.longrepr[2])
+            elif isinstance(report.longrepr, str):
+                self.longrepr.append(report.longrepr)
+            else:
+                self.longrepr.append(str(report.longrepr))
+            if report.outcome == 'failed' and report.when in (
+                    'setup', 'teardown'):
+                self.longrepr[first_msg_idx] = '{} {}: {}'.format(
+                    _('ERROR at'), report.when, self.longrepr[first_msg_idx])
 
+    def pytest_runtest_logfinish(self, nodeid, location):
+        """Called by pytest when the entire test is completed."""
+        if self.was_xfail:
+            if self.status == 'passed':
+                self.status = 'xpassed'
+            else: # 'skipped'
+                self.status = 'xfailed'
+        elif self.was_skipped:
+            self.status = 'skipped'
+        data = {'event': 'logreport',
+                'outcome': self.status,
+                'witherror': self.had_error,
+                'sections': self.sections,
+                'duration': self.duration,
+                'nodeid': nodeid,
+                'filename': location[0],
+                'lineno': location[1]}
+        if self.longrepr:
+            msg_lines = self.longrepr[0].rstrip().splitlines()
+            data['message'] = msg_lines[0]
+            start_item = 1 if len(msg_lines) == 1 else 0
+            data['longrepr'] = '\n'.join(self.longrepr[start_item:])
+        self.writer.write(data)
 
 def main(args):
     """Run pytest with the Spyder plugin."""
