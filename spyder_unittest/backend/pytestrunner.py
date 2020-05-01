@@ -67,7 +67,9 @@ class PyTestRunner(RunnerBase):
         result_list = []
 
         for result_item in output:
-            if result_item['event'] == 'collected':
+            if result_item['event'] == 'config':
+                self.rootdir = result_item['rootdir']
+            elif result_item['event'] == 'collected':
                 testname = convert_nodeid_to_testname(result_item['nodeid'])
                 collected_list.append(testname)
             elif result_item['event'] == 'collecterror':
@@ -76,7 +78,7 @@ class PyTestRunner(RunnerBase):
             elif result_item['event'] == 'starttest':
                 starttest_list.append(logreport_starttest_to_str(result_item))
             elif result_item['event'] == 'logreport':
-                testresult = logreport_to_testresult(result_item, self.config)
+                testresult = logreport_to_testresult(result_item, self.rootdir)
                 result_list.append(testresult)
             elif result_item['event'] == 'finished':
                 self.output = result_item['stdout']
@@ -131,7 +133,7 @@ def logreport_starttest_to_str(report):
     return convert_nodeid_to_testname(report['nodeid'])
 
 
-def logreport_to_testresult(report, config):
+def logreport_to_testresult(report, rootdir):
     """Convert a logreport sent by test process to a TestResult."""
     status = report['outcome']
     if report['outcome'] in ('failed', 'xpassed') or report['witherror']:
@@ -148,7 +150,7 @@ def logreport_to_testresult(report, config):
             extra_text +=  '\n'
         for (heading, text) in report['sections']:
             extra_text += '----- {} -----\n{}'.format(heading, text)
-    filename = osp.join(config.wdir, report['filename'])
+    filename = osp.join(rootdir, report['filename'])
     result = TestResult(cat, status, testname, message=message,
                         time=report['duration'], extra_text=extra_text,
                         filename=filename, lineno=report['lineno'])

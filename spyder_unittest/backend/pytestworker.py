@@ -61,6 +61,13 @@ class SpyderPlugin():
         self.was_skipped = False
         self.was_xfail = False
 
+    def pytest_report_header(self, config, startdir):
+        """Called by pytest before any reporting."""
+        self.writer.write({
+            'event': 'config',
+            'rootdir': str(config.rootdir)
+        })
+
     def pytest_collectreport(self, report):
         """Called by pytest after collecting tests from a file."""
         if report.outcome == 'failed':
