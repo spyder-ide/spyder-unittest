@@ -409,7 +409,7 @@ def test():
 
     # add wdir's parent to python path, so that `import spyder_unittest` works
     rootdir = osp.abspath(osp.join(wdir, osp.pardir))
-    widget.pythonpath = rootdir
+    widget.pythonpath = [rootdir]
 
     widget.resize(800, 600)
     widget.show()
