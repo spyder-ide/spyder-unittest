@@ -13,7 +13,7 @@ import tempfile
 from qtpy.QtCore import (QObject, QProcess, QProcessEnvironment, QTextCodec,
                          Signal)
 from spyder.py3compat import to_text_string
-from spyder.utils.misc import add_pathlist_to_PYTHONPATH, get_python_executable
+from spyder.utils.misc import get_python_executable
 
 try:
     from importlib.util import find_spec as find_spec_or_loader
@@ -179,17 +179,14 @@ class RunnerBase(QObject):
         process.setProcessChannelMode(QProcess.MergedChannels)
         process.setWorkingDirectory(config.wdir)
         process.finished.connect(self.finished)
-        if pythonpath is not None:
-            env = [
-                to_text_string(_pth)
-                for _pth in process.systemEnvironment()
-            ]
-            add_pathlist_to_PYTHONPATH(env, pythonpath)
-            processEnvironment = QProcessEnvironment()
-            for envItem in env:
-                envName, separator, envValue = envItem.partition('=')
-                processEnvironment.insert(envName, envValue)
-            process.setProcessEnvironment(processEnvironment)
+        if pythonpath:
+            env = QProcessEnvironment.systemEnvironment()
+            old_python_path = env.value('PYTHONPATH', None)
+            python_path_str = os.pathsep.join(pythonpath)
+            if old_python_path:
+                python_path_str += os.pathsep + old_python_path
+            env.insert('PYTHONPATH', python_path_str)
+            process.setProcessEnvironment(env)
         return process
 
     def start(self, config, pythonpath):
