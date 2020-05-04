@@ -12,7 +12,6 @@ import os.path as osp
 # Third party imports
 import pytest
 from qtpy.QtCore import QByteArray
-from spyder.utils.misc import get_python_executable
 
 # Local imports
 from spyder_unittest.backend.pytestrunner import (PyTestRunner,
@@ -29,50 +28,43 @@ except ImportError:
 def test_pytestrunner_is_installed():
     assert PyTestRunner(None).is_installed()
 
-def test_pytestrunner_start(monkeypatch):
-    MockQProcess = Mock()
-    monkeypatch.setattr('spyder_unittest.backend.runnerbase.QProcess',
-                        MockQProcess)
-    mock_process = MockQProcess()
-    mock_process.systemEnvironment = lambda: ['VAR=VALUE', 'PYTHONPATH=old']
 
-    MockEnvironment = Mock()
-    monkeypatch.setattr(
-        'spyder_unittest.backend.runnerbase.QProcessEnvironment',
-        MockEnvironment)
-    mock_environment = MockEnvironment()
-
-    mock_remove = Mock(side_effect=OSError())
-    monkeypatch.setattr('spyder_unittest.backend.runnerbase.os.remove',
-                        mock_remove)
-
+def test_pytestrunner_create_argument_list(monkeypatch):
     MockZMQStreamReader = Mock()
     monkeypatch.setattr(
         'spyder_unittest.backend.pytestrunner.ZmqStreamReader',
         MockZMQStreamReader)
     mock_reader = MockZMQStreamReader()
     mock_reader.port = 42
+    runner = PyTestRunner(None, 'results')
+    runner.reader = mock_reader
+    monkeypatch.setattr('spyder_unittest.backend.pytestrunner.os.path.dirname',
+                        lambda _: 'dir')
+    pyfile, port = runner.create_argument_list()
+    assert pyfile == 'dir{}pytestworker.py'.format(os.sep)
+    assert port == '42'
+
+
+def test_pytestrunner_start(monkeypatch):
+    MockZMQStreamReader = Mock()
+    monkeypatch.setattr(
+        'spyder_unittest.backend.pytestrunner.ZmqStreamReader',
+        MockZMQStreamReader)
+    mock_reader = MockZMQStreamReader()
+
+    MockRunnerBase = Mock(name='RunnerBase')
+    monkeypatch.setattr('spyder_unittest.backend.pytestrunner.RunnerBase',
+                        MockRunnerBase)
 
     runner = PyTestRunner(None, 'results')
-    config = Config('pytest', 'wdir')
+    config = Config()
     runner.start(config, ['pythondir'])
-
-    mock_process.setWorkingDirectory.assert_called_once_with('wdir')
-    mock_process.finished.connect.assert_called_once_with(runner.finished)
-    mock_process.setProcessEnvironment.assert_called_once_with(
-        mock_environment)
-
-    workerfile = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), os.pardir, 'pytestworker.py'))
-    mock_process.start.assert_called_once_with(
-            get_python_executable(), [workerfile, '42'])
-
-    mock_environment.insert.assert_any_call('VAR', 'VALUE')
-    # mock_environment.insert.assert_any_call('PYTHONPATH', 'pythondir:old')
-    # TODO: Find out why above test fails
-    mock_remove.called_once_with('results')
-
+    assert runner.config is config
     assert runner.reader is mock_reader
+    runner.reader.sig_received.connect.assert_called_once_with(
+        runner.process_output)
+    MockRunnerBase.start.assert_called_once_with(runner, config, ['pythondir'])
+
 
 def test_pytestrunner_process_output_with_collected(qtbot):
     runner = PyTestRunner(None)
