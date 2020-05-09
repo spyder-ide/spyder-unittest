@@ -96,6 +96,22 @@ def test_pytestrunner_process_output_with_starttest(qtbot):
     expected = ['ham.spam.ham', 'ham.eggs.bacon']
     assert blocker.args == [expected]
 
+
+@pytest.mark.parametrize('output,results', [
+    ('== 1 passed in 0.10s ==', None),
+    ('== no tests ran 0.01s ==', [])
+])
+def test_pytestrunner_finished(qtbot, output, results):
+    mock_reader = Mock()
+    mock_reader.close = lambda: None
+    runner = PyTestRunner(None)
+    runner.reader = mock_reader
+    runner.read_all_process_output = lambda: output
+    with qtbot.waitSignal(runner.sig_finished) as blocker:
+        runner.finished()
+    assert blocker.args == [results, output]
+
+
 def standard_logreport_output():
     return {
         'event': 'logreport',
