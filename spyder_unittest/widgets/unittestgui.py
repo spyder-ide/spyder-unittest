@@ -20,15 +20,21 @@ from spyder.config.base import get_conf_path, get_translation
 from spyder.utils import icon_manager as ima
 from spyder.utils.qthelpers import create_action, create_toolbutton
 from spyder.plugins.variableexplorer.widgets.texteditor import TextEditor
+from spyder.py3compat import PY3
 
 # Local imports
 from spyder_unittest.backend.frameworkregistry import FrameworkRegistry
 from spyder_unittest.backend.noserunner import NoseRunner
-from spyder_unittest.backend.pytestrunner import PyTestRunner
 from spyder_unittest.backend.runnerbase import Category, TestResult
 from spyder_unittest.backend.unittestrunner import UnittestRunner
 from spyder_unittest.widgets.configdialog import Config, ask_for_config
 from spyder_unittest.widgets.datatree import TestDataModel, TestDataView
+
+# This import uses Python 3 syntax, so importing it under Python 2 throws
+# a SyntaxError which means that the plugin's check_compatibility method
+# will never run.
+if PY3:
+    from spyder_unittest.backend.pytestrunner import PyTestRunner
 
 # This is needed for testing this module as a stand alone script
 try:
@@ -38,7 +44,10 @@ except KeyError:
     _ = gettext.gettext
 
 # Supported testing framework
-FRAMEWORKS = {NoseRunner, PyTestRunner, UnittestRunner}
+if PY3:
+    FRAMEWORKS = {NoseRunner, PyTestRunner, UnittestRunner}
+else:
+    FRAMEWORKS = {NoseRunner, UnittestRunner}
 
 
 class UnitTestWidget(QWidget):
