@@ -56,6 +56,7 @@ setup(
     packages=find_packages(),
     package_data={LIBNAME: get_package_data(LIBNAME, EXTLIST)},
     keywords=["Qt PyQt4 PyQt5 spyder plugins testing"],
+    python_requires='>=3.5',
     install_requires=REQUIREMENTS,
     url='https://github.com/spyder-ide/spyder-unittest',
     license='MIT',
@@ -69,10 +70,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Testing',
         'Topic :: Text Editors :: Integrated Development Environments (IDE)'])
