@@ -13,7 +13,7 @@ from qtpy.QtWidgets import QVBoxLayout
 from spyder.api.plugins import SpyderPluginWidget
 from spyder.config.base import get_translation
 from spyder.config.gui import is_dark_interface
-from spyder.py3compat import getcwd
+from spyder.py3compat import PY2, getcwd
 from spyder.utils import icon_manager as ima
 from spyder.utils.qthelpers import create_action
 
@@ -216,6 +216,27 @@ class UnitTestPlugin(SpyderPluginWidget):
     def apply_plugin_settings(self, options):
         """Apply configuration file's plugin settings."""
         pass
+
+    def check_compatibility(self):
+        """
+        Check compatibility of the plugin.
+
+        This checks that the plugin is not run under Python 2.
+
+        Returns
+        -------
+        (bool, str)
+            The first value tells Spyder if the plugin has passed the
+            compatibility test defined in this method. The second value
+            is a message that must explain users why the plugin was
+            found to be incompatible (e.g. 'This plugin does not work
+            with PyQt4'). It will be shown at startup in a QMessageBox.
+        """
+        if PY2:
+            msg = _('The unittest plugin does not work with Python 2.')
+            return (False, msg)
+        else:
+            return (True, '')
 
     # ----- Public API --------------------------------------------------------
     def maybe_configure_and_start(self):
