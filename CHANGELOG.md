@@ -1,5 +1,40 @@
 # History of changes
 
+## Version 0.4.1 (2020/05/23)
+
+This release fixes several bugs and other issues, allowing the plugin to be
+used with Spyder 4.1. This release can not be used with Python 2.
+
+### Issues Closed
+
+* [Issue 154](https://github.com/spyder-ide/spyder-unittest/issues/154) - Make plugin depend on Python 3 ([PR 155](https://github.com/spyder-ide/spyder-unittest/pull/155))
+* [Issue 145](https://github.com/spyder-ide/spyder-unittest/issues/145) - Go to test definition only works when run from root dir ([PR 149](https://github.com/spyder-ide/spyder-unittest/pull/149))
+* [Issue 138](https://github.com/spyder-ide/spyder-unittest/issues/138) - Move CI to github actions ([PR 143](https://github.com/spyder-ide/spyder-unittest/pull/143))
+* [Issue 127](https://github.com/spyder-ide/spyder-unittest/issues/127) - Teardown function's logs not captured ([PR 151](https://github.com/spyder-ide/spyder-unittest/pull/151))
+* [Issue 115](https://github.com/spyder-ide/spyder-unittest/issues/115) - Report pytest plugins used while running a test suite ([PR 146](https://github.com/spyder-ide/spyder-unittest/pull/146))
+* [Issue 47](https://github.com/spyder-ide/spyder-unittest/issues/47) - pytest statuses "expected-fail" and "unexpectedly passing" not yet reflected in Category ([PR 151](https://github.com/spyder-ide/spyder-unittest/pull/151))
+
+In this release 6 issues were closed.
+
+### Pull Requests Merged
+
+* [PR 155](https://github.com/spyder-ide/spyder-unittest/pull/155) - PR: Require Python 3.5 or later ([154](https://github.com/spyder-ide/spyder-unittest/issues/154))
+* [PR 153](https://github.com/spyder-ide/spyder-unittest/pull/153) - Fix tests that could never fail
+* [PR 152](https://github.com/spyder-ide/spyder-unittest/pull/152) - Fix pytest output processing
+* [PR 151](https://github.com/spyder-ide/spyder-unittest/pull/151) - Fix pytest backend ([47](https://github.com/spyder-ide/spyder-unittest/issues/47), [127](https://github.com/spyder-ide/spyder-unittest/issues/127))
+* [PR 150](https://github.com/spyder-ide/spyder-unittest/pull/150) - Fix test_pytestrunner_start
+* [PR 149](https://github.com/spyder-ide/spyder-unittest/pull/149) - Fix pytest test filename path resolution ([145](https://github.com/spyder-ide/spyder-unittest/issues/145))
+* [PR 148](https://github.com/spyder-ide/spyder-unittest/pull/148) - Use set_status_label function
+* [PR 147](https://github.com/spyder-ide/spyder-unittest/pull/147) - Fix abbreviator if name has parameters with dots
+* [PR 146](https://github.com/spyder-ide/spyder-unittest/pull/146) - Show version info of test installed frameworks and their plugins ([115](https://github.com/spyder-ide/spyder-unittest/issues/115))
+* [PR 144](https://github.com/spyder-ide/spyder-unittest/pull/144) - Dynamic sizing of text editor window ([12202](https://github.com/spyder-ide/spyder/issues/12202))
+* [PR 143](https://github.com/spyder-ide/spyder-unittest/pull/143) - Move CI to GitHub actions ([138](https://github.com/spyder-ide/spyder-unittest/issues/138))
+* [PR 141](https://github.com/spyder-ide/spyder-unittest/pull/141) - Fix status label
+* [PR 139](https://github.com/spyder-ide/spyder-unittest/pull/139) - Fix TextEditor constructor
+
+In this release 13 pull requests were closed.
+
+
 ## Version 0.4.0 (2020/01/07)
 
 This release updates the plugin to be used with Spyder 4 and fixes some bugs.
