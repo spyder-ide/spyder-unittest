@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: spyder-unittest\n"
 "POT-Creation-Date: 2019-12-09 10:16-0500\n"
-"PO-Revision-Date: 2020-04-30 09:10\n"
+"PO-Revision-Date: 2020-05-30 11:46\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -34,7 +34,7 @@ msgstr ""
 
 #: spyder_unittest/widgets/configdialog.py:61
 msgid "Configure tests"
-msgstr ""
+msgstr "Tests konfigurieren"
 
 #: spyder_unittest/widgets/configdialog.py:65
 msgid "Test framework"
@@ -42,7 +42,7 @@ msgstr ""
 
 #: spyder_unittest/widgets/configdialog.py:74
 msgid "not available"
-msgstr ""
+msgstr "nicht verfügbar"
 
 #: spyder_unittest/widgets/configdialog.py:83
 msgid "Directory from which to run tests"
@@ -51,7 +51,7 @@ msgstr ""
 #: spyder_unittest/widgets/configdialog.py:89
 #: spyder_unittest/widgets/configdialog.py:125
 msgid "Select directory"
-msgstr ""
+msgstr "Verzeichnis auswählen"
 
 #: spyder_unittest/widgets/datatree.py:42
 msgid "Message"
@@ -59,23 +59,23 @@ msgstr ""
 
 #: spyder_unittest/widgets/datatree.py:42
 msgid "Name"
-msgstr ""
+msgstr "Name"
 
 #: spyder_unittest/widgets/datatree.py:42
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 #: spyder_unittest/widgets/datatree.py:42
 msgid "Time (ms)"
-msgstr ""
+msgstr "Zeit (ms)"
 
 #: spyder_unittest/widgets/datatree.py:138
 msgid "Collapse"
-msgstr ""
+msgstr "Einklappen"
 
 #: spyder_unittest/widgets/datatree.py:141
 msgid "Expand"
-msgstr ""
+msgstr "Ausklappen"
 
 #: spyder_unittest/widgets/datatree.py:146
 msgid "Go to definition"
@@ -99,11 +99,11 @@ msgstr ""
 
 #: spyder_unittest/widgets/datatree.py:396
 msgid "{} failed"
-msgstr ""
+msgstr "{} fehlgeschlagen"
 
 #: spyder_unittest/widgets/datatree.py:397
 msgid ", {} passed"
-msgstr ""
+msgstr ", {} bestanden"
 
 #: spyder_unittest/widgets/datatree.py:399
 msgid ", {} other"
@@ -111,23 +111,23 @@ msgstr ""
 
 #: spyder_unittest/widgets/datatree.py:401
 msgid ", {} pending"
-msgstr ""
+msgstr ", {} ausstehend"
 
 #: spyder_unittest/widgets/unittestgui.py:153
 msgid "Configure ..."
-msgstr ""
+msgstr "Konfigurieren ..."
 
 #: spyder_unittest/widgets/unittestgui.py:158
 msgid "Show output"
-msgstr ""
+msgstr "Ausgabe anzeigen"
 
 #: spyder_unittest/widgets/unittestgui.py:163
 msgid "Collapse all"
-msgstr ""
+msgstr "Alle einklappen"
 
 #: spyder_unittest/widgets/unittestgui.py:168
 msgid "Expand all"
-msgstr ""
+msgstr "Alle ausklappen"
 
 #: spyder_unittest/widgets/unittestgui.py:181
 msgid "Unit testing output"
@@ -135,7 +135,7 @@ msgstr ""
 
 #: spyder_unittest/widgets/unittestgui.py:263
 msgid "Error"
-msgstr ""
+msgstr "Fehler"
 
 #: spyder_unittest/widgets/unittestgui.py:263
 msgid "Process failed to start"
@@ -147,7 +147,7 @@ msgstr ""
 
 #: spyder_unittest/widgets/unittestgui.py:287
 msgid "Stop"
-msgstr ""
+msgstr "Stopp"
 
 #: spyder_unittest/widgets/unittestgui.py:288
 msgid "Stop current test process"
@@ -164,7 +164,7 @@ msgstr ""
 #: spyder_unittest/widgets/unittestgui.py:333
 #: spyder_unittest/widgets/unittestgui.py:339
 msgid "pending"
-msgstr ""
+msgstr "ausstehend"
 
 #: spyder_unittest/widgets/unittestgui.py:340
 msgid "running"
