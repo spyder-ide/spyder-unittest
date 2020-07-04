@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: spyder-unittest\n"
 "POT-Creation-Date: 2019-12-09 10:16-0500\n"
-"PO-Revision-Date: 2020-05-30 11:46\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2020-07-04 11:39\n"
+"Last-Translator: \n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,8 +11,10 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Crowdin-Project: spyder-unittest\n"
+"X-Crowdin-Project-ID: 381839\n"
 "X-Crowdin-Language: de\n"
 "X-Crowdin-File: /master/spyder_unittest/locale/spyder_unittest.pot\n"
+"X-Crowdin-File-ID: 49\n"
 "Language: de_DE\n"
 
 #: spyder_unittest/backend/noserunner.py:86
@@ -46,7 +48,7 @@ msgstr "nicht verfügbar"
 
 #: spyder_unittest/widgets/configdialog.py:83
 msgid "Directory from which to run tests"
-msgstr ""
+msgstr "Verzeichnis, aus dem Tests ausgeführt werden sollen"
 
 #: spyder_unittest/widgets/configdialog.py:89
 #: spyder_unittest/widgets/configdialog.py:125
@@ -55,7 +57,7 @@ msgstr "Verzeichnis auswählen"
 
 #: spyder_unittest/widgets/datatree.py:42
 msgid "Message"
-msgstr ""
+msgstr "Nachricht"
 
 #: spyder_unittest/widgets/datatree.py:42
 msgid "Name"
@@ -83,15 +85,15 @@ msgstr ""
 
 #: spyder_unittest/widgets/datatree.py:386
 msgid "test"
-msgstr ""
+msgstr "Test"
 
 #: spyder_unittest/widgets/datatree.py:386
 msgid "tests"
-msgstr ""
+msgstr "Tests"
 
 #: spyder_unittest/widgets/datatree.py:390
 msgid "No results to show."
-msgstr ""
+msgstr "Keine anzuzeigenden Ergebnisse."
 
 #: spyder_unittest/widgets/datatree.py:395
 msgid "collected {}"
