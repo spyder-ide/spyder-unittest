@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: spyder-unittest\n"
 "POT-Creation-Date: 2019-12-09 10:16-0500\n"
-"PO-Revision-Date: 2020-07-04 11:39\n"
+"PO-Revision-Date: 2020-07-05 11:36\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -97,7 +97,7 @@ msgstr "Keine anzuzeigenden Ergebnisse."
 
 #: spyder_unittest/widgets/datatree.py:395
 msgid "collected {}"
-msgstr ""
+msgstr "{} gesammelt"
 
 #: spyder_unittest/widgets/datatree.py:396
 msgid "{} failed"
@@ -145,7 +145,7 @@ msgstr ""
 
 #: spyder_unittest/widgets/unittestgui.py:266
 msgid "<b>Running tests ...<b>"
-msgstr ""
+msgstr "<b>Tests laufen ...<b>"
 
 #: spyder_unittest/widgets/unittestgui.py:287
 msgid "Stop"
