@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: spyder-unittest\n"
 "POT-Creation-Date: 2019-12-09 10:16-0500\n"
-"PO-Revision-Date: 2020-04-30 09:10\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2020-07-17 08:16\n"
+"Last-Translator: \n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -11,170 +11,172 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Crowdin-Project: spyder-unittest\n"
+"X-Crowdin-Project-ID: 381839\n"
 "X-Crowdin-Language: fr\n"
 "X-Crowdin-File: /master/spyder_unittest/locale/spyder_unittest.pot\n"
+"X-Crowdin-File-ID: 49\n"
 "Language: fr_FR\n"
 
 #: spyder_unittest/backend/noserunner.py:86
 msgid "Captured stdout"
-msgstr ""
+msgstr "Stdout récupéré"
 
 #: spyder_unittest/backend/noserunner.py:88
 msgid "Captured stderr"
-msgstr ""
+msgstr "Stderr récupéré"
 
 #: spyder_unittest/unittestplugin.py:156
 msgid "Unit testing"
-msgstr ""
+msgstr "Tests unitaires"
 
 #: spyder_unittest/unittestplugin.py:200
 #: spyder_unittest/widgets/unittestgui.py:294
 msgid "Run unit tests"
-msgstr ""
+msgstr "Lancement des tests unitaires"
 
 #: spyder_unittest/widgets/configdialog.py:61
 msgid "Configure tests"
-msgstr ""
+msgstr "Configurer les tests"
 
 #: spyder_unittest/widgets/configdialog.py:65
 msgid "Test framework"
-msgstr ""
+msgstr "Système de test"
 
 #: spyder_unittest/widgets/configdialog.py:74
 msgid "not available"
-msgstr ""
+msgstr "non disponible"
 
 #: spyder_unittest/widgets/configdialog.py:83
 msgid "Directory from which to run tests"
-msgstr ""
+msgstr "Répertoire depuis lequel exécuter les tests"
 
 #: spyder_unittest/widgets/configdialog.py:89
 #: spyder_unittest/widgets/configdialog.py:125
 msgid "Select directory"
-msgstr ""
+msgstr "Sélectionner un dossier"
 
 #: spyder_unittest/widgets/datatree.py:42
 msgid "Message"
-msgstr ""
+msgstr "Message"
 
 #: spyder_unittest/widgets/datatree.py:42
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
 #: spyder_unittest/widgets/datatree.py:42
 msgid "Status"
-msgstr ""
+msgstr "État "
 
 #: spyder_unittest/widgets/datatree.py:42
 msgid "Time (ms)"
-msgstr ""
+msgstr "Durée (ms)"
 
 #: spyder_unittest/widgets/datatree.py:138
 msgid "Collapse"
-msgstr ""
+msgstr "Réduire"
 
 #: spyder_unittest/widgets/datatree.py:141
 msgid "Expand"
-msgstr ""
+msgstr "Déployer"
 
 #: spyder_unittest/widgets/datatree.py:146
 msgid "Go to definition"
-msgstr ""
+msgstr "Aller à la définition"
 
 #: spyder_unittest/widgets/datatree.py:386
 msgid "test"
-msgstr ""
+msgstr "test"
 
 #: spyder_unittest/widgets/datatree.py:386
 msgid "tests"
-msgstr ""
+msgstr "tests"
 
 #: spyder_unittest/widgets/datatree.py:390
 msgid "No results to show."
-msgstr ""
+msgstr "Aucun résultat à afficher."
 
 #: spyder_unittest/widgets/datatree.py:395
 msgid "collected {}"
-msgstr ""
+msgstr "{} collectés"
 
 #: spyder_unittest/widgets/datatree.py:396
 msgid "{} failed"
-msgstr ""
+msgstr "{} échec"
 
 #: spyder_unittest/widgets/datatree.py:397
 msgid ", {} passed"
-msgstr ""
+msgstr ", {} réussi"
 
 #: spyder_unittest/widgets/datatree.py:399
 msgid ", {} other"
-msgstr ""
+msgstr ", {} autres"
 
 #: spyder_unittest/widgets/datatree.py:401
 msgid ", {} pending"
-msgstr ""
+msgstr ", {} en cours"
 
 #: spyder_unittest/widgets/unittestgui.py:153
 msgid "Configure ..."
-msgstr ""
+msgstr "Configurer ..."
 
 #: spyder_unittest/widgets/unittestgui.py:158
 msgid "Show output"
-msgstr ""
+msgstr "Afficher les résultats"
 
 #: spyder_unittest/widgets/unittestgui.py:163
 msgid "Collapse all"
-msgstr ""
+msgstr "Tout réduire"
 
 #: spyder_unittest/widgets/unittestgui.py:168
 msgid "Expand all"
-msgstr ""
+msgstr "Tout déployer"
 
 #: spyder_unittest/widgets/unittestgui.py:181
 msgid "Unit testing output"
-msgstr ""
+msgstr "Résultats de tests unitaires"
 
 #: spyder_unittest/widgets/unittestgui.py:263
 msgid "Error"
-msgstr ""
+msgstr "Erreur"
 
 #: spyder_unittest/widgets/unittestgui.py:263
 msgid "Process failed to start"
-msgstr ""
+msgstr "Le processus n'a pas pu démarrer"
 
 #: spyder_unittest/widgets/unittestgui.py:266
 msgid "<b>Running tests ...<b>"
-msgstr ""
+msgstr "<b>Exécution des tests ...<b>"
 
 #: spyder_unittest/widgets/unittestgui.py:287
 msgid "Stop"
-msgstr ""
+msgstr "Arrêter"
 
 #: spyder_unittest/widgets/unittestgui.py:288
 msgid "Stop current test process"
-msgstr ""
+msgstr "Arrêter le processus de test en cours"
 
 #: spyder_unittest/widgets/unittestgui.py:293
 msgid "Run tests"
-msgstr ""
+msgstr "Lancer les tests"
 
 #: spyder_unittest/widgets/unittestgui.py:326
 msgid "not run"
-msgstr ""
+msgstr "non lancé"
 
 #: spyder_unittest/widgets/unittestgui.py:333
 #: spyder_unittest/widgets/unittestgui.py:339
 msgid "pending"
-msgstr ""
+msgstr "en attente"
 
 #: spyder_unittest/widgets/unittestgui.py:340
 msgid "running"
-msgstr ""
+msgstr "en cours"
 
 #: spyder_unittest/widgets/unittestgui.py:346
 msgid "failure"
-msgstr ""
+msgstr "échec"
 
 #: spyder_unittest/widgets/unittestgui.py:347
 msgid "collection error"
-msgstr ""
+msgstr "erreur de collecte"
 
