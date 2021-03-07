@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: spyder-unittest\n"
 "POT-Creation-Date: 2019-12-09 10:16-0500\n"
-"PO-Revision-Date: 2020-07-05 11:36\n"
+"PO-Revision-Date: 2021-03-07 12:08\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -27,12 +27,12 @@ msgstr ""
 
 #: spyder_unittest/unittestplugin.py:156
 msgid "Unit testing"
-msgstr ""
+msgstr "Unit-Tests"
 
 #: spyder_unittest/unittestplugin.py:200
 #: spyder_unittest/widgets/unittestgui.py:294
 msgid "Run unit tests"
-msgstr ""
+msgstr "Unit-Tests ausführen"
 
 #: spyder_unittest/widgets/configdialog.py:61
 msgid "Configure tests"
@@ -81,7 +81,7 @@ msgstr "Ausklappen"
 
 #: spyder_unittest/widgets/datatree.py:146
 msgid "Go to definition"
-msgstr ""
+msgstr "Zur Definition gehen"
 
 #: spyder_unittest/widgets/datatree.py:386
 msgid "test"
@@ -109,7 +109,7 @@ msgstr ", {} bestanden"
 
 #: spyder_unittest/widgets/datatree.py:399
 msgid ", {} other"
-msgstr ""
+msgstr ", {} andere"
 
 #: spyder_unittest/widgets/datatree.py:401
 msgid ", {} pending"
@@ -133,7 +133,7 @@ msgstr "Alle ausklappen"
 
 #: spyder_unittest/widgets/unittestgui.py:181
 msgid "Unit testing output"
-msgstr ""
+msgstr "Ausgabe der Unit-Tests"
 
 #: spyder_unittest/widgets/unittestgui.py:263
 msgid "Error"
@@ -141,7 +141,7 @@ msgstr "Fehler"
 
 #: spyder_unittest/widgets/unittestgui.py:263
 msgid "Process failed to start"
-msgstr ""
+msgstr "Prozess konnte nicht gestartet werden"
 
 #: spyder_unittest/widgets/unittestgui.py:266
 msgid "<b>Running tests ...<b>"
@@ -153,11 +153,11 @@ msgstr "Stopp"
 
 #: spyder_unittest/widgets/unittestgui.py:288
 msgid "Stop current test process"
-msgstr ""
+msgstr "Aktuellen Testprozess stoppen"
 
 #: spyder_unittest/widgets/unittestgui.py:293
 msgid "Run tests"
-msgstr ""
+msgstr "Tests ausführen"
 
 #: spyder_unittest/widgets/unittestgui.py:326
 msgid "not run"
@@ -170,11 +170,11 @@ msgstr "ausstehend"
 
 #: spyder_unittest/widgets/unittestgui.py:340
 msgid "running"
-msgstr ""
+msgstr "läuft"
 
 #: spyder_unittest/widgets/unittestgui.py:346
 msgid "failure"
-msgstr ""
+msgstr "Fehlschlag"
 
 #: spyder_unittest/widgets/unittestgui.py:347
 msgid "collection error"
