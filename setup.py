@@ -37,7 +37,7 @@ def get_package_data(name, extlist):
 
 
 # Requirements
-REQUIREMENTS = ['lxml', 'spyder>=3', 'pyzmq']
+REQUIREMENTS = ['lxml', 'spyder>=5.2', 'pyzmq']
 EXTLIST = ['.jpg', '.png', '.json', '.mo', '.ini']
 LIBNAME = 'spyder_unittest'
 
@@ -72,4 +72,7 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Testing',
-        'Topic :: Text Editors :: Integrated Development Environments (IDE)'])
+        'Topic :: Text Editors :: Integrated Development Environments (IDE)'],
+    entry_points={
+        'spyder.plugins': [
+            'unittest = spyder_unittest.unittestplugin:UnitTestPlugin']})

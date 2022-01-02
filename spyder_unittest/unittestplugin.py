@@ -9,13 +9,12 @@
 import os.path as osp
 
 # Third party imports
-from qtpy.QtWidgets import QVBoxLayout
-from spyder.api.plugins import SpyderPluginWidget
+from spyder.api.plugins import Plugins, SpyderDockablePlugin
+from spyder.api.plugin_registration.decorators import on_plugin_available
 from spyder.config.base import get_translation
 from spyder.config.gui import is_dark_interface
+from spyder.plugins.mainmenu.api import ApplicationMenus
 from spyder.py3compat import PY2, getcwd
-from spyder.utils import icon_manager as ima
-from spyder.utils.qthelpers import create_action
 
 # Local imports
 from spyder_unittest.widgets.configdialog import Config
@@ -24,200 +23,83 @@ from spyder_unittest.widgets.unittestgui import UnitTestWidget
 _ = get_translation("unittest", dirname="spyder_unittest")
 
 
-class UnitTestPlugin(SpyderPluginWidget):
+class UnitTestPluginActions:
+    Run = 'Run tests'
+
+
+class UnitTestPlugin(SpyderDockablePlugin):
     """Spyder plugin for unit testing."""
 
-    CONF_SECTION = 'unittest'
+    NAME = 'unittest'
+    REQUIRES = []
+    OPTIONAL = [Plugins.Editor, Plugins.MainMenu, Plugins.Preferences,
+                Plugins.Projects, Plugins.WorkingDirectory]
+    TABIFY = [Plugins.VariableExplorer]
+    WIDGET_CLASS = UnitTestWidget
+
+    CONF_SECTION = NAME
     CONF_DEFAULTS = [(CONF_SECTION, {'framework': '', 'wdir': ''})]
     CONF_NAMEMAP = {CONF_SECTION: [(CONF_SECTION, ['framework', 'wdir'])]}
+    CONF_FILE = True
     CONF_VERSION = '0.1.0'
 
-    def __init__(self, parent):
+    # --- Mandatory SpyderDockablePlugin methods ------------------------------
+
+    @staticmethod
+    def get_name():
         """
-        Initialize plugin and corresponding widget.
+        Return the plugin localized name.
 
-        The part of the initialization that depends on `parent` is done in
-        `self.register_plugin()`.
+        Returns
+        -------
+        str
+            Localized name of the plugin.
         """
-        SpyderPluginWidget.__init__(self, parent)
+        return _('Unit testing')
 
-        # Create unit test widget and add to dockwindow
-        self.unittestwidget = UnitTestWidget(
-            self.main,
-            options_button=self.options_button,
-            options_menu=self._options_menu)
-        layout = QVBoxLayout()
-        layout.addWidget(self.unittestwidget)
-        self.setLayout(layout)
-
-    def update_pythonpath(self):
+    def get_description(self):
         """
-        Update Python path used to run unit tests.
+        Return the plugin localized description.
 
-        This function is called whenever the Python path set in Spyder changes.
-        It synchronizes the Python path in the unittest widget with the Python
-        path in Spyder.
+        Returns
+        -------
+        str
+            Localized description of the plugin.
         """
-        self.unittestwidget.pythonpath = self.main.get_spyder_pythonpath()
+        return _('Run test suites and view their results')
 
-    def handle_project_change(self):
+    def get_icon(self):
         """
-        Handle the event where the current project changes.
+        Return the plugin associated icon.
 
-        This updates the default working directory for running tests and loads
-        the test configuration from the project preferences.
+        Returns
+        -------
+        QIcon
+            QIcon instance
         """
-        self.update_default_wdir()
-        self.load_config()
+        return self.create_icon('profiler')
 
-    def update_default_wdir(self):
+    def on_initialize(self):
         """
-        Update default working dir for running unit tests.
-
-        The default working dir for running unit tests is set to the project
-        directory if a project is open, or the current working directory if no
-        project is opened. This function is called whenever this directory may
-        change.
+        Setup the plugin.
         """
-        wdir = self.main.projects.get_active_project_path()
-        if not wdir:  # if no project opened
-            wdir = getcwd()
-        self.unittestwidget.default_wdir = wdir
-
-    def load_config(self):
-        """
-        Load test configuration from project preferences.
-
-        If the test configuration stored in the project preferences is valid,
-        then use it. If it is not valid (e.g., because the user never
-        configured testing for this project) or no project is opened, then
-        invalidate the current test configuration.
-
-        If necessary, patch the project preferences to include this plugin's
-        config options.
-        """
-        project = self.main.projects.get_active_project()
-        if not project:
-            self.unittestwidget.set_config_without_emit(None)
-            return
-
-        if self.CONF_SECTION not in project.config._name_map:
-            project.config._name_map = project.config._name_map.copy()
-            project.config._name_map.update(self.CONF_NAMEMAP)
-
-        if self.CONF_SECTION not in project.config._configs_map:
-            config_class = project.config.get_config_class()
-            path = osp.join(project.root_path, '.spyproject', 'config')
-            conf = config_class(
-                name=self.CONF_SECTION,
-                defaults=self.CONF_DEFAULTS,
-                path=path,
-                load=True,
-                version=self.CONF_VERSION)
-            project.config._configs_map[self.CONF_SECTION] = conf
-
-        new_config = Config(
-            framework=project.get_option(self.CONF_SECTION, 'framework'),
-            wdir=project.get_option(self.CONF_SECTION, 'wdir'))
-        if not self.unittestwidget.config_is_valid(new_config):
-            new_config = None
-        self.unittestwidget.set_config_without_emit(new_config)
-
-    def save_config(self, test_config):
-        """
-        Save test configuration in project preferences.
-
-        If no project is opened, then do not save.
-        """
-        project = self.main.projects.get_active_project()
-        if not project:
-            return
-        project.set_option(self.CONF_SECTION, 'framework',
-                           test_config.framework)
-        project.set_option(self.CONF_SECTION, 'wdir', test_config.wdir)
-
-    def goto_in_editor(self, filename, lineno):
-        """
-        Go to specified line in editor.
-
-        This function is called when the unittest widget emits `sig_edit_goto`.
-        Note that the line number in the signal is zero based (the first line
-        is line 0), but the editor expects a one-based line number.
-        """
-        self.main.editor.load(filename, lineno + 1, '')
-
-# ----- SpyderPluginWidget API --------------------------------------------
-
-    def get_plugin_title(self):
-        """Return widget title."""
-        return _("Unit testing")
-
-    def get_plugin_icon(self):
-        """Return widget icon."""
-        return ima.icon('profiler')
-
-    def get_focus_widget(self):
-        """Return the widget to give focus to this dockwidget when raised."""
-        return self.unittestwidget.testdataview
-
-    def get_plugin_actions(self):
-        """Return a list of actions related to plugin."""
-        return self.unittestwidget.create_actions()
-
-    def on_first_registration(self):
-        """Action to be performed on first plugin registration."""
-        self.main.tabify_plugins(self.main.help, self)
-        self.dockwidget.hide()
-
-    def register_plugin(self):
-        """Register plugin in Spyder's main window."""
-        super(UnitTestPlugin, self).register_plugin()
-
-        # Get information from Spyder proper into plugin
         self.update_pythonpath()
-        self.update_default_wdir()
-        self.unittestwidget.use_dark_interface(is_dark_interface())
+        self.get_main().sig_pythonpath_changed.connect(self.update_pythonpath)
+        self.get_widget().sig_newconfig.connect(self.save_config)
 
-        # Connect to relevant signals
-        self.main.sig_pythonpath_changed.connect(self.update_pythonpath)
-        self.main.workingdirectory.set_explorer_cwd.connect(
-            self.update_default_wdir)
-        self.main.projects.sig_project_created.connect(
-            self.handle_project_change)
-        self.main.projects.sig_project_loaded.connect(
-            self.handle_project_change)
-        self.main.projects.sig_project_closed.connect(
-            self.handle_project_change)
-        self.unittestwidget.sig_newconfig.connect(self.save_config)
-        self.unittestwidget.sig_edit_goto.connect(self.goto_in_editor)
+        self.create_action(
+            UnitTestPluginActions.Run,
+            text=_('Run unit tests'),
+            tip=_('Run unit tests'),
+            icon=self.create_icon('profiler'),
+            triggered=self.maybe_configure_and_start,
+            register_shortcut=True)
+        #  TODO: shortcut="Shift+Alt+F11"
 
-        # Create action and add it to Spyder's menu
-        unittesting_act = create_action(
-            self,
-            _("Run unit tests"),
-            icon=ima.icon('profiler'),
-            shortcut="Shift+Alt+F11",
-            triggered=self.maybe_configure_and_start)
-        self.main.run_menu_actions += [unittesting_act]
-        self.main.editor.pythonfile_dependent_actions += [unittesting_act]
+    # --- Optional SpyderDockablePlugin methods -------------------------------
 
-        # Save all files before running tests
-        self.unittestwidget.pre_test_hook = self.main.editor.save_all
-
-    def refresh_plugin(self):
-        """Refresh unit testing widget."""
-        self._options_menu.clear()
-        self.get_plugin_actions()
-
-    def closing_plugin(self, cancelable=False):
-        """Perform actions before parent main window is closed."""
-        return True
-
-    def apply_plugin_settings(self, options):
-        """Apply configuration file's plugin settings."""
-        pass
-
-    def check_compatibility(self):
+    @staticmethod
+    def check_compatibility():
         """
         Check compatibility of the plugin.
 
@@ -238,7 +120,184 @@ class UnitTestPlugin(SpyderPluginWidget):
         else:
             return (True, '')
 
+    # ----- Set up interactions with other plugins ----------------------------
+
+    @on_plugin_available(plugin=Plugins.Editor)
+    def on_editor_available(self):
+        """
+        Set up interactions when Editor plugin available.
+
+        Add 'Run unit tests' to context menu in editor for Python files.
+        Save all files in editor before running tests.
+        Go to test definition in editor on double click in unit test plugin.
+        """
+        editor = self.get_plugin(Plugins.Editor)
+        run_action = self.get_action(UnitTestPluginActions.Run)
+        editor.pythonfile_dependent_actions += [run_action]
+        # FIXME: Previous line does not do anything
+        self.get_widget().pre_test_hook = editor.save_all
+        self.get_widget().sig_edit_goto.connect(self.goto_in_editor)
+
+    @on_plugin_available(plugin=Plugins.MainMenu)
+    def on_main_menu_available(self):
+        """
+        Add 'Run unit tests' menu item when MainMenu plugin available.
+        """
+        mainmenu = self.get_plugin(Plugins.MainMenu)
+        run_action = self.get_action(UnitTestPluginActions.Run)
+        mainmenu.add_item_to_application_menu(
+            run_action, menu_id=ApplicationMenus.Run)
+
+    @on_plugin_available(plugin=Plugins.Preferences)
+    def on_preferences_available(self):
+        """
+        Use config when Preferences plugin available.
+
+        Specifically, find out whether Spyder uses a dark interface and
+        communicate this to the unittest widget.
+        """
+        self.get_widget().use_dark_interface(is_dark_interface())
+
+    @on_plugin_available(plugin=Plugins.Projects)
+    def on_projects_available(self):
+        """
+        Connect when Projects plugin available.
+
+        Connect to signals emitted when the current project changes.
+        """
+        projects = self.get_plugin(Plugins.Projects)
+        projects.sig_project_created.connect(self.handle_project_change)
+        projects.sig_project_loaded.connect(self.handle_project_change)
+        projects.sig_project_closed.connect(self.handle_project_change)
+
+    @on_plugin_available(plugin=Plugins.WorkingDirectory)
+    def on_working_directory_available(self):
+        """
+        Connect when WorkingDirectory plugin available.
+
+        Find out what the current working directory is and connect to the
+        signal emitted when the current working directory changes.
+        """
+        working_directory = self.get_plugin(Plugins.WorkingDirectory)
+        working_directory.sig_current_directory_changed.connect(
+            self.update_default_wdir)
+        self.update_default_wdir()
+
+    # --- UnitTestPlugin methods ----------------------------------------------
+
+    def update_pythonpath(self):
+        """
+        Update Python path used to run unit tests.
+
+        This function is called whenever the Python path set in Spyder changes.
+        It synchronizes the Python path in the unittest widget with the Python
+        path in Spyder.
+        """
+        self.get_widget().pythonpath = self.get_main().get_spyder_pythonpath()
+
+    def handle_project_change(self):
+        """
+        Handle the event where the current project changes.
+
+        This updates the default working directory for running tests and loads
+        the test configuration from the project preferences.
+        """
+        self.update_default_wdir()
+        self.load_config()
+
+    def update_default_wdir(self):
+        """
+        Update default working dir for running unit tests.
+
+        The default working dir for running unit tests is set to the project
+        directory if a project is open, or the current working directory if no
+        project is opened. This function is called whenever this directory may
+        change.
+        """
+        projects = self.get_plugin(Plugins.Projects)
+        if projects:
+            wdir = projects.get_active_project_path()
+            if not wdir:  # if no project opened
+                wdir = getcwd()
+        else:
+            wdir = getcwd()
+        self.get_widget().default_wdir = wdir
+
+    def load_config(self):
+        """
+        Load test configuration from project preferences.
+
+        If the test configuration stored in the project preferences is valid,
+        then use it. If it is not valid (e.g., because the user never
+        configured testing for this project) or no project is opened, then
+        invalidate the current test configuration.
+
+        If necessary, patch the project preferences to include this plugin's
+        config options.
+        """
+        widget = self.get_widget()
+        projects_plugin = self.get_plugin(Plugins.Projects)
+        if projects_plugin:
+            project = projects_plugin.get_active_project()
+        else:
+            project = None
+
+        if not project:
+            widget.set_config_without_emit(None)
+            return
+
+        if self.CONF_SECTION not in project.config._name_map:
+            project.config._name_map = project.config._name_map.copy()
+            project.config._name_map.update(self.CONF_NAMEMAP)
+
+        if self.CONF_SECTION not in project.config._configs_map:
+            config_class = project.config.get_config_class()
+            path = osp.join(project.root_path, '.spyproject', 'config')
+            conf = config_class(
+                name=self.CONF_SECTION,
+                defaults=self.CONF_DEFAULTS,
+                path=path,
+                load=True,
+                version=self.CONF_VERSION)
+            project.config._configs_map[self.CONF_SECTION] = conf
+
+        new_config = Config(
+            framework=project.get_option('framework', self.CONF_SECTION),
+            wdir=project.get_option('wdir', self.CONF_SECTION))
+        if not widget.config_is_valid(new_config):
+            new_config = None
+        widget.set_config_without_emit(new_config)
+
+    def save_config(self, test_config):
+        """
+        Save test configuration in project preferences.
+
+        If no project is opened, then do not save.
+        """
+        projects_plugin = self.get_plugin(Plugins.Projects)
+        if not projects_plugin:
+            return
+        project = projects_plugin.get_active_project()
+        if not project:
+            return
+        project.set_option('framework', test_config.framework,
+                           self.CONF_SECTION)
+        project.set_option('wdir', test_config.wdir, self.CONF_SECTION)
+
+    def goto_in_editor(self, filename, lineno):
+        """
+        Go to specified line in editor.
+
+        This function is called when the unittest widget emits `sig_edit_goto`.
+        Note that the line number in the signal is zero based (the first line
+        is line 0), but the editor expects a one-based line number.
+        """
+        editor_plugin = self.get_plugin(Plugins.Editor)
+        if editor_plugin:
+            editor_plugin.load(filename, lineno + 1, '')
+
     # ----- Public API --------------------------------------------------------
+
     def maybe_configure_and_start(self):
         """
         Ask for configuration if necessary and then run tests.
@@ -247,6 +306,5 @@ class UnitTestPlugin(SpyderPluginWidget):
         not valid (or not set), then ask the user to configure. Then
         run the tests.
         """
-        if self.dockwidget:
-            self.switch_to_plugin()
-        self.unittestwidget.maybe_configure_and_start()
+        self.switch_to_plugin()
+        self.get_widget().maybe_configure_and_start()
