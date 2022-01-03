@@ -273,7 +273,7 @@ class UnitTestWidget(PluginMainWidget):
         else:
             oldconfig = Config(wdir=self.default_wdir)
         frameworks = self.framework_registry.frameworks
-        config = ask_for_config(frameworks, oldconfig)
+        config = ask_for_config(frameworks, oldconfig, parent=self)
         if config:
             self.config = config
 
