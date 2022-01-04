@@ -28,11 +28,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install libegl1-mesa
       - name: Install Conda
-        uses: goanpeca/setup-miniconda@v1
+        uses: conda-incubator/setup-miniconda@v2
         with:
-           activate-environment: test
            auto-update-conda: true
-           auto-activate-base: false
            python-version: ${{ matrix.PYTHON_VERSION }} 
       - name: Install package dependencies
         shell: bash -l {0}
