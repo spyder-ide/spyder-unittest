@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false 
       matrix:
-        PYTHON_VERSION: ['3.6', '3.7', '3.8']
+        PYTHON_VERSION: ['3.7', '3.8', '3.9']
     steps:
       - name: Checkout branch
         uses: actions/checkout@v2
@@ -54,6 +54,6 @@ jobs:
         run: xvfb-run --auto-servernum pytest spyder_unittest --cov=spyder_unittest -x -vv
         timeout-minutes: 10
       - name: Upload coverage to Codecov
-        if: matrix.PYTHON_VERSION == '3.8'
+        if: matrix.PYTHON_VERSION == '3.9'
         shell: bash -l {0}
         run: codecov -t 3458851b-c7a5-4108-be5e-9d19066a2fde
