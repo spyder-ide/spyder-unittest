@@ -98,7 +98,8 @@ class PyTestRunner(RunnerBase):
         """
         self.reader.close()
         output = self.read_all_process_output()
-        self.sig_finished.emit([] if "no tests ran" in output else None, output)
+        no_tests_ran = "no tests ran" in output.splitlines()[-1]
+        self.sig_finished.emit([] if no_tests_ran else None, output)
 
 
 def normalize_module_name(name):

@@ -14,11 +14,10 @@ import sys
 
 # Third party imports
 from qtpy.QtCore import Signal
-from qtpy.QtWidgets import (QHBoxLayout, QLabel, QMenu, QMessageBox,
-                            QToolButton, QVBoxLayout, QWidget)
+from qtpy.QtWidgets import QLabel, QMessageBox, QVBoxLayout
+from spyder.api.widgets.main_widget import PluginMainWidget
 from spyder.config.base import get_conf_path, get_translation
 from spyder.utils import icon_manager as ima
-from spyder.utils.qthelpers import create_action, create_toolbutton
 from spyder.plugins.variableexplorer.widgets.texteditor import TextEditor
 from spyder.py3compat import PY3
 
@@ -50,7 +49,26 @@ else:
     FRAMEWORKS = {NoseRunner, UnittestRunner}
 
 
-class UnitTestWidget(QWidget):
+class UnitTestWidgetActions:
+    RunTests = 'run_tests'
+    Config = 'config'
+    ShowLog = 'show_log'
+    CollapseAll = 'collapse_all'
+    ExpandAll = 'expand_all'
+    ShowDependencies = 'show_dependencies'
+
+
+class UnitTestWidgetButtons:
+    Start = 'start'
+
+
+class UnitTestWidgetToolbar:
+    LeftStretcher = 'left_stretcher'
+    StatusLabel = 'status_label'
+    RightStretcher = 'right_stretcher'
+
+
+class UnitTestWidget(PluginMainWidget):
     """
     Unit testing widget.
 
@@ -86,11 +104,9 @@ class UnitTestWidget(QWidget):
     sig_newconfig = Signal(Config)
     sig_edit_goto = Signal(str, int)
 
-    def __init__(self, parent, options_button=None, options_menu=None):
+    def __init__(self, name, plugin, parent):
         """Unit testing widget."""
-        QWidget.__init__(self, parent)
-
-        self.setWindowTitle("Unit testing")
+        super().__init__(name, plugin, parent)
 
         self.config = None
         self.pythonpath = None
@@ -109,37 +125,104 @@ class UnitTestWidget(QWidget):
         for runner in FRAMEWORKS:
             self.framework_registry.register(runner)
 
-        self.start_button = create_toolbutton(self, text_beside_icon=True)
-        self.set_running_state(False)
-
-        self.status_label = QLabel('', self)
-
-        self.create_actions()
-
-        self.options_menu = options_menu or QMenu()
-        self.options_menu.addAction(self.config_action)
-        self.options_menu.addAction(self.log_action)
-        self.options_menu.addAction(self.collapse_action)
-        self.options_menu.addAction(self.expand_action)
-        self.options_menu.addAction(self.versions_action)
-
-        self.options_button = options_button or QToolButton(self)
-        self.options_button.setIcon(ima.icon('tooloptions'))
-        self.options_button.setPopupMode(QToolButton.InstantPopup)
-        self.options_button.setMenu(self.options_menu)
-        self.options_button.setAutoRaise(True)
-
-        hlayout = QHBoxLayout()
-        hlayout.addWidget(self.start_button)
-        hlayout.addStretch()
-        hlayout.addWidget(self.status_label)
-        hlayout.addStretch()
-        hlayout.addWidget(self.options_button)
-
         layout = QVBoxLayout()
-        layout.addLayout(hlayout)
         layout.addWidget(self.testdataview)
         self.setLayout(layout)
+
+    # --- Mandatory PluginMainWidget methods ----------------------------------
+
+    def get_title(self):
+        """
+        Return the title that will be displayed on dockwidget or window title.
+        """
+        return _('Unit testing')
+
+    def setup(self):
+        """
+        Create widget actions, add to menu and other setup requirements.
+        """
+
+        # Options menu
+
+        menu = self.get_options_menu()
+
+        config_action = self.create_action(
+            UnitTestWidgetActions.Config,
+            text=_('Configure ...'),
+            icon=self.create_icon('configure'),
+            triggered=self.configure)
+        self.add_item_to_menu(config_action, menu)
+
+        self.show_log_action = self.create_action(
+            UnitTestWidgetActions.ShowLog,
+            text=_('Show output'),
+            icon=self.create_icon('log'),
+            triggered=self.show_log)
+        self.add_item_to_menu(self.show_log_action, menu)
+
+        collapse_all_action = self.create_action(
+            UnitTestWidgetActions.CollapseAll,
+            text=_('Collapse all'),
+            icon=self.create_icon('collapse'),
+            triggered=self.testdataview.collapseAll)
+        self.add_item_to_menu(collapse_all_action, menu)
+
+        expand_all_action = self.create_action(
+            UnitTestWidgetActions.ExpandAll,
+            text=_('Expand all'),
+            icon=self.create_icon('expand'),
+            triggered=self.testdataview.expandAll)
+        self.add_item_to_menu(expand_all_action, menu)
+
+        show_dependencies_action = self.create_action(
+            UnitTestWidgetActions.ShowDependencies,
+            text=_('Dependencies'),
+            icon=self.create_icon('advanced'),
+            triggered=self.show_versions)
+        self.add_item_to_menu(show_dependencies_action, menu)
+
+        # Other widgets in the main toolbar
+
+        toolbar = self.get_main_toolbar()
+
+        self.start_button = self.create_toolbutton(UnitTestWidgetButtons.Start)
+        self.set_running_state(False)
+        self.add_item_to_toolbar(self.start_button, toolbar=toolbar)
+
+        self.add_item_to_toolbar(
+            self.create_stretcher(id_=UnitTestWidgetToolbar.LeftStretcher),
+            toolbar=toolbar)
+
+        self.status_label = QLabel('')
+        self.status_label.ID = UnitTestWidgetToolbar.StatusLabel
+        self.add_item_to_toolbar(self.status_label, toolbar=toolbar)
+
+        self.add_item_to_toolbar(
+            self.create_stretcher(id_=UnitTestWidgetToolbar.RightStretcher),
+            toolbar=toolbar)
+
+    def update_actions(self):
+        """
+        Update the state of exposed actions.
+
+        Exposed actions are actions created by the self.create_action method.
+        """
+        pass
+
+    # --- Optional PluginMainWidget methods -----------------------------------
+
+    def get_focus_widget(self):
+        """
+        Return the test data view as the widget to give focus to.
+
+        Returns
+        -------
+        QWidget
+            QWidget to give focus to.
+        """
+        return self.testdataview
+
+    # --- UnitTestWidget methods ----------------------------------------------
 
     @property
     def config(self):
@@ -161,45 +244,14 @@ class UnitTestWidget(QWidget):
         """Set whether widget should use colours appropriate for dark UI."""
         self.testdatamodel.is_dark_interface = flag
 
-    def create_actions(self):
-        """Create the actions for the unittest widget."""
-        self.config_action = create_action(
-            self,
-            text=_("Configure ..."),
-            icon=ima.icon('configure'),
-            triggered=self.configure)
-        self.log_action = create_action(
-            self,
-            text=_('Show output'),
-            icon=ima.icon('log'),
-            triggered=self.show_log)
-        self.collapse_action = create_action(
-            self,
-            text=_('Collapse all'),
-            icon=ima.icon('collapse'),
-            triggered=self.testdataview.collapseAll)
-        self.expand_action = create_action(
-            self,
-            text=_('Expand all'),
-            icon=ima.icon('expand'),
-            triggered=self.testdataview.expandAll)
-        self.versions_action = create_action(
-            self,
-            text=_('Dependencies'),
-            icon=ima.icon('advanced'),
-            triggered=self.show_versions)
-        return [
-            self.config_action, self.log_action, self.collapse_action,
-            self.expand_action, self.versions_action
-        ]
-
     def show_log(self):
         """Show output of testing process."""
         if self.output:
             te = TextEditor(
                 self.output,
                 title=_("Unit testing output"),
-                readonly=True)
+                readonly=True,
+                parent=self)
             te.show()
             te.exec_()
 
@@ -221,7 +273,7 @@ class UnitTestWidget(QWidget):
         else:
             oldconfig = Config(wdir=self.default_wdir)
         frameworks = self.framework_registry.frameworks
-        config = ask_for_config(frameworks, oldconfig)
+        config = ask_for_config(frameworks, oldconfig, parent=self)
         if config:
             self.config = config
 
@@ -343,7 +395,7 @@ class UnitTestWidget(QWidget):
         self.output = output
         self.set_running_state(False)
         self.testrunner = None
-        self.log_action.setEnabled(bool(output))
+        self.show_log_action.setEnabled(bool(output))
         if testresults is not None:
             self.testdatamodel.testresults = testresults
         self.replace_pending_with_not_run()
