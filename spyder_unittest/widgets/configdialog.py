@@ -24,7 +24,7 @@ from spyder.py3compat import getcwd, to_text_string
 from spyder.utils import icon_manager as ima
 
 try:
-    _ = get_translation("unittest", dirname="spyder_unittest")
+    _ = get_translation('spyder_unittest')
 except KeyError:
     import gettext
     _ = gettext.gettext

@@ -22,7 +22,7 @@ from spyder_unittest.backend.abbreviator import Abbreviator
 from spyder_unittest.backend.runnerbase import Category
 
 try:
-    _ = get_translation("unittest", dirname="spyder_unittest")
+    _ = get_translation('spyder_unittest')
 except KeyError:
     import gettext
     _ = gettext.gettext
