@@ -1,0 +1,203 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: spyder-unittest\n"
+"POT-Creation-Date: 2022-01-18 14:22+0000\n"
+"PO-Revision-Date: 2022-01-18 14:46\n"
+"Last-Translator: \n"
+"Language-Team: Croatian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Crowdin-Project: spyder-unittest\n"
+"X-Crowdin-Project-ID: 381839\n"
+"X-Crowdin-Language: hr\n"
+"X-Crowdin-File: /master/spyder_unittest/locale/spyder_unittest.pot\n"
+"X-Crowdin-File-ID: 49\n"
+"Language: hr_HR\n"
+
+#: spyder_unittest/backend/noserunner.py:100
+msgid "Captured stdout"
+msgstr ""
+
+#: spyder_unittest/backend/noserunner.py:102
+msgid "Captured stderr"
+msgstr ""
+
+#: spyder_unittest/backend/pytestworker.py:107
+msgid "WAS EXPECTED TO FAIL"
+msgstr ""
+
+#: spyder_unittest/backend/pytestworker.py:123
+msgid "ERROR at"
+msgstr ""
+
+#: spyder_unittest/unittestplugin.py:58 spyder_unittest/widgets/unittestgui.py:138
+msgid "Unit testing"
+msgstr ""
+
+#: spyder_unittest/unittestplugin.py:69
+msgid "Run test suites and view their results"
+msgstr ""
+
+#: spyder_unittest/unittestplugin.py:92 spyder_unittest/unittestplugin.py:93 spyder_unittest/widgets/unittestgui.py:379
+msgid "Run unit tests"
+msgstr ""
+
+#: spyder_unittest/unittestplugin.py:118
+msgid "The unittest plugin does not work with Python 2."
+msgstr ""
+
+#: spyder_unittest/widgets/configdialog.py:61
+msgid "Configure tests"
+msgstr ""
+
+#: spyder_unittest/widgets/configdialog.py:65
+msgid "Test framework"
+msgstr ""
+
+#: spyder_unittest/widgets/configdialog.py:74 spyder_unittest/widgets/unittestgui.py:265
+msgid "not available"
+msgstr ""
+
+#: spyder_unittest/widgets/configdialog.py:83
+msgid "Directory from which to run tests"
+msgstr ""
+
+#: spyder_unittest/widgets/configdialog.py:89 spyder_unittest/widgets/configdialog.py:125
+msgid "Select directory"
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:49
+msgid "Message"
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:49
+msgid "Name"
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:49
+msgid "Status"
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:49
+msgid "Time (ms)"
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:145
+msgid "Collapse"
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:148
+msgid "Expand"
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:153
+msgid "Go to definition"
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:402
+msgid "test"
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:402
+msgid "tests"
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:406
+msgid "No results to show."
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:411
+msgid "collected {}"
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:412
+msgid "{} failed"
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:413
+msgid ", {} passed"
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:415
+msgid ", {} other"
+msgstr ""
+
+#: spyder_unittest/widgets/datatree.py:417
+msgid ", {} pending"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:151
+msgid "Configure ..."
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:158
+msgid "Show output"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:165
+msgid "Collapse all"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:172
+msgid "Expand all"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:179 spyder_unittest/widgets/unittestgui.py:266
+msgid "Dependencies"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:252
+msgid "Unit testing output"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:260
+msgid "Versions of frameworks and their installed plugins:"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:348
+msgid "Error"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:348
+msgid "Process failed to start"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:351
+msgid "Running tests ..."
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:372
+msgid "Stop"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:373
+msgid "Stop current test process"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:378
+msgid "Run tests"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:411
+msgid "not run"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:418 spyder_unittest/widgets/unittestgui.py:424
+msgid "pending"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:425
+msgid "running"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:431
+msgid "failure"
+msgstr ""
+
+#: spyder_unittest/widgets/unittestgui.py:432
+msgid "collection error"
+msgstr ""
+
