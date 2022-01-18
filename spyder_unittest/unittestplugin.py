@@ -20,7 +20,7 @@ from spyder.py3compat import PY2, getcwd
 from spyder_unittest.widgets.configdialog import Config
 from spyder_unittest.widgets.unittestgui import UnitTestWidget
 
-_ = get_translation("unittest", dirname="spyder_unittest")
+_ = get_translation('spyder_unittest')
 
 
 class UnitTestPluginActions:

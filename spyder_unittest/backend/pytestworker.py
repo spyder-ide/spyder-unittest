@@ -22,7 +22,7 @@ from spyder.config.base import get_translation
 from spyder_unittest.backend.zmqstream import ZmqStreamWriter
 
 try:
-    _ = get_translation("unittest", dirname="spyder_unittest")
+    _ = get_translation('spyder_unittest')
 except KeyError:  # pragma: no cover
     import gettext
     _ = gettext.gettext

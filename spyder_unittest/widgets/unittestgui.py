@@ -37,7 +37,7 @@ if PY3:
 
 # This is needed for testing this module as a stand alone script
 try:
-    _ = get_translation("unittest", dirname="spyder_unittest")
+    _ = get_translation('spyder_unittest')
 except KeyError:
     import gettext
     _ = gettext.gettext
