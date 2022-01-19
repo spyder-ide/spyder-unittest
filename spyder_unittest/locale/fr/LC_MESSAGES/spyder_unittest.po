@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: spyder-unittest\n"
 "POT-Creation-Date: 2022-01-18 14:22+0000\n"
-"PO-Revision-Date: 2022-01-18 14:46\n"
+"PO-Revision-Date: 2022-01-19 14:43\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
@@ -167,7 +167,7 @@ msgstr "Le processus n'a pas pu démarrer"
 
 #: spyder_unittest/widgets/unittestgui.py:351
 msgid "Running tests ..."
-msgstr ""
+msgstr "Exécution des tests ..."
 
 #: spyder_unittest/widgets/unittestgui.py:372
 msgid "Stop"
