@@ -1,5 +1,10 @@
 # History of changes
 
+## Version 0.5.0 (2022/01/20)
+
+* Update plugin for Spyder 5.2 ([Issue 163](https://github.com/spyder-ide/spyder-unittest/issues/163), [PR 166](https://github.com/spyder-ide/spyder-unittest/pull/166)). No version of the plugin is compatible with Spyder 5.0 or 5.1.
+* Add partial translations for Brazilian Portuguese, French and German ([Issue 30](https://github.com/spyder-ide/spyder-unittest/issues/30), [PR 168](https://github.com/spyder-ide/spyder-unittest/pull/168), [PR 169](https://github.com/spyder-ide/spyder-unittest/pull/169), [PR 170](https://github.com/spyder-ide/spyder-unittest/pull/170)).
+
 ## Version 0.4.1 (2020/05/23)
 
 This release fixes several bugs and other issues, allowing the plugin to be
