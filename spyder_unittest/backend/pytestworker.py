@@ -18,14 +18,10 @@ import sys
 import pytest
 
 # Local imports
-from spyder.config.base import get_translation
-from spyder_unittest.backend.zmqstream import ZmqStreamWriter
+from zmqstream import ZmqStreamWriter
 
-try:
-    _ = get_translation('spyder_unittest')
-except KeyError:  # pragma: no cover
-    import gettext
-    _ = gettext.gettext
+import gettext
+_ = gettext.gettext
 
 
 class FileStub():

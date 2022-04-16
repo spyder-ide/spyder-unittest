@@ -212,7 +212,7 @@ class RunnerBase(QObject):
             If process failed to start.
         """
         self.process = self._prepare_process(config, pythonpath)
-        executable = get_python_executable()
+        executable = config.pyexec or get_python_executable()
         p_args = self.create_argument_list()
         try:
             os.remove(self.resultfilename)
