@@ -21,7 +21,7 @@ from qtpy.QtWidgets import (QApplication, QComboBox, QDialog, QDialogButtonBox,
                             QVBoxLayout)
 from spyder.config.base import get_translation
 from spyder.py3compat import getcwd, to_text_string
-from spyder.utils import icon_manager as ima
+from spyder.utils import icon_manager as ima, programs
 from spyder.utils.misc import getcwd_or_home
 
 try:
@@ -102,7 +102,9 @@ class ConfigDialog(QDialog):
         self.pyexec_button = QPushButton(ima.icon('DirOpenIcon'), '', self)
         self.pyexec_button.setToolTip(_("Select interpreter"))
         self.pyexec_button.clicked.connect(
-            lambda: self.select_file(self.pyexec_lineedit))
+            lambda: self.select_file(self.pyexec_lineedit,
+                                     "Python (python*)"
+                                     ))
         pyexec_layout.addWidget(self.pyexec_button)
         layout.addLayout(pyexec_layout)
 
@@ -152,7 +154,7 @@ class ConfigDialog(QDialog):
             filters = _("All files (*)")
         title = _("Select file")
         filename, _selfilter = getopenfilename(self, title, basedir, filters)
-        if filename:
+        if filename and programs.is_python_interpreter(filename):
             edit.setText(filename)
 
     def get_config(self):
