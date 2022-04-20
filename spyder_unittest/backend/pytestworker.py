@@ -17,12 +17,18 @@ import sys
 # Third party imports
 import pytest
 
-# Local imports
+# Local imports, needs to not be absolute otherwise it will fail if trying
+# to execute in a different env with only spyder-kernel installed
 from zmqstream import ZmqStreamWriter
 
-import gettext
-_ = gettext.gettext
-
+try:
+    # if only spyder kernels are installed in the desired env,
+    # then this import will fail
+    from spyder.config.base import get_translation
+    _ = get_translation('spyder_unittest')
+except (KeyError, ModuleNotFoundError):  # pragma: no cover
+    import gettext
+    _ = gettext.gettext
 
 class FileStub():
     """Stub for ZmqStreamWriter which instead writes to a file."""
