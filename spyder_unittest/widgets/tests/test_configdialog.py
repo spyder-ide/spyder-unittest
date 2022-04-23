@@ -43,7 +43,7 @@ frameworks = {r.name: r for r in [SpamRunner, HamRunner, EggsRunner]}
 
 
 def default_config():
-    return Config(framework=None, wdir=os.getcwd())
+    return Config(framework=None, wdir=os.getcwd(), pyexec=None)
 
 
 def test_configdialog_uses_frameworks(qtbot):

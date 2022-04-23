@@ -169,8 +169,11 @@ class ConfigDialog(QDialog):
         framework = self.framework_combobox.currentText()
         if framework == '':
             framework = None
+        pyexec = self.pyexec_lineedit.text()
+        if pyexec == '':
+            pyexec = None
         return Config(framework=framework, wdir=self.wdir_lineedit.text(),
-                      pyexec=self.pyexec_lineedit.text())
+                      pyexec=pyexec)
 
 
 def ask_for_config(frameworks, config, parent=None):
