@@ -19,7 +19,12 @@ import pytest
 
 # Local imports, needs to not be absolute otherwise it will fail if trying
 # to execute in a different env with only spyder-kernel installed
-from .zmqstream import ZmqStreamWriter
+try:
+    # this line is needed for the pytests to succeed
+    from .zmqstream import ZmqStreamWriter
+except:
+    # this line is needed for the plugin to work
+    from zmqstream import ZmqStreamWriter
 
 try:
     # if only spyder kernels are installed in the desired env,
