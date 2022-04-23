@@ -19,7 +19,7 @@ import pytest
 
 # Local imports, needs to not be absolute otherwise it will fail if trying
 # to execute in a different env with only spyder-kernel installed
-from zmqstream import ZmqStreamWriter
+from .zmqstream import ZmqStreamWriter
 
 try:
     # if only spyder kernels are installed in the desired env,
