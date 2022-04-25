@@ -26,15 +26,6 @@ except:
     # this line is needed for the plugin to work
     from zmqstream import ZmqStreamWriter
 
-try:
-    # if only spyder kernels are installed in the desired env,
-    # then this import will fail
-    from spyder.config.base import get_translation
-    _ = get_translation('spyder_unittest')
-except (KeyError, ModuleNotFoundError):  # pragma: no cover
-    import gettext
-    _ = gettext.gettext
-
 class FileStub():
     """Stub for ZmqStreamWriter which instead writes to a file."""
 
@@ -111,8 +102,8 @@ class SpyderPlugin():
                 self.was_skipped = True
         if hasattr(report, 'wasxfail'):
             self.was_xfail = True
-            self.longrepr.append(report.wasxfail if report.wasxfail else _(
-                'WAS EXPECTED TO FAIL'))
+            self.longrepr.append(report.wasxfail if report.wasxfail else 
+                'WAS EXPECTED TO FAIL')
         self.sections = report.sections  # already accumulated over phases
         if report.longrepr:
             first_msg_idx = len(self.longrepr)
@@ -127,7 +118,7 @@ class SpyderPlugin():
             if report.outcome == 'failed' and report.when in (
                     'setup', 'teardown'):
                 self.longrepr[first_msg_idx] = '{} {}: {}'.format(
-                    _('ERROR at'), report.when, self.longrepr[first_msg_idx])
+                    'ERROR at', report.when, self.longrepr[first_msg_idx])
 
     def pytest_runtest_logfinish(self, nodeid, location):
         """Called by pytest when the entire test is completed."""
