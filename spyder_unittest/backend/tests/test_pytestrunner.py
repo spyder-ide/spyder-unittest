@@ -8,10 +8,10 @@
 # Standard library imports
 import os
 import os.path as osp
+import sys
 
 # Third party imports
 import pytest
-from qtpy.QtCore import QByteArray
 
 # Local imports
 from spyder_unittest.backend.pytestrunner import (PyTestRunner,
@@ -58,12 +58,13 @@ def test_pytestrunner_start(monkeypatch):
 
     runner = PyTestRunner(None, 'results')
     config = Config()
-    runner.start(config, ['pythondir'])
+    runner.start(config, sys.executable, ['pythondir'])
     assert runner.config is config
     assert runner.reader is mock_reader
     runner.reader.sig_received.connect.assert_called_once_with(
         runner.process_output)
-    MockRunnerBase.start.assert_called_once_with(runner, config, ['pythondir'])
+    MockRunnerBase.start.assert_called_once_with(
+        runner, config, sys.executable, ['pythondir'])
 
 
 def test_pytestrunner_process_output_with_collected(qtbot):

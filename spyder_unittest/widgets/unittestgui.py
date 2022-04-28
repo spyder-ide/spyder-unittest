@@ -83,6 +83,8 @@ class UnitTestWidget(PluginMainWidget):
     pre_test_hook : function returning bool or None
         If set, contains function to run before running tests; abort the test
         run if hook returns False.
+    python_executable : str
+        Path to Python executable for running tests.
     pythonpath : list of str
         Directories to be added to the Python path when running tests.
     testrunner : TestRunner or None
@@ -110,6 +112,7 @@ class UnitTestWidget(PluginMainWidget):
 
         self.config = None
         self.pythonpath = None
+        self.python_executable = sys.executable
         self.default_wdir = None
         self.pre_test_hook = None
         self.testrunner = None
@@ -342,7 +345,7 @@ class UnitTestWidget(PluginMainWidget):
         self.testrunner.sig_stop.connect(self.tests_stopped)
 
         try:
-            self.testrunner.start(config, pythonpath)
+            self.testrunner.start(config, self.python_executable, pythonpath)
         except RuntimeError:
             QMessageBox.critical(self,
                                  _("Error"), _("Process failed to start"))
