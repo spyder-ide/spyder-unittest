@@ -303,7 +303,8 @@ class UnitTestPlugin(SpyderDockablePlugin):
         project.set_option('framework', test_config.framework,
                            self.CONF_SECTION)
         project.set_option('wdir', test_config.wdir, self.CONF_SECTION)
-        project.set_option('pyexec', test_config.pyexec, self.CONF_SECTION)
+        project.set_option('pyexec', test_config.pyexec or '', 
+                           self.CONF_SECTION)
 
     def goto_in_editor(self, filename, lineno):
         """
