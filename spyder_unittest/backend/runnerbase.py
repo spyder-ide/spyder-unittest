@@ -161,7 +161,7 @@ class RunnerBase(QObject):
         """
         raise NotImplementedError
 
-    def create_argument_list(self):
+    def create_argument_list(self, config):
         """
         Create argument list for testing process (dummy).
 
@@ -213,7 +213,7 @@ class RunnerBase(QObject):
         """
         self.process = self._prepare_process(config, pythonpath)
         executable = get_python_executable()
-        p_args = self.create_argument_list()
+        p_args = self.create_argument_list(config)
         try:
             os.remove(self.resultfilename)
         except OSError:

@@ -82,8 +82,8 @@ def test_runnerbase_start(monkeypatch):
 
     runner = RunnerBase(None, 'results')
     runner._prepare_process = lambda c, p: mock_process
-    runner.create_argument_list = lambda: ['arg1', 'arg2']
-    config = Config('pytest', 'wdir')
+    runner.create_argument_list = lambda c: ['arg1', 'arg2']
+    config = Config('pytest', 'wdir', False)
     mock_process.waitForStarted = lambda: False
     with pytest.raises(RuntimeError):
         runner.start(config, ['pythondir'])

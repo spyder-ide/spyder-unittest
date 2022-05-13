@@ -30,6 +30,7 @@ def test_pytestrunner_is_installed():
 
 
 def test_pytestrunner_create_argument_list(monkeypatch):
+    config = Config()
     MockZMQStreamReader = Mock()
     monkeypatch.setattr(
         'spyder_unittest.backend.pytestrunner.ZmqStreamReader',
@@ -40,7 +41,7 @@ def test_pytestrunner_create_argument_list(monkeypatch):
     runner.reader = mock_reader
     monkeypatch.setattr('spyder_unittest.backend.pytestrunner.os.path.dirname',
                         lambda _: 'dir')
-    pyfile, port = runner.create_argument_list()
+    pyfile, port, *coverage = runner.create_argument_list(config)
     assert pyfile == 'dir{}pytestworker.py'.format(os.sep)
     assert port == '42'
 

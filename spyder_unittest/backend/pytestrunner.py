@@ -12,6 +12,7 @@ import os.path as osp
 # Local imports
 from spyder_unittest.backend.runnerbase import Category, RunnerBase, TestResult
 from spyder_unittest.backend.zmqstream import ZmqStreamReader
+from spyder.py3compat import getcwd
 
 
 class PyTestRunner(RunnerBase):
@@ -40,10 +41,12 @@ class PyTestRunner(RunnerBase):
                     plugins=[GetPluginVersionsPlugin()])
         return versions
 
-    def create_argument_list(self):
+    def create_argument_list(self, config):
         """Create argument list for testing process."""
         pyfile = os.path.join(os.path.dirname(__file__), 'pytestworker.py')
-        return [pyfile, str(self.reader.port)]
+        return [pyfile, str(self.reader.port)] + (
+            [f"--cov={getcwd()}", "--cov-report=term-missing"]
+            if config.coverage else [])
 
     def start(self, config, pythonpath):
         """Start process which will run the unit test suite."""
