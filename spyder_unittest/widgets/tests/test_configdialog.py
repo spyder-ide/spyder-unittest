@@ -43,7 +43,7 @@ frameworks = {r.name: r for r in [SpamRunner, HamRunner, EggsRunner]}
 
 
 def default_config():
-    return Config(framework=None, wdir=os.getcwd())
+    return Config(framework=None, wdir=os.getcwd(), coverage=False)
 
 
 def test_configdialog_uses_frameworks(qtbot):
@@ -98,6 +98,14 @@ def test_configdialog_clicking_pytest_enables_ok(qtbot):
     qtbot.addWidget(configdialog)
     configdialog.framework_combobox.setCurrentIndex(1)
     assert configdialog.buttons.button(QDialogButtonBox.Ok).isEnabled()
+
+
+def test_configdialog_coverage_checkbox(qtbot):
+    configdialog = ConfigDialog(frameworks, default_config())
+    qtbot.addWidget(configdialog)
+    configdialog.framework_combobox.setCurrentIndex(1)
+    configdialog.coverage_checkbox.click()
+    assert configdialog.get_config().coverage is True
 
 
 def test_configdialog_wdir_lineedit(qtbot):
