@@ -7,7 +7,6 @@
 
 # Standard library imports
 import os
-import sys
 
 # Third party imports
 from qtpy.QtWidgets import QDialogButtonBox
@@ -44,7 +43,7 @@ frameworks = {r.name: r for r in [SpamRunner, HamRunner, EggsRunner]}
 
 
 def default_config():
-    return Config(framework=None, wdir=os.getcwd(), pyexec=None)
+    return Config(framework=None, wdir=os.getcwd())
 
 
 def test_configdialog_uses_frameworks(qtbot):
@@ -118,22 +117,3 @@ def test_configdialog_wdir_button(qtbot, monkeypatch):
         lambda parent, caption, basedir: wdir)
     configdialog.wdir_button.click()
     assert configdialog.get_config().wdir == wdir
-
-
-def test_configdialog_pyexec_lineedit(qtbot):
-    configdialog = ConfigDialog(frameworks, default_config())
-    qtbot.addWidget(configdialog)
-    pyexec = sys.executable
-    configdialog.pyexec_lineedit.setText(pyexec)
-    assert configdialog.get_config().pyexec == pyexec
-
-
-def test_configdialog_pyexec_button(qtbot, monkeypatch):
-    configdialog = ConfigDialog(frameworks, default_config())
-    qtbot.addWidget(configdialog)
-    pyexec = sys.executable
-    monkeypatch.setattr(
-        'spyder_unittest.widgets.configdialog.getopenfilename',
-        lambda parent, caption, basedir, filters: (pyexec, None))
-    configdialog.pyexec_button.click()
-    assert configdialog.get_config().pyexec == pyexec

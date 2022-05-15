@@ -14,15 +14,14 @@ from collections import namedtuple
 import os.path as osp
 
 # Third party imports
-from qtpy.compat import getexistingdirectory, getopenfilename
+from qtpy.compat import getexistingdirectory
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import (QApplication, QComboBox, QDialog, QDialogButtonBox,
                             QHBoxLayout, QLabel, QLineEdit, QPushButton,
                             QVBoxLayout)
 from spyder.config.base import get_translation
 from spyder.py3compat import getcwd, to_text_string
-from spyder.utils import icon_manager as ima, programs
-from spyder.utils.misc import getcwd_or_home
+from spyder.utils import icon_manager as ima
 
 try:
     _ = get_translation('spyder_unittest')
@@ -30,8 +29,8 @@ except KeyError:
     import gettext
     _ = gettext.gettext
 
-Config = namedtuple('Config', ['framework', 'wdir', 'pyexec'])
-Config.__new__.__defaults__ = (None, '', None)
+Config = namedtuple('Config', ['framework', 'wdir'])
+Config.__new__.__defaults__ = (None, '')
 
 
 class ConfigDialog(QDialog):
@@ -94,22 +93,6 @@ class ConfigDialog(QDialog):
 
         layout.addSpacing(20)
 
-        pyexec_label = QLabel(_('Use the following Python interpreter:'))
-        layout.addWidget(pyexec_label)
-        pyexec_layout = QHBoxLayout()
-        self.pyexec_lineedit = QLineEdit(self)
-        pyexec_layout.addWidget(self.pyexec_lineedit)
-        self.pyexec_button = QPushButton(ima.icon('DirOpenIcon'), '', self)
-        self.pyexec_button.setToolTip(_("Select interpreter"))
-        self.pyexec_button.clicked.connect(
-            lambda: self.select_file(self.pyexec_lineedit,
-                                     "Python (python*)"
-                                     ))
-        pyexec_layout.addWidget(self.pyexec_button)
-        layout.addLayout(pyexec_layout)
-
-        layout.addSpacing(20)
-
         self.buttons = QDialogButtonBox(QDialogButtonBox.Ok |
                                         QDialogButtonBox.Cancel)
         layout.addWidget(self.buttons)
@@ -127,7 +110,6 @@ class ConfigDialog(QDialog):
             if index != -1:
                 self.framework_combobox.setCurrentIndex(index)
         self.wdir_lineedit.setText(config.wdir)
-        self.pyexec_lineedit.setText(config.pyexec)
 
     @Slot(int)
     def framework_changed(self, index):
@@ -145,18 +127,6 @@ class ConfigDialog(QDialog):
         if directory:
             self.wdir_lineedit.setText(directory)
 
-    def select_file(self, edit, filters=None):
-        """Select File"""
-        basedir = osp.dirname(to_text_string(edit.text()))
-        if not osp.isdir(basedir):
-            basedir = getcwd_or_home()
-        if filters is None:
-            filters = _("All files (*)")
-        title = _("Select file")
-        filename, _selfilter = getopenfilename(self, title, basedir, filters)
-        if filename and programs.is_python_interpreter(filename):
-            edit.setText(filename)
-
     def get_config(self):
         """
         Return the test configuration specified by the user.
@@ -169,11 +139,7 @@ class ConfigDialog(QDialog):
         framework = self.framework_combobox.currentText()
         if framework == '':
             framework = None
-        pyexec = self.pyexec_lineedit.text()
-        if pyexec == '':
-            pyexec = None
-        return Config(framework=framework, wdir=self.wdir_lineedit.text(),
-                      pyexec=pyexec)
+        return Config(framework=framework, wdir=self.wdir_lineedit.text())
 
 
 def ask_for_config(frameworks, config, parent=None):
@@ -192,5 +158,5 @@ def ask_for_config(frameworks, config, parent=None):
 if __name__ == '__main__':
     app = QApplication([])
     frameworks = ['nose', 'pytest', 'unittest']
-    config = Config(framework=None, wdir=getcwd(), pyexec=None)
+    config = Config(framework=None, wdir=getcwd())
     print(ask_for_config(frameworks, config))

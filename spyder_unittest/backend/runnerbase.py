@@ -203,7 +203,7 @@ class RunnerBase(QObject):
         config : TestConfig
             Unit test configuration.
         executable : str
-            Path to Python executable (may be overridden by `config`)
+            Path to Python executable
         pythonpath : list of str
             List of directories to be added to the Python path
 
@@ -213,7 +213,6 @@ class RunnerBase(QObject):
             If process failed to start.
         """
         self.process = self._prepare_process(config, pythonpath)
-        executable = config.pyexec or executable
         p_args = self.create_argument_list()
         try:
             os.remove(self.resultfilename)
