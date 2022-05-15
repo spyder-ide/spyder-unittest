@@ -9,14 +9,12 @@
 import os.path as osp
 
 # Third party imports
-from spyder.api.config.decorators import on_conf_change
 from spyder.api.plugins import Plugins, SpyderDockablePlugin
 from spyder.api.plugin_registration.decorators import on_plugin_available
 from spyder.config.base import get_translation
 from spyder.config.gui import is_dark_interface
 from spyder.plugins.mainmenu.api import ApplicationMenus
 from spyder.py3compat import PY2, getcwd
-from spyder.utils.misc import get_python_executable
 
 # Local imports
 from spyder_unittest.widgets.configdialog import Config
@@ -185,22 +183,6 @@ class UnitTestPlugin(SpyderDockablePlugin):
         working_directory.sig_current_directory_changed.connect(
             self.update_default_wdir)
         self.update_default_wdir()
-
-    @on_conf_change(section='main_interpreter',
-                    option=['default', 'custom_interpreter'])
-    def on_interpreter_config_change(self, option, value):
-        """
-        Handle changes of interpreter configuration.
-
-        Retrieve the Python interpreter in the Spyder preferences and
-        communicate this to the unittest widget.
-        """
-        if self.get_conf(section='main_interpreter', option='default'):
-            executable = get_python_executable()
-        else:
-            executable = self.get_conf(section='main_interpreter',
-                                       option='custom_interpreter')
-        self.get_widget().python_executable = executable
 
     # --- UnitTestPlugin methods ----------------------------------------------
 

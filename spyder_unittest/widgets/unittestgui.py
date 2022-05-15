@@ -15,11 +15,13 @@ import sys
 # Third party imports
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QLabel, QMessageBox, QVBoxLayout
+from spyder.api.config.decorators import on_conf_change
 from spyder.api.widgets.main_widget import PluginMainWidget
 from spyder.config.base import get_conf_path, get_translation
 from spyder.utils import icon_manager as ima
 from spyder.plugins.variableexplorer.widgets.texteditor import TextEditor
 from spyder.py3compat import PY3
+from spyder.utils.misc import get_python_executable
 
 # Local imports
 from spyder_unittest.backend.frameworkregistry import FrameworkRegistry
@@ -224,6 +226,22 @@ class UnitTestWidget(PluginMainWidget):
             QWidget to give focus to.
         """
         return self.testdataview
+
+    @on_conf_change(section='main_interpreter',
+                    option=['default', 'custom_interpreter'])
+    def on_interpreter_config_change(self, option, value):
+        """
+        Handle changes of interpreter configuration.
+
+        Retrieve the Python interpreter in the Spyder preferences and
+        communicate this to the unittest widget.
+        """
+        if self.get_conf(section='main_interpreter', option='default'):
+            executable = get_python_executable()
+        else:
+            executable = self.get_conf(section='main_interpreter',
+                                       option='custom_interpreter')
+        self.python_executable = executable
 
     # --- UnitTestWidget methods ----------------------------------------------
 
