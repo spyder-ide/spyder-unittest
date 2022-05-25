@@ -27,7 +27,7 @@ class UnittestRunner(RunnerBase):
         import platform
         return ['unittest {}'.format(platform.python_version())]
 
-    def create_argument_list(self, config):
+    def create_argument_list(self, config, cov_path):
         """Create argument list for testing process."""
         return ['-m', self.module, 'discover', '-v']
 

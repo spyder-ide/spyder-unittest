@@ -27,6 +27,18 @@ def test_runnerbase_with_nonexisting_module():
 
     assert not FooRunner.is_installed()
 
+    foo_runner = FooRunner(None)
+    config = Config(foo_runner.module, 'wdir', True)
+
+    with pytest.raises(NotImplementedError):
+        foo_runner.create_argument_list(config, 'cov_path')
+
+    with pytest.raises(NotImplementedError):
+        foo_runner.get_versions()
+
+    with pytest.raises(NotImplementedError):
+        foo_runner.finished()
+
 
 @pytest.mark.parametrize('pythonpath,env_pythonpath', [
     ([], None),
@@ -82,11 +94,12 @@ def test_runnerbase_start(monkeypatch):
 
     runner = RunnerBase(None, 'results')
     runner._prepare_process = lambda c, p: mock_process
-    runner.create_argument_list = lambda c: ['arg1', 'arg2']
+    runner.create_argument_list = lambda c, cp: ['arg1', 'arg2']
     config = Config('pytest', 'wdir', False)
+    cov_path = None
     mock_process.waitForStarted = lambda: False
     with pytest.raises(RuntimeError):
-        runner.start(config, ['pythondir'])
+        runner.start(config, cov_path, ['pythondir'])
 
     mock_process.start.assert_called_once_with('python', ['arg1', 'arg2'])
     mock_remove.assert_called_once_with('results')

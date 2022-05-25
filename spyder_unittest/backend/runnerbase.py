@@ -161,7 +161,7 @@ class RunnerBase(QObject):
         """
         raise NotImplementedError
 
-    def create_argument_list(self, config):
+    def create_argument_list(self, config, cov_path):
         """
         Create argument list for testing process (dummy).
 
@@ -189,7 +189,7 @@ class RunnerBase(QObject):
             process.setProcessEnvironment(env)
         return process
 
-    def start(self, config, pythonpath):
+    def start(self, config, cov_path, pythonpath):
         """
         Start process which will run the unit test suite.
 
@@ -203,6 +203,8 @@ class RunnerBase(QObject):
         ----------
         config : TestConfig
             Unit test configuration.
+        cov_path : str or None
+            Path to filter source for coverage report
         pythonpath : list of str
             List of directories to be added to the Python path
 
@@ -213,7 +215,7 @@ class RunnerBase(QObject):
         """
         self.process = self._prepare_process(config, pythonpath)
         executable = get_python_executable()
-        p_args = self.create_argument_list(config)
+        p_args = self.create_argument_list(config, cov_path)
         try:
             os.remove(self.resultfilename)
         except OSError:

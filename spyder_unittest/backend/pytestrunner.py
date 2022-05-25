@@ -40,19 +40,19 @@ class PyTestRunner(RunnerBase):
                     plugins=[GetPluginVersionsPlugin()])
         return versions
 
-    def create_argument_list(self, config):
+    def create_argument_list(self, config, cov_path):
         """Create argument list for testing process."""
         pyfile = os.path.join(os.path.dirname(__file__), 'pytestworker.py')
         return [pyfile, str(self.reader.port)] + (
-            ["--cov=", "--cov-report=term-missing"]
+            [f"--cov={cov_path}", "--cov-report=term-missing"]
             if config.coverage else [])
 
-    def start(self, config, pythonpath):
+    def start(self, config, cov_path, pythonpath):
         """Start process which will run the unit test suite."""
         self.config = config
         self.reader = ZmqStreamReader()
         self.reader.sig_received.connect(self.process_output)
-        RunnerBase.start(self, config, pythonpath)
+        RunnerBase.start(self, config, cov_path, pythonpath)
 
     def process_output(self, output):
         """

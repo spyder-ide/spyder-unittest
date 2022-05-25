@@ -31,6 +31,7 @@ def test_pytestrunner_is_installed():
 
 def test_pytestrunner_create_argument_list(monkeypatch):
     config = Config()
+    cov_path = None
     MockZMQStreamReader = Mock()
     monkeypatch.setattr(
         'spyder_unittest.backend.pytestrunner.ZmqStreamReader',
@@ -41,7 +42,7 @@ def test_pytestrunner_create_argument_list(monkeypatch):
     runner.reader = mock_reader
     monkeypatch.setattr('spyder_unittest.backend.pytestrunner.os.path.dirname',
                         lambda _: 'dir')
-    pyfile, port, *coverage = runner.create_argument_list(config)
+    pyfile, port, *coverage = runner.create_argument_list(config, cov_path)
     assert pyfile == 'dir{}pytestworker.py'.format(os.sep)
     assert port == '42'
 
@@ -59,12 +60,14 @@ def test_pytestrunner_start(monkeypatch):
 
     runner = PyTestRunner(None, 'results')
     config = Config()
-    runner.start(config, ['pythondir'])
+    cov_path = None
+    runner.start(config, cov_path, ['pythondir'])
     assert runner.config is config
     assert runner.reader is mock_reader
     runner.reader.sig_received.connect.assert_called_once_with(
         runner.process_output)
-    MockRunnerBase.start.assert_called_once_with(runner, config, ['pythondir'])
+    MockRunnerBase.start.assert_called_once_with(
+        runner, config, cov_path, ['pythondir'])
 
 
 def test_pytestrunner_process_output_with_collected(qtbot):
