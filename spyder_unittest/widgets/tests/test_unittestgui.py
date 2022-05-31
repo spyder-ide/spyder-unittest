@@ -42,14 +42,14 @@ def test_unittestwidget_forwards_sig_edit_goto(qtbot, widget):
     assert blocker.args == ['ham', 42]
 
 def test_unittestwidget_set_config_emits_newconfig(qtbot, widget):
-    config = Config(wdir=os.getcwd(), framework='unittest')
+    config = Config(wdir=os.getcwd(), framework='unittest', coverage=False)
     with qtbot.waitSignal(widget.sig_newconfig) as blocker:
         widget.config = config
     assert blocker.args == [config]
     assert widget.config == config
 
 def test_unittestwidget_set_config_does_not_emit_when_invalid(qtbot, widget):
-    config = Config(wdir=os.getcwd(), framework=None)
+    config = Config(wdir=os.getcwd(), framework=None, coverage=False)
     with qtbot.assertNotEmitted(widget.sig_newconfig):
         widget.config = config
     assert widget.config == config
@@ -57,7 +57,8 @@ def test_unittestwidget_set_config_does_not_emit_when_invalid(qtbot, widget):
 def test_unittestwidget_config_with_unknown_framework_invalid(widget):
     """Check that if the framework in the config is not known,
     config_is_valid() returns False"""
-    config = Config(wdir=os.getcwd(), framework='unknown framework')
+    config = Config(
+        wdir=os.getcwd(), framework='unknown framework', coverage=False)
     assert widget.config_is_valid(config) == False
 
 def test_unittestwidget_process_finished_updates_results(widget):
@@ -117,7 +118,7 @@ def test_unittestwidget_set_message(widget):
 def test_run_tests_starts_testrunner(widget):
     mockRunner = Mock()
     widget.framework_registry.create_runner = Mock(return_value=mockRunner)
-    config = Config(wdir=None, framework='ham')
+    config = Config(wdir=None, framework='ham', coverage=False)
     widget.run_tests(config)
     assert widget.framework_registry.create_runner.call_count == 1
     assert widget.framework_registry.create_runner.call_args[0][0] == 'ham'
@@ -160,7 +161,7 @@ def test_run_tests_and_display_results(qtbot, widget, tmpdir, monkeypatch, frame
     monkeypatch.setattr('spyder_unittest.widgets.unittestgui.QMessageBox',
                         MockQMessageBox)
 
-    config = Config(wdir=tmpdir.strpath, framework=framework)
+    config = Config(wdir=tmpdir.strpath, framework=framework, coverage=False)
     with qtbot.waitSignal(widget.sig_finished, timeout=10000, raising=True):
         widget.run_tests(config)
 
@@ -194,7 +195,7 @@ def test_run_tests_using_unittest_and_display_results(
     monkeypatch.setattr('spyder_unittest.widgets.unittestgui.QMessageBox',
                         MockQMessageBox)
 
-    config = Config(wdir=tmpdir.strpath, framework='unittest')
+    config = Config(wdir=tmpdir.strpath, framework='unittest', coverage=False)
     with qtbot.waitSignal(widget.sig_finished, timeout=10000, raising=True):
         widget.run_tests(config)
 
@@ -220,7 +221,7 @@ def test_run_with_no_tests_discovered_and_display_results(
     monkeypatch.setattr('spyder_unittest.widgets.unittestgui.QMessageBox',
                         MockQMessageBox)
 
-    config = Config(wdir=tmpdir.strpath, framework=framework)
+    config = Config(wdir=tmpdir.strpath, framework=framework, coverage=False)
     with qtbot.waitSignal(widget.sig_finished, timeout=10000, raising=True):
         widget.run_tests(config)
 
@@ -241,7 +242,7 @@ def test_stop_running_tests_before_testresult_is_received(qtbot, widget, tmpdir)
                 "      time.sleep(3)\n"
                 "      self.assertTrue(True)\n")
 
-    config = Config(wdir=tmpdir.strpath, framework='unittest')
+    config = Config(wdir=tmpdir.strpath, framework='unittest', coverage=False)
     widget.run_tests(config)
     qtbot.waitUntil(lambda: widget.testrunner.process.state() == QProcess.Running)
     widget.testrunner.stop_if_running()
