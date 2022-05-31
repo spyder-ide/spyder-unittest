@@ -15,13 +15,11 @@ import sys
 # Third party imports
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QLabel, QMessageBox, QVBoxLayout
-from spyder.api.config.decorators import on_conf_change
 from spyder.api.widgets.main_widget import PluginMainWidget
 from spyder.config.base import get_conf_path, get_translation
 from spyder.utils import icon_manager as ima
 from spyder.plugins.variableexplorer.widgets.texteditor import TextEditor
 from spyder.py3compat import PY3
-from spyder.utils.misc import get_python_executable
 
 # Local imports
 from spyder_unittest.backend.frameworkregistry import FrameworkRegistry
@@ -85,8 +83,6 @@ class UnitTestWidget(PluginMainWidget):
     pre_test_hook : function returning bool or None
         If set, contains function to run before running tests; abort the test
         run if hook returns False.
-    python_executable : str
-        Path to Python executable for running tests.
     pythonpath : list of str
         Directories to be added to the Python path when running tests.
     testrunner : TestRunner or None
@@ -114,7 +110,6 @@ class UnitTestWidget(PluginMainWidget):
 
         self.config = None
         self.pythonpath = None
-        self.python_executable = sys.executable
         self.default_wdir = None
         self.pre_test_hook = None
         self.testrunner = None
@@ -226,22 +221,6 @@ class UnitTestWidget(PluginMainWidget):
             QWidget to give focus to.
         """
         return self.testdataview
-
-    @on_conf_change(section='main_interpreter',
-                    option=['default', 'custom_interpreter'])
-    def on_interpreter_config_change(self, option, value):
-        """
-        Handle changes of interpreter configuration.
-
-        Retrieve the Python interpreter in the Spyder preferences and
-        communicate this to the unittest widget.
-        """
-        if self.get_conf(section='main_interpreter', option='default'):
-            executable = get_python_executable()
-        else:
-            executable = self.get_conf(section='main_interpreter',
-                                       option='custom_interpreter')
-        self.python_executable = executable
 
     # --- UnitTestWidget methods ----------------------------------------------
 
@@ -361,9 +340,9 @@ class UnitTestWidget(PluginMainWidget):
         self.testrunner.sig_starttest.connect(self.tests_started)
         self.testrunner.sig_testresult.connect(self.tests_yield_result)
         self.testrunner.sig_stop.connect(self.tests_stopped)
-
+        executable = self.get_conf('executable', section='main_interpreter')
         try:
-            self.testrunner.start(config, self.python_executable, pythonpath)
+            self.testrunner.start(config, executable, pythonpath)
         except RuntimeError:
             QMessageBox.critical(self,
                                  _("Error"), _("Process failed to start"))
