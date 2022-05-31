@@ -81,7 +81,7 @@ class ConfigDialog(QDialog):
         layout.addSpacing(10)
 
         coverage_label = _('Include Coverage Report in Output')
-        coverage_toolTip = _('Works for pytest and nose')
+        coverage_toolTip = _('Works for pytest')
         coverage_layout = QHBoxLayout()
         self.coverage_checkbox = QCheckBox(coverage_label, self)
         self.coverage_checkbox.setToolTip(coverage_toolTip)
@@ -128,8 +128,9 @@ class ConfigDialog(QDialog):
         """Called when selected framework changes."""
         if index != -1:
             self.ok_button.setEnabled(True)
-            # FIXME: not sure how to do coverage for unittest
-            if str(self.framework_combobox.currentText()) == 'unittest':
+            # FIXME: not sure how to do coverage for unittest, disabled for now
+            if str(self.framework_combobox.currentText()) in ['nose',
+                                                              'unittest']:
                 self.coverage_checkbox.setEnabled(False)
                 self.coverage_checkbox.setChecked(False)
             else:
