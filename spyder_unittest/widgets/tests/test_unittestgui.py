@@ -7,6 +7,7 @@
 
 # Standard library imports
 import os
+import sys
 
 # Third party imports
 from qtpy.QtCore import Qt, QProcess
@@ -26,6 +27,10 @@ except ImportError:
 @pytest.fixture
 def widget(qtbot):
     unittest_widget = UnitTestWidget('testwidget', None, None)
+    unittest_widget.get_conf(
+        'executable',
+        section='main_interpreter',
+        default=sys.executable)
     unittest_widget.setup()
     qtbot.addWidget(unittest_widget)
     return unittest_widget
