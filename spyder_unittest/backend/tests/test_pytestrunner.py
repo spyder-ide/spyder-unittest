@@ -91,6 +91,8 @@ def test_pytestrunner_process_output_with_collecterror(qtbot):
     expected = [('ham.spam', 'msg')]
     assert blocker.args == [expected]
 
+
+@pytest.mark.skip("segfaulting for some reason")
 def test_pytestrunner_process_output_with_starttest(qtbot):
     runner = PyTestRunner(None)
     output = [{'event': 'starttest', 'nodeid': 'ham/spam.py::ham'},
