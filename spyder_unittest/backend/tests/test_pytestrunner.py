@@ -67,7 +67,6 @@ def test_pytestrunner_start(monkeypatch):
         runner, config, sys.executable, ['pythondir'])
 
 
-@pytest.mark.skip("segfaulting for some reason")
 def test_pytestrunner_process_output_with_collected(qtbot):
     runner = PyTestRunner(None)
     output = [{'event': 'collected', 'nodeid': 'spam.py::ham'},
@@ -76,6 +75,7 @@ def test_pytestrunner_process_output_with_collected(qtbot):
         runner.process_output(output)
     expected = ['spam.ham', 'eggs.bacon']
     assert blocker.args == [expected]
+
 
 def test_pytestrunner_process_output_with_collecterror(qtbot):
     runner = PyTestRunner(None)
@@ -88,6 +88,7 @@ def test_pytestrunner_process_output_with_collecterror(qtbot):
         runner.process_output(output)
     expected = [('ham.spam', 'msg')]
     assert blocker.args == [expected]
+
 
 def test_pytestrunner_process_output_with_starttest(qtbot):
     runner = PyTestRunner(None)
