@@ -4,4 +4,4 @@ nose
 pytest
 pytest-cov
 pytest-mock
-pytest-qt
+pytest-qt>=4
