@@ -88,10 +88,6 @@ def test_runnerbase_start(monkeypatch):
     monkeypatch.setattr('spyder_unittest.backend.runnerbase.os.remove',
                         mock_remove)
 
-    monkeypatch.setattr(
-        'spyder_unittest.backend.runnerbase.get_python_executable',
-        lambda: 'python')
-
     runner = RunnerBase(None, 'results')
     runner._prepare_process = lambda c, p: mock_process
     runner.create_argument_list = lambda c, cp: ['arg1', 'arg2']
@@ -99,7 +95,7 @@ def test_runnerbase_start(monkeypatch):
     cov_path = None
     mock_process.waitForStarted = lambda: False
     with pytest.raises(RuntimeError):
-        runner.start(config, cov_path, ['pythondir'])
+        runner.start(config, cov_path, 'python_exec', ['pythondir'])
 
-    mock_process.start.assert_called_once_with('python', ['arg1', 'arg2'])
+    mock_process.start.assert_called_once_with('python_exec', ['arg1', 'arg2'])
     mock_remove.assert_called_once_with('results')

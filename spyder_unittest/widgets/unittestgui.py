@@ -345,9 +345,9 @@ class UnitTestWidget(PluginMainWidget):
                                  section='project_explorer')
         # config returns 'None' as a string rather than None
         cov_path = config.wdir if cov_path == 'None' else cov_path
-
+        executable = self.get_conf('executable', section='main_interpreter')
         try:
-            self.testrunner.start(config, cov_path, pythonpath)
+            self.testrunner.start(config, cov_path, executable, pythonpath)
         except RuntimeError:
             QMessageBox.critical(self,
                                  _("Error"), _("Process failed to start"))

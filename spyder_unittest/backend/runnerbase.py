@@ -13,7 +13,6 @@ import tempfile
 from qtpy.QtCore import (QObject, QProcess, QProcessEnvironment, QTextCodec,
                          Signal)
 from spyder.py3compat import to_text_string
-from spyder.utils.misc import get_python_executable
 
 try:
     from importlib.util import find_spec as find_spec_or_loader
@@ -189,7 +188,7 @@ class RunnerBase(QObject):
             process.setProcessEnvironment(env)
         return process
 
-    def start(self, config, cov_path, pythonpath):
+    def start(self, config, cov_path, executable, pythonpath):
         """
         Start process which will run the unit test suite.
 
@@ -205,6 +204,8 @@ class RunnerBase(QObject):
             Unit test configuration.
         cov_path : str or None
             Path to filter source for coverage report
+        executable : str
+            Path to Python executable
         pythonpath : list of str
             List of directories to be added to the Python path
 
@@ -214,7 +215,6 @@ class RunnerBase(QObject):
             If process failed to start.
         """
         self.process = self._prepare_process(config, pythonpath)
-        executable = get_python_executable()
         p_args = self.create_argument_list(config, cov_path)
         try:
             os.remove(self.resultfilename)

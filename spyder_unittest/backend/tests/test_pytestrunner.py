@@ -8,10 +8,10 @@
 # Standard library imports
 import os
 import os.path as osp
+import sys
 
 # Third party imports
 import pytest
-from qtpy.QtCore import QByteArray
 
 # Local imports
 from spyder_unittest.backend.pytestrunner import (PyTestRunner,
@@ -61,13 +61,13 @@ def test_pytestrunner_start(monkeypatch):
     runner = PyTestRunner(None, 'results')
     config = Config()
     cov_path = None
-    runner.start(config, cov_path, ['pythondir'])
+    runner.start(config, cov_path, sys.executable, ['pythondir'])
     assert runner.config is config
     assert runner.reader is mock_reader
     runner.reader.sig_received.connect.assert_called_once_with(
         runner.process_output)
     MockRunnerBase.start.assert_called_once_with(
-        runner, config, cov_path, ['pythondir'])
+        runner, config, cov_path, sys.executable, ['pythondir'])
 
 
 def test_pytestrunner_process_output_with_collected(qtbot):
@@ -78,6 +78,7 @@ def test_pytestrunner_process_output_with_collected(qtbot):
         runner.process_output(output)
     expected = ['spam.ham', 'eggs.bacon']
     assert blocker.args == [expected]
+
 
 def test_pytestrunner_process_output_with_collecterror(qtbot):
     runner = PyTestRunner(None)
@@ -90,6 +91,7 @@ def test_pytestrunner_process_output_with_collecterror(qtbot):
         runner.process_output(output)
     expected = [('ham.spam', 'msg')]
     assert blocker.args == [expected]
+
 
 def test_pytestrunner_process_output_with_starttest(qtbot):
     runner = PyTestRunner(None)

@@ -47,12 +47,12 @@ class PyTestRunner(RunnerBase):
             [f"--cov={cov_path}", "--cov-report=term-missing"]
             if config.coverage else [])
 
-    def start(self, config, cov_path, pythonpath):
+    def start(self, config, cov_path, executable, pythonpath):
         """Start process which will run the unit test suite."""
         self.config = config
         self.reader = ZmqStreamReader()
         self.reader.sig_received.connect(self.process_output)
-        RunnerBase.start(self, config, cov_path, pythonpath)
+        RunnerBase.start(self, config, cov_path, executable, pythonpath)
 
     def process_output(self, output):
         """
