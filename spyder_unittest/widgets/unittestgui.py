@@ -340,9 +340,9 @@ class UnitTestWidget(PluginMainWidget):
         self.testrunner.sig_starttest.connect(self.tests_started)
         self.testrunner.sig_testresult.connect(self.tests_yield_result)
         self.testrunner.sig_stop.connect(self.tests_stopped)
-
+        executable = self.get_conf('executable', section='main_interpreter')
         try:
-            self.testrunner.start(config, pythonpath)
+            self.testrunner.start(config, executable, pythonpath)
         except RuntimeError:
             QMessageBox.critical(self,
                                  _("Error"), _("Process failed to start"))

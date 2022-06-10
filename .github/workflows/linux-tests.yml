@@ -25,8 +25,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Install System Packages
         run: | 
-          sudo apt-get update
-          sudo apt-get install libegl1-mesa
+          sudo apt-get update --fix-missing
+          sudo apt-get install -qq pyqt5-dev-tools libxcb-xinerama0 xterm --fix-missing
       - name: Install Conda
         uses: conda-incubator/setup-miniconda@v2
         with:

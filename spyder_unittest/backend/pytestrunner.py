@@ -45,12 +45,12 @@ class PyTestRunner(RunnerBase):
         pyfile = os.path.join(os.path.dirname(__file__), 'pytestworker.py')
         return [pyfile, str(self.reader.port)]
 
-    def start(self, config, pythonpath):
+    def start(self, config, executable, pythonpath):
         """Start process which will run the unit test suite."""
         self.config = config
         self.reader = ZmqStreamReader()
         self.reader.sig_received.connect(self.process_output)
-        RunnerBase.start(self, config, pythonpath)
+        RunnerBase.start(self, config, executable, pythonpath)
 
     def process_output(self, output):
         """

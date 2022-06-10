@@ -1,7 +1,7 @@
 codecov
 flaky
 nose
-pytest
+pytest>=5
 pytest-cov
 pytest-mock
 pytest-qt
