@@ -16,7 +16,8 @@ import pytest
 # Local imports
 from spyder_unittest.backend.pytestrunner import (PyTestRunner,
                                                   logreport_to_testresult)
-from spyder_unittest.backend.runnerbase import Category, TestResult
+from spyder_unittest.backend.runnerbase import (Category, TestResult,
+                                                COV_TEST_NAME)
 from spyder_unittest.widgets.configdialog import Config
 
 try:
@@ -113,6 +114,7 @@ def test_pytestrunner_finished(qtbot, output, results):
     runner = PyTestRunner(None)
     runner.reader = mock_reader
     runner.read_all_process_output = lambda: output
+    runner.config = Config('pytest', None, False)
     with qtbot.waitSignal(runner.sig_finished) as blocker:
         runner.finished()
     assert blocker.args == [results, output]
@@ -138,6 +140,80 @@ def test_pytestrunner_process_output_with_logreport_passed(qtbot):
     expected = [TestResult(Category.OK, 'passed', 'foo.bar', time=42,
                            filename=osp.join('ham', 'foo.py'), lineno=24)]
     assert blocker.args == [expected]
+
+
+def test_pytestrunner_process_coverage(qtbot):
+    output = """
+============================= test session starts ==============================
+platform linux -- Python 3.9.12, pytest-7.1.2, pluggy-1.0.0
+PyQt5 5.12.3 -- Qt runtime 5.12.9 -- Qt compiled 5.12.9
+rootdir: /TRAC/TRAC-data/spyder-unittest, configfile: setup.cfg
+plugins: flaky-3.7.0, cov-3.0.0, qt-4.0.2, mock-3.7.0
+collected 152 items
+
+spyder_unittest/backend/tests/test_abbreviator.py ...........            [  7%]
+spyder_unittest/backend/tests/test_frameworkregistry.py ..               [  8%]
+spyder_unittest/backend/tests/test_noserunner.py .....                   [ 11%]
+spyder_unittest/backend/tests/test_pytestrunner.py ..................... [ 25%]
+....                                                                     [ 28%]
+spyder_unittest/backend/tests/test_pytestworker.py ..................... [ 42%]
+....                                                                     [ 44%]
+spyder_unittest/backend/tests/test_runnerbase.py .....                   [ 48%]
+spyder_unittest/backend/tests/test_unittestrunner.py ..........          [ 54%]
+spyder_unittest/backend/tests/test_zmqstream.py .                        [ 55%]
+spyder_unittest/tests/test_unittestplugin.py s.sss                       [ 58%]
+spyder_unittest/widgets/tests/test_configdialog.py ...........           [ 65%]
+spyder_unittest/widgets/tests/test_datatree.py ......................... [ 82%]
+..                                                                       [ 83%]
+spyder_unittest/widgets/tests/test_unittestgui.py ...................... [ 98%]
+...                                                                      [100%]
+
+=============================== warnings summary ===============================
+
+---------- coverage: platform linux, python 3.9.12-final-0 -----------
+Name                                        Stmts   Miss  Cover   Missing
+-------------------------------------------------------------------------
+setup.py                                       26     26     0%   7-53
+spyder_unittest/backend/noserunner.py          62      7    89%   17-19, 71-72, 94, 103
+spyder_unittest/backend/pytestrunner.py       101      6    94%   100-106
+spyder_unittest/backend/pytestworker.py        78      4    95%   36, 40, 44, 152
+spyder_unittest/backend/runnerbase.py          87      2    98%   20-21
+spyder_unittest/backend/unittestrunner.py      78      5    94%   69, 75, 123, 138, 146
+spyder_unittest/unittestplugin.py             119     65    45%   60, 71, 119-123, 136-141, 148-150, 161, 170-173, 183-186, 207-208, 219-226, 240-272, 280-289, 299-301, 313-314
+spyder_unittest/widgets/configdialog.py        95     10    89%   28-30, 134-135, 144, 173-176
+spyder_unittest/widgets/datatree.py           244     14    94%   26-28, 100, 105, 107, 276-277, 280, 293, 312, 417, 422-424
+spyder_unittest/widgets/unittestgui.py        218     35    84%   41-43, 49, 223, 241, 245, 249-256, 271-278, 302-305, 330, 351-352, 468-482
+-------------------------------------------------------------------------
+TOTAL                                        1201    174    86%
+
+6 files skipped due to complete coverage.
+
+================= 148 passed, 4 skipped, 242 warnings in 4.25s =================
+    """
+    cov_text = """
+---------- coverage: platform linux, python 3.9.12-final-0 -----------
+Name                                        Stmts   Miss  Cover   Missing
+-------------------------------------------------------------------------
+setup.py                                       26     26     0%   7-53
+spyder_unittest/backend/noserunner.py          62      7    89%   17-19, 71-72, 94, 103
+spyder_unittest/backend/pytestrunner.py       101      6    94%   100-106
+spyder_unittest/backend/pytestworker.py        78      4    95%   36, 40, 44, 152
+spyder_unittest/backend/runnerbase.py          87      2    98%   20-21
+spyder_unittest/backend/unittestrunner.py      78      5    94%   69, 75, 123, 138, 146
+spyder_unittest/unittestplugin.py             119     65    45%   60, 71, 119-123, 136-141, 148-150, 161, 170-173, 183-186, 207-208, 219-226, 240-272, 280-289, 299-301, 313-314
+spyder_unittest/widgets/configdialog.py        95     10    89%   28-30, 134-135, 144, 173-176
+spyder_unittest/widgets/datatree.py           244     14    94%   26-28, 100, 105, 107, 276-277, 280, 293, 312, 417, 422-424
+spyder_unittest/widgets/unittestgui.py        218     35    84%   41-43, 49, 223, 241, 245, 249-256, 271-278, 302-305, 330, 351-352, 468-482
+-------------------------------------------------------------------------
+TOTAL                                        1201    174    86%
+
+6 files skipped due to complete coverage."""
+    runner = PyTestRunner(None)
+    runner.rootdir = 'ham'
+    with qtbot.waitSignal(runner.sig_testresult) as blocker:
+        runner.process_coverage(output)
+    expected = TestResult(
+        Category.COVERAGE, "86%", COV_TEST_NAME, extra_text=cov_text)
 
 
 @pytest.mark.parametrize('outcome,witherror,category', [

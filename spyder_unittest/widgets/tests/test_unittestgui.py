@@ -14,7 +14,8 @@ from qtpy.QtCore import Qt, QProcess
 import pytest
 
 # Local imports
-from spyder_unittest.backend.runnerbase import Category, TestResult
+from spyder_unittest.backend.runnerbase import (Category, TestResult,
+                                                COV_TEST_NAME)
 from spyder_unittest.widgets.configdialog import Config
 from spyder_unittest.widgets.unittestgui import UnitTestWidget
 
@@ -147,7 +148,10 @@ def test_run_tests_with_pre_test_hook_returning_false(widget):
 
 @pytest.mark.parametrize('results,label',
                          [([TestResult(Category.OK, 'ok', '')], '0 tests failed, 1 passed'),
-                          ([], 'No results to show.')])
+                          ([], 'No results to show.'),
+                          ([TestResult(Category.OK, 'ok', ''),
+                           TestResult(Category.COVERAGE, '90%', COV_TEST_NAME)],
+                          '0 tests failed, 1 passed, 90% coverage')])
 def test_unittestwidget_process_finished_updates_status_label(widget, results, label):
     widget.process_finished(results, 'output')
     assert widget.status_label.text() == '<b>{}</b>'.format(label)

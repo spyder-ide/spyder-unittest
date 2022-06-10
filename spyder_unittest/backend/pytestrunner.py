@@ -8,9 +8,11 @@
 # Standard library imports
 import os
 import os.path as osp
+import re
 
 # Local imports
-from spyder_unittest.backend.runnerbase import Category, RunnerBase, TestResult
+from spyder_unittest.backend.runnerbase import (Category, RunnerBase,
+                                                TestResult, COV_TEST_NAME)
 from spyder_unittest.backend.zmqstream import ZmqStreamReader
 
 
@@ -44,7 +46,7 @@ class PyTestRunner(RunnerBase):
         """Create argument list for testing process."""
         pyfile = os.path.join(os.path.dirname(__file__), 'pytestworker.py')
         return [pyfile, str(self.reader.port)] + (
-            [f"--cov={cov_path}", "--cov-report=term-missing"]
+            [f'--cov={cov_path}', '--cov-report=term-missing']
             if config.coverage else [])
 
     def start(self, config, cov_path, executable, pythonpath):
@@ -67,7 +69,6 @@ class PyTestRunner(RunnerBase):
         collecterror_list = []
         starttest_list = []
         result_list = []
-
         for result_item in output:
             if result_item['event'] == 'config':
                 self.rootdir = result_item['rootdir']
@@ -92,6 +93,23 @@ class PyTestRunner(RunnerBase):
         if result_list:
             self.sig_testresult.emit(result_list)
 
+    def process_coverage(self, output):
+        """Search the output text for coverage details.
+
+        Called by the function 'finished' at the very end."""
+        cov_results = re.search(
+            r'(-*? coverage.*?---------------\nTOTAL\s.*?\s(\d*?)\%.*)\n====',
+            output, flags=re.S)
+        if cov_results:
+            cov = cov_results.group(2)
+            cov_text = cov_results.group(1)
+            cov_report = TestResult(
+                Category.COVERAGE, f'{cov}%', COV_TEST_NAME,
+                extra_text=cov_text)
+            # create a fake test, then emit the coverage as the result
+            self.sig_collected.emit([COV_TEST_NAME])
+            self.sig_testresult.emit([cov_report])
+
     def finished(self):
         """
         Called when the unit test process has finished.
@@ -100,6 +118,8 @@ class PyTestRunner(RunnerBase):
         """
         self.reader.close()
         output = self.read_all_process_output()
+        if self.config.coverage:
+            self.process_coverage(output)
         no_tests_ran = "no tests ran" in output.splitlines()[-1]
         self.sig_finished.emit([] if no_tests_ran else None, output)
 

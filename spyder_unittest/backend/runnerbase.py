@@ -20,6 +20,11 @@ except ImportError:  # Python 2
     from pkgutil import find_loader as find_spec_or_loader
 
 
+# if generating coverage report, use this name for the TestResult
+# it's here in case we can get coverage results from unittest too
+COV_TEST_NAME = 'Total Test Coverage'
+
+
 class Category:
     """Enum type representing category of test result."""
 
@@ -27,6 +32,7 @@ class Category:
     OK = 2
     SKIP = 3
     PENDING = 4
+    COVERAGE = 5
 
 
 class TestResult:
