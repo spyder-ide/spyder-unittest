@@ -96,9 +96,10 @@ class PyTestRunner(RunnerBase):
     def process_coverage(self, output):
         """Search the output text for coverage details.
 
-        Called by the function 'finished' at the very end."""
+        Called by the function 'finished' at the very end.
+        """
         cov_results = re.search(
-            r'(-*? coverage.*?---------------\nTOTAL\s.*?\s(\d*?)\%.*)\n====',
+            r'(-*? coverage:.*?---------------\nTOTAL\s.*?\s(\d*?)\%.*)\n====',
             output, flags=re.S)
         if cov_results:
             cov = cov_results.group(2)
@@ -109,6 +110,17 @@ class PyTestRunner(RunnerBase):
             # create a fake test, then emit the coverage as the result
             self.sig_collected.emit([COV_TEST_NAME])
             self.sig_testresult.emit([cov_report])
+
+            # also build a result for each file's coverage
+            header = "".join(cov_results.group(0).split("\n")[1:3])
+            for row in re.findall(r'^((.*?\.py) .*?(\d+%).*?(\d[\d\,\-\ ]*))$',
+                                  cov_results.group(0), flags=re.M):
+                file_cov = TestResult(
+                    Category.COVERAGE, row[2], row[1],
+                    message=f'Missing: {row[3]}',
+                    extra_text=f'{header}\n{row[0]}', filename=row[1])
+                self.sig_collected.emit([row[1]])
+                self.sig_testresult.emit([file_cov])
 
     def finished(self):
         """

@@ -319,6 +319,9 @@ class TestDataModel(QAbstractItemModel):
             elif column == STATUS_COLUMN:
                 return self.testresults[row].status
             elif column == NAME_COLUMN:
+                # don't abbreviate for the code coverage filename
+                if self.testresults[row].category == Category.COVERAGE:
+                    return self.testresults[row].name
                 return self.abbreviator.abbreviate(self.testresults[row].name)
             elif column == MESSAGE_COLUMN:
                 return self.testresults[row].message
