@@ -113,11 +113,12 @@ class PyTestRunner(RunnerBase):
 
             # also build a result for each file's coverage
             header = "".join(cov_results.group(0).split("\n")[1:3])
-            for row in re.findall(r'^((.*?\.py) .*?(\d+%).*?(\d[\d\,\-\ ]*))$',
-                                  cov_results.group(0), flags=re.M):
+            for row in re.findall(
+                    r'^((.*?\.py) .*?(\d+%).*?(\d[\d\,\-\ ]*)?)$',
+                    cov_results.group(0), flags=re.M):
                 file_cov = TestResult(
                     Category.COVERAGE, row[2], row[1],
-                    message=f'Missing: {row[3]}',
+                    message=f'Missing: {row[3] if row[3] else "(none)"}',
                     extra_text=f'{header}\n{row[0]}', filename=row[1])
                 self.sig_collected.emit([row[1]])
                 self.sig_testresult.emit([file_cov])
