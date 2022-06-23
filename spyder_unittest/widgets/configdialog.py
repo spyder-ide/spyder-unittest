@@ -24,6 +24,11 @@ from spyder.py3compat import getcwd, to_text_string
 from spyder.utils import icon_manager as ima
 
 try:
+    from importlib.util import find_spec as find_spec_or_loader
+except ImportError:  # Python 2
+    from pkgutil import find_loader as find_spec_or_loader
+
+try:
     _ = get_translation('spyder_unittest')
 except KeyError:
     import gettext
@@ -81,7 +86,7 @@ class ConfigDialog(QDialog):
         layout.addSpacing(10)
 
         coverage_label = _('Include Coverage Report in Output')
-        coverage_toolTip = _('Works for pytest')
+        coverage_toolTip = _('Works for pytest, requires pytest-cov')
         coverage_layout = QHBoxLayout()
         self.coverage_checkbox = QCheckBox(coverage_label, self)
         self.coverage_checkbox.setToolTip(coverage_toolTip)
@@ -129,8 +134,9 @@ class ConfigDialog(QDialog):
         if index != -1:
             self.ok_button.setEnabled(True)
             # FIXME: not sure how to do coverage for unittest, disabled for now
-            if str(self.framework_combobox.currentText()) in ['nose',
-                                                              'unittest']:
+            if (str(self.framework_combobox.currentText()) in ['nose',
+                                                              'unittest']
+                    or find_spec_or_loader("pytest-cov") is None):
                 self.coverage_checkbox.setEnabled(False)
                 self.coverage_checkbox.setChecked(False)
             else:

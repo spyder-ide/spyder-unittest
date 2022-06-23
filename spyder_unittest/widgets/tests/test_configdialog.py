@@ -100,9 +100,12 @@ def test_configdialog_clicking_pytest_enables_ok(qtbot):
     assert configdialog.buttons.button(QDialogButtonBox.Ok).isEnabled()
 
 
-def test_configdialog_coverage_checkbox(qtbot):
+def test_configdialog_coverage_checkbox(qtbot, monkeypatch):
     configdialog = ConfigDialog(frameworks, default_config())
     qtbot.addWidget(configdialog)
+    monkeypatch.setattr(
+        'spyder_unittest.widgets.configdialog.find_spec_or_loader',
+        lambda str: "pytest-conv exists")
     configdialog.framework_combobox.setCurrentIndex(1)
     configdialog.coverage_checkbox.click()
     assert configdialog.get_config().coverage is True
