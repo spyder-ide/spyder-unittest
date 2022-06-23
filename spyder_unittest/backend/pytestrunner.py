@@ -11,9 +11,16 @@ import os.path as osp
 import re
 
 # Local imports
+from spyder.config.base import get_translation
 from spyder_unittest.backend.runnerbase import (Category, RunnerBase,
                                                 TestResult, COV_TEST_NAME)
 from spyder_unittest.backend.zmqstream import ZmqStreamReader
+
+try:
+    _ = get_translation('spyder_unittest')
+except KeyError:
+    import gettext
+    _ = gettext.gettext
 
 
 class PyTestRunner(RunnerBase):
@@ -107,8 +114,8 @@ class PyTestRunner(RunnerBase):
             cov = cov_results.group(2)
             cov_text = cov_results.group(1)
             cov_report = TestResult(
-                Category.COVERAGE, f'{cov}%', COV_TEST_NAME,
-                extra_text=cov_text)
+                Category.COVERAGE, f'{cov}%', _(COV_TEST_NAME),
+                extra_text=_(cov_text))
             # create a fake test, then emit the coverage as the result
             self.sig_collected.emit([COV_TEST_NAME])
             self.sig_testresult.emit([cov_report])
@@ -122,8 +129,8 @@ class PyTestRunner(RunnerBase):
                           if row[3] else None)
                 file_cov = TestResult(
                     Category.COVERAGE, row[2], row[1],
-                    message=f'Missing: {row[3] if row[3] else "(none)"}',
-                    extra_text=f'{header}\n{row[0]}', filename=row[1],
+                    message=_(f'Missing: {row[3] if row[3] else "(none)"}'),
+                    extra_text=_(f'{header}\n{row[0]}'), filename=row[1],
                     lineno=lineno)
                 self.sig_collected.emit([row[1]])
                 self.sig_testresult.emit([file_cov])
