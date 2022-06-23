@@ -136,7 +136,7 @@ class ConfigDialog(QDialog):
             # FIXME: not sure how to do coverage for unittest, disabled for now
             if (str(self.framework_combobox.currentText()) in ['nose',
                                                               'unittest']
-                    or find_spec_or_loader("pytest-cov") is None):
+                    or find_spec_or_loader("pytest_cov") is None):
                 self.coverage_checkbox.setEnabled(False)
                 self.coverage_checkbox.setChecked(False)
             else:
