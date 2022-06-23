@@ -98,8 +98,10 @@ class PyTestRunner(RunnerBase):
 
         Called by the function 'finished' at the very end.
         """
+        # coverage report columns:
+        # Name  Stmts   Miss  Cover   Missing
         cov_results = re.search(
-            r'(-*? coverage:.*?---------------\nTOTAL\s.*?\s(\d*?)\%.*)\n====',
+            r'(-*? coverage:.*?-*\nTOTAL\s.*?\s(\d*?)\%.*)\n=*',
             output, flags=re.S)
         if cov_results:
             cov = cov_results.group(2)
@@ -116,10 +118,13 @@ class PyTestRunner(RunnerBase):
             for row in re.findall(
                     r'^((.*?\.py) .*?(\d+%).*?(\d[\d\,\-\ ]*)?)$',
                     cov_results.group(0), flags=re.M):
+                lineno = (int(re.search(r'^(\d*)', row[3]).group(1)) - 1
+                          if row[3] else None)
                 file_cov = TestResult(
                     Category.COVERAGE, row[2], row[1],
                     message=f'Missing: {row[3] if row[3] else "(none)"}',
-                    extra_text=f'{header}\n{row[0]}', filename=row[1])
+                    extra_text=f'{header}\n{row[0]}', filename=row[1],
+                    lineno=lineno)
                 self.sig_collected.emit([row[1]])
                 self.sig_testresult.emit([file_cov])
 
