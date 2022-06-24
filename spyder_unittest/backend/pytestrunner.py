@@ -105,23 +105,22 @@ class PyTestRunner(RunnerBase):
 
         Called by the function 'finished' at the very end.
         """
-        # coverage report columns:
-        # Name  Stmts   Miss  Cover   Missing
         cov_results = re.search(
-            r'(-*? coverage:.*?-*\nTOTAL\s.*?\s(\d*?)\%.*)\n=*',
+            r'-*? coverage:.*?-*\nTOTAL\s.*?\s(\d*?)\%.*\n=*',
             output, flags=re.S)
         if cov_results:
-            cov = cov_results.group(2)
-            cov_text = cov_results.group(1)
+            total_coverage = cov_results.group(1)
             cov_report = TestResult(
-                Category.COVERAGE, f'{cov}%', _(COV_TEST_NAME),
-                extra_text=_(cov_text))
+                Category.COVERAGE, f'{total_coverage}%', _(COV_TEST_NAME))
             # create a fake test, then emit the coverage as the result
+            # This gives overall test coverage, used in TestDataModel.summary
             self.sig_collected.emit([COV_TEST_NAME])
             self.sig_testresult.emit([cov_report])
 
             # also build a result for each file's coverage
             header = "".join(cov_results.group(0).split("\n")[1:3])
+            # coverage report columns:
+            # Name  Stmts   Miss  Cover   Missing
             for row in re.findall(
                     r'^((.*?\.py) .*?(\d+%).*?(\d[\d\,\-\ ]*)?)$',
                     cov_results.group(0), flags=re.M):
