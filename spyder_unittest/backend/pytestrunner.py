@@ -52,9 +52,11 @@ class PyTestRunner(RunnerBase):
     def create_argument_list(self, config, cov_path):
         """Create argument list for testing process."""
         pyfile = os.path.join(os.path.dirname(__file__), 'pytestworker.py')
-        return [pyfile, str(self.reader.port)] + (
-            [f'--cov={cov_path}', '--cov-report=term-missing']
-            if config.coverage else [])
+        arguments = [pyfile, str(self.reader.port)]
+        if config.coverage:
+            arguments += [f'--cov={cov_path}', '--cov-report=term-missing']
+        return arguments
+
 
     def start(self, config, cov_path, executable, pythonpath):
         """Start process which will run the unit test suite."""
