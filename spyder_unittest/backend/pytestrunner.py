@@ -113,7 +113,7 @@ class PyTestRunner(RunnerBase):
         if cov_results:
             total_coverage = cov_results.group(1)
             cov_report = TestResult(
-                Category.COVERAGE, f'{total_coverage}%', _(COV_TEST_NAME))
+                Category.COVERAGE, f'{total_coverage}%', COV_TEST_NAME)
             # create a fake test, then emit the coverage as the result
             # This gives overall test coverage, used in TestDataModel.summary
             self.sig_collected.emit([COV_TEST_NAME])
@@ -130,8 +130,8 @@ class PyTestRunner(RunnerBase):
                           if row[3] else None)
                 file_cov = TestResult(
                     Category.COVERAGE, row[2], row[1],
-                    message=_(f'Missing: {row[3] if row[3] else "(none)"}'),
-                    extra_text=_(f'{header}\n{row[0]}'), filename=row[1],
+                    message=_('Missing: {}').format(row[3] if row[3] else _("(none)")),
+                    extra_text=_('{}\n{}').format(header, row[0]), filename=row[1],
                     lineno=lineno)
                 self.sig_collected.emit([row[1]])
                 self.sig_testresult.emit([file_cov])
