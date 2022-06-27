@@ -31,14 +31,16 @@ COLORS = {
     Category.OK: QBrush(QColor("#C1FFBA")),
     Category.FAIL: QBrush(QColor("#FF5050")),
     Category.SKIP: QBrush(QColor("#C5C5C5")),
-    Category.PENDING: QBrush(QColor("#C5C5C5"))
+    Category.PENDING: QBrush(QColor("#C5C5C5")),
+    Category.COVERAGE: QBrush(QColor("#89CFF0"))
 }
 
 COLORS_DARK = {
     Category.OK: QBrush(QColor("#008000")),
     Category.FAIL: QBrush(QColor("#C6001E")),
     Category.SKIP: QBrush(QColor("#505050")),
-    Category.PENDING: QBrush(QColor("#505050"))
+    Category.PENDING: QBrush(QColor("#505050")),
+    Category.COVERAGE: QBrush(QColor("#0047AB"))
 }
 
 STATUS_COLUMN = 0
@@ -317,6 +319,9 @@ class TestDataModel(QAbstractItemModel):
             elif column == STATUS_COLUMN:
                 return self.testresults[row].status
             elif column == NAME_COLUMN:
+                # don't abbreviate for the code coverage filename
+                if self.testresults[row].category == Category.COVERAGE:
+                    return self.testresults[row].name
                 return self.abbreviator.abbreviate(self.testresults[row].name)
             elif column == MESSAGE_COLUMN:
                 return self.testresults[row].message
@@ -415,6 +420,11 @@ class TestDataModel(QAbstractItemModel):
             msg += _(', {} other').format(counts[Category.SKIP])
         if counts[Category.PENDING]:
             msg += _(', {} pending').format(counts[Category.PENDING])
+        if counts[Category.COVERAGE]:
+            # find the coverage result and get its status
+            coverage = [res for res in self.testresults
+                        if res.category == Category.COVERAGE][0].status
+            msg += _(', {} coverage').format(coverage)
         return msg
 
     def emit_summary(self):

@@ -20,6 +20,11 @@ except ImportError:  # Python 2
     from pkgutil import find_loader as find_spec_or_loader
 
 
+# if generating coverage report, use this name for the TestResult
+# it's here in case we can get coverage results from unittest too
+COV_TEST_NAME = 'Total Test Coverage'
+
+
 class Category:
     """Enum type representing category of test result."""
 
@@ -27,6 +32,7 @@ class Category:
     OK = 2
     SKIP = 3
     PENDING = 4
+    COVERAGE = 5
 
 
 class TestResult:
@@ -160,7 +166,7 @@ class RunnerBase(QObject):
         """
         raise NotImplementedError
 
-    def create_argument_list(self):
+    def create_argument_list(self, config, cov_path):
         """
         Create argument list for testing process (dummy).
 
@@ -188,7 +194,7 @@ class RunnerBase(QObject):
             process.setProcessEnvironment(env)
         return process
 
-    def start(self, config, executable, pythonpath):
+    def start(self, config, cov_path, executable, pythonpath):
         """
         Start process which will run the unit test suite.
 
@@ -202,6 +208,8 @@ class RunnerBase(QObject):
         ----------
         config : TestConfig
             Unit test configuration.
+        cov_path : str or None
+            Path to filter source for coverage report
         executable : str
             Path to Python executable
         pythonpath : list of str
@@ -213,7 +221,7 @@ class RunnerBase(QObject):
             If process failed to start.
         """
         self.process = self._prepare_process(config, pythonpath)
-        p_args = self.create_argument_list()
+        p_args = self.create_argument_list(config, cov_path)
         try:
             os.remove(self.resultfilename)
         except OSError:

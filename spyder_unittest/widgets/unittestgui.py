@@ -340,9 +340,14 @@ class UnitTestWidget(PluginMainWidget):
         self.testrunner.sig_starttest.connect(self.tests_started)
         self.testrunner.sig_testresult.connect(self.tests_yield_result)
         self.testrunner.sig_stop.connect(self.tests_stopped)
+
+        cov_path = self.get_conf('current_project_path', default='None',
+                                 section='project_explorer')
+        # config returns 'None' as a string rather than None
+        cov_path = config.wdir if cov_path == 'None' else cov_path
         executable = self.get_conf('executable', section='main_interpreter')
         try:
-            self.testrunner.start(config, executable, pythonpath)
+            self.testrunner.start(config, cov_path, executable, pythonpath)
         except RuntimeError:
             QMessageBox.critical(self,
                                  _("Error"), _("Process failed to start"))

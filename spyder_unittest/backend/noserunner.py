@@ -39,12 +39,12 @@ class NoseRunner(RunnerBase):
                     "   {} {}".format(ep.dist.project_name, ep.dist.version))
         return versions
 
-    def create_argument_list(self):
+    def create_argument_list(self, config, cov_path):
         """Create argument list for testing process."""
         return [
             '-m', self.module, '--with-xunit',
-            '--xunit-file={}'.format(self.resultfilename)
-        ]
+            '--xunit-file={}'.format(self.resultfilename),
+            ]
 
     def finished(self):
         """Called when the unit test process has finished."""

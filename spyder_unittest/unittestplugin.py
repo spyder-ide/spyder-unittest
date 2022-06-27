@@ -38,8 +38,10 @@ class UnitTestPlugin(SpyderDockablePlugin):
     WIDGET_CLASS = UnitTestWidget
 
     CONF_SECTION = NAME
-    CONF_DEFAULTS = [(CONF_SECTION, {'framework': '', 'wdir': ''})]
-    CONF_NAMEMAP = {CONF_SECTION: [(CONF_SECTION, ['framework', 'wdir'])]}
+    CONF_DEFAULTS = [(CONF_SECTION,
+                      {'framework': '', 'wdir': '', 'coverage': False})]
+    CONF_NAMEMAP = {CONF_SECTION: [(CONF_SECTION,
+                                    ['framework', 'wdir', 'coverage'])]}
     CONF_FILE = True
     CONF_VERSION = '0.1.0'
 
@@ -263,7 +265,8 @@ class UnitTestPlugin(SpyderDockablePlugin):
 
         new_config = Config(
             framework=project.get_option('framework', self.CONF_SECTION),
-            wdir=project.get_option('wdir', self.CONF_SECTION))
+            wdir=project.get_option('wdir', self.CONF_SECTION),
+            coverage=project.get_option('coverage', self.CONF_SECTION))
         if not widget.config_is_valid(new_config):
             new_config = None
         widget.set_config_without_emit(new_config)
@@ -283,6 +286,7 @@ class UnitTestPlugin(SpyderDockablePlugin):
         project.set_option('framework', test_config.framework,
                            self.CONF_SECTION)
         project.set_option('wdir', test_config.wdir, self.CONF_SECTION)
+        project.set_option('coverage', test_config.coverage, self.CONF_SECTION)
 
     def goto_in_editor(self, filename, lineno):
         """

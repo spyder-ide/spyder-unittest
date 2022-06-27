@@ -18,10 +18,15 @@ from qtpy.compat import getexistingdirectory
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import (QApplication, QComboBox, QDialog, QDialogButtonBox,
                             QHBoxLayout, QLabel, QLineEdit, QPushButton,
-                            QVBoxLayout)
+                            QVBoxLayout, QCheckBox)
 from spyder.config.base import get_translation
 from spyder.py3compat import getcwd, to_text_string
 from spyder.utils import icon_manager as ima
+
+try:
+    from importlib.util import find_spec as find_spec_or_loader
+except ImportError:  # Python 2
+    from pkgutil import find_loader as find_spec_or_loader
 
 try:
     _ = get_translation('spyder_unittest')
@@ -29,8 +34,8 @@ except KeyError:
     import gettext
     _ = gettext.gettext
 
-Config = namedtuple('Config', ['framework', 'wdir'])
-Config.__new__.__defaults__ = (None, '')
+Config = namedtuple('Config', ['framework', 'wdir', 'coverage'])
+Config.__new__.__defaults__ = (None, '', False)
 
 
 class ConfigDialog(QDialog):
@@ -80,6 +85,17 @@ class ConfigDialog(QDialog):
 
         layout.addSpacing(10)
 
+        coverage_label = _('Include coverage report in output')
+        coverage_toolTip = _('Works only for pytest, requires pytest-cov')
+        coverage_layout = QHBoxLayout()
+        self.coverage_checkbox = QCheckBox(coverage_label, self)
+        self.coverage_checkbox.setToolTip(coverage_toolTip)
+        self.coverage_checkbox.setEnabled(False)
+        coverage_layout.addWidget(self.coverage_checkbox)
+        layout.addLayout(coverage_layout)
+
+        layout.addSpacing(10)
+
         wdir_label = QLabel(_('Directory from which to run tests'))
         layout.addWidget(wdir_label)
         wdir_layout = QHBoxLayout()
@@ -110,12 +126,22 @@ class ConfigDialog(QDialog):
             if index != -1:
                 self.framework_combobox.setCurrentIndex(index)
         self.wdir_lineedit.setText(config.wdir)
+        self.coverage_checkbox.setChecked(config.coverage)
 
     @Slot(int)
     def framework_changed(self, index):
         """Called when selected framework changes."""
         if index != -1:
             self.ok_button.setEnabled(True)
+            # Coverage is only implemented for pytest, and requires pytest_cov
+            if (str(self.framework_combobox.currentText()) in ['nose',
+                                                              'unittest']
+                    or find_spec_or_loader("pytest_cov") is None):
+                self.coverage_checkbox.setEnabled(False)
+                self.coverage_checkbox.setChecked(False)
+            else:
+                self.coverage_checkbox.setEnabled(True)
+
 
     def select_directory(self):
         """Display dialog for user to select working directory."""
@@ -139,7 +165,8 @@ class ConfigDialog(QDialog):
         framework = self.framework_combobox.currentText()
         if framework == '':
             framework = None
-        return Config(framework=framework, wdir=self.wdir_lineedit.text())
+        return Config(framework=framework, wdir=self.wdir_lineedit.text(),
+                      coverage=self.coverage_checkbox.isChecked())
 
 
 def ask_for_config(frameworks, config, parent=None):
@@ -158,5 +185,5 @@ def ask_for_config(frameworks, config, parent=None):
 if __name__ == '__main__':
     app = QApplication([])
     frameworks = ['nose', 'pytest', 'unittest']
-    config = Config(framework=None, wdir=getcwd())
+    config = Config(framework=None, wdir=getcwd(), coverage=False)
     print(ask_for_config(frameworks, config))
