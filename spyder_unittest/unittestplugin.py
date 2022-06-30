@@ -6,6 +6,7 @@
 """Unit testing Plugin."""
 
 # Standard library imports
+from os import getcwd
 import os.path as osp
 
 # Third party imports
@@ -14,7 +15,6 @@ from spyder.api.plugin_registration.decorators import on_plugin_available
 from spyder.config.base import get_translation
 from spyder.config.gui import is_dark_interface
 from spyder.plugins.mainmenu.api import ApplicationMenus
-from spyder.py3compat import PY2, getcwd
 
 # Local imports
 from spyder_unittest.widgets.configdialog import Config
@@ -97,30 +97,6 @@ class UnitTestPlugin(SpyderDockablePlugin):
             triggered=self.maybe_configure_and_start,
             register_shortcut=True)
         #  TODO: shortcut="Shift+Alt+F11"
-
-    # --- Optional SpyderDockablePlugin methods -------------------------------
-
-    @staticmethod
-    def check_compatibility():
-        """
-        Check compatibility of the plugin.
-
-        This checks that the plugin is not run under Python 2.
-
-        Returns
-        -------
-        (bool, str)
-            The first value tells Spyder if the plugin has passed the
-            compatibility test defined in this method. The second value
-            is a message that must explain users why the plugin was
-            found to be incompatible (e.g. 'This plugin does not work
-            with PyQt4'). It will be shown at startup in a QMessageBox.
-        """
-        if PY2:
-            msg = _('The unittest plugin does not work with Python 2.')
-            return (False, msg)
-        else:
-            return (True, '')
 
     # ----- Set up interactions with other plugins ----------------------------
 
