@@ -68,7 +68,7 @@ class ZmqStreamReader(QObject):
 
     def __init__(self):
         """Constructor; also constructs ZMQ stream."""
-        super(QObject, self).__init__()
+        super().__init__()
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PAIR)
         self.port = self.socket.bind_to_random_port('tcp://*')

@@ -62,7 +62,7 @@ class ConfigDialog(QDialog):
             Initial configuration
         parent : QWidget
         """
-        super(ConfigDialog, self).__init__(parent)
+        super().__init__(parent)
         self.setWindowTitle(_('Configure tests'))
         layout = QVBoxLayout(self)
 
