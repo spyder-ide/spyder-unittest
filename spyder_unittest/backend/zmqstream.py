@@ -11,8 +11,6 @@ The intended usage is that you construct a reader in one process and a writer
 process can then use the stream to send its result to the reader.
 """
 
-from __future__ import print_function
-
 # Standard library imports
 import sys
 

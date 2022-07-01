@@ -5,8 +5,6 @@
 # (see LICENSE.txt for details)
 """Unit Testing widget."""
 
-from __future__ import with_statement
-
 # Standard library imports
 import copy
 import os.path as osp
