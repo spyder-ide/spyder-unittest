@@ -8,15 +8,11 @@
 # Third party imports
 import pytest
 from spyder.plugins.projects.api import EmptyProject
+from unittest.mock import MagicMock
 
 # Local imports
 from spyder_unittest.unittestplugin import UnitTestPlugin
 from spyder_unittest.widgets.configdialog import Config
-
-try:
-    from unittest.mock import MagicMock
-except ImportError:
-    from mock import MagicMock  # Python 2
 
 
 class PluginForTesting(UnitTestPlugin):

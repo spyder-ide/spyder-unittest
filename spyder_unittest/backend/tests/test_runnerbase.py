@@ -7,6 +7,7 @@
 
 # Standard library imports
 import os
+from unittest.mock import Mock
 
 # Third party imports
 import pytest
@@ -14,11 +15,6 @@ import pytest
 # Local imports
 from spyder_unittest.backend.runnerbase import RunnerBase
 from spyder_unittest.widgets.configdialog import Config
-
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock  # Python 2
 
 
 def test_runnerbase_with_nonexisting_module():

@@ -7,6 +7,7 @@
 
 # Standard library imports
 import os
+from unittest.mock import call, create_autospec, MagicMock, Mock
 
 # Third party imports
 import pytest
@@ -14,11 +15,6 @@ import pytest
 # Local imports
 from spyder_unittest.backend.pytestworker import SpyderPlugin, main
 from spyder_unittest.backend.zmqstream import ZmqStreamWriter
-
-try:
-    from unittest.mock import call, create_autospec, MagicMock, Mock
-except ImportError:
-    from mock import call, create_autospec, MagicMock, Mock  # Python 2
 
 
 class EmptyClass:

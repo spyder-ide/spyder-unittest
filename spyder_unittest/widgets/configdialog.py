@@ -12,6 +12,7 @@ The main entry point is `ask_for_config()`.
 # Standard library imports
 from collections import namedtuple
 from os import getcwd
+from pkgutil import find_loader as find_spec_or_loader
 import os.path as osp
 
 # Third party imports
@@ -23,10 +24,6 @@ from qtpy.QtWidgets import (QApplication, QComboBox, QDialog, QDialogButtonBox,
 from spyder.config.base import get_translation
 from spyder.utils import icon_manager as ima
 
-try:
-    from importlib.util import find_spec as find_spec_or_loader
-except ImportError:  # Python 2
-    from pkgutil import find_loader as find_spec_or_loader
 
 try:
     _ = get_translation('spyder_unittest')
