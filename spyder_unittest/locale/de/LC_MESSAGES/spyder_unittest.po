@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: spyder-unittest\n"
 "POT-Creation-Date: 2022-06-26 13:58-0600\n"
-"PO-Revision-Date: 2022-06-27 12:46\n"
+"PO-Revision-Date: 2022-07-03 13:43\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -31,12 +31,13 @@ msgstr ""
 
 #: spyder_unittest/backend/pytestrunner.py:133
 msgid "Missing: {}"
-msgstr ""
+msgstr "Fehlt: {}"
 
 #: spyder_unittest/backend/pytestrunner.py:134
 msgid "{}\n"
 "{}"
-msgstr ""
+msgstr "{}\n"
+"{}"
 
 #: spyder_unittest/unittestplugin.py:60 spyder_unittest/widgets/unittestgui.py:138
 msgid "Unit testing"
@@ -144,7 +145,7 @@ msgstr ", {} ausstehend"
 
 #: spyder_unittest/widgets/datatree.py:427
 msgid ", {} coverage"
-msgstr ""
+msgstr ", {} Abdeckung"
 
 #: spyder_unittest/widgets/unittestgui.py:151
 msgid "Configure ..."
@@ -164,7 +165,7 @@ msgstr "Alle ausklappen"
 
 #: spyder_unittest/widgets/unittestgui.py:179 spyder_unittest/widgets/unittestgui.py:266
 msgid "Dependencies"
-msgstr ""
+msgstr "Abhängigkeiten"
 
 #: spyder_unittest/widgets/unittestgui.py:252
 msgid "Unit testing output"
