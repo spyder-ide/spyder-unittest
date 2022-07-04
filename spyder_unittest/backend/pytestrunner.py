@@ -146,8 +146,7 @@ class PyTestRunner(RunnerBase):
         output = self.read_all_process_output()
         if self.config.coverage:
             self.process_coverage(output)
-        no_tests_ran = "no tests ran" in output.splitlines()[-1]
-        self.sig_finished.emit([] if no_tests_ran else None, output)
+        self.sig_finished.emit([], output)
 
 
 def normalize_module_name(name):

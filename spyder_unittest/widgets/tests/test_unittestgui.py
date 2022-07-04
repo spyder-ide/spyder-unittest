@@ -68,12 +68,6 @@ def test_unittestwidget_process_finished_updates_results(widget):
     widget.process_finished(results, 'output')
     assert widget.testdatamodel.testresults == results
 
-def test_unittestwidget_process_finished_with_results_none(widget):
-    results = [TestResult(Category.OK, 'ok', 'hammodule.spam')]
-    widget.testdatamodel.testresults = results
-    widget.process_finished(None, 'output')
-    assert widget.testdatamodel.testresults == results
-
 def test_unittestwidget_replace_pending_with_not_run(widget):
     use_mock_model(widget)
     results = [TestResult(Category.PENDING, 'pending', 'hammodule.eggs'),

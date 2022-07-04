@@ -382,16 +382,14 @@ class UnitTestWidget(PluginMainWidget):
 
         Parameters
         ----------
-        testresults : list of TestResult or None
-            `None` indicates all test results have already been transmitted.
+        testresults : list of TestResult
         output : str
         """
         self.output = output
         self.set_running_state(False)
         self.testrunner = None
         self.show_log_action.setEnabled(bool(output))
-        if testresults is not None:
-            self.testdatamodel.testresults = testresults
+        self.testdatamodel.add_testresults(testresults)
         self.replace_pending_with_not_run()
         self.sig_finished.emit()
 
