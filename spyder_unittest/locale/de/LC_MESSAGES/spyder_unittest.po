@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: spyder-unittest\n"
 "POT-Creation-Date: 2022-06-26 13:58-0600\n"
-"PO-Revision-Date: 2022-07-03 13:43\n"
+"PO-Revision-Date: 2022-07-04 13:42\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -27,7 +27,7 @@ msgstr ""
 
 #: spyder_unittest/backend/pytestrunner.py:133
 msgid "(none)"
-msgstr ""
+msgstr "(keine)"
 
 #: spyder_unittest/backend/pytestrunner.py:133
 msgid "Missing: {}"
@@ -69,11 +69,11 @@ msgstr "nicht verfügbar"
 
 #: spyder_unittest/widgets/configdialog.py:88
 msgid "Include coverage report in output"
-msgstr ""
+msgstr "Abdeckungsbericht in Ausgabe einbeziehen"
 
 #: spyder_unittest/widgets/configdialog.py:89
 msgid "Works only for pytest, requires pytest-cov"
-msgstr ""
+msgstr "Funktioniert nur für pytest, erfordert pytest-cov"
 
 #: spyder_unittest/widgets/configdialog.py:99
 msgid "Directory from which to run tests"
