@@ -146,7 +146,7 @@ class PyTestRunner(RunnerBase):
         output = self.read_all_process_output()
         if self.config.coverage:
             self.process_coverage(output)
-        self.sig_finished.emit([], output)
+        self.sig_finished.emit([], output, True)
 
 
 def normalize_module_name(name):

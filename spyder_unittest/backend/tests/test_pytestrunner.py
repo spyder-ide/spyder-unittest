@@ -114,7 +114,7 @@ def test_pytestrunner_finished(qtbot, output):
     with qtbot.waitSignal(runner.sig_finished) as blocker:
         runner.finished()
     results = []
-    assert blocker.args == [results, output]
+    assert blocker.args == [results, output, True]
 
 
 def standard_logreport_output():
