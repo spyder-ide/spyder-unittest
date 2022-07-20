@@ -150,9 +150,11 @@ def main(args):
         writer = FileStub('pytestworker.log')
     else:
         writer = ZmqStreamWriter(int(args[1]))
-    pytest.main(args[2:], plugins=[SpyderPlugin(writer)])
+    result = pytest.main(args[2:], plugins=[SpyderPlugin(writer)])
     writer.close()
+    return result
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    result = main(sys.argv)
+    sys.exit(result)
