@@ -8,17 +8,13 @@
 # Third party imports
 from qtpy.QtCore import QModelIndex, QPoint, Qt
 from qtpy.QtGui import QContextMenuEvent
+from unittest.mock import Mock
 import pytest
 
 # Local imports
 from spyder_unittest.backend.runnerbase import Category, TestResult
 from spyder_unittest.widgets.datatree import (COLORS, COLORS_DARK,
                                               TestDataModel, TestDataView)
-
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock  # Python 2
 
 
 @pytest.fixture

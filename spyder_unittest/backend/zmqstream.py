@@ -11,8 +11,6 @@ The intended usage is that you construct a reader in one process and a writer
 process can then use the stream to send its result to the reader.
 """
 
-from __future__ import print_function
-
 # Standard library imports
 import sys
 
@@ -68,7 +66,7 @@ class ZmqStreamReader(QObject):
 
     def __init__(self):
         """Constructor; also constructs ZMQ stream."""
-        super(QObject, self).__init__()
+        super().__init__()
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PAIR)
         self.port = self.socket.bind_to_random_port('tcp://*')

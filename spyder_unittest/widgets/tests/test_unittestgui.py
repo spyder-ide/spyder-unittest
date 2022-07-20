@@ -8,6 +8,7 @@
 # Standard library imports
 import os
 import sys
+from unittest.mock import Mock
 
 # Third party imports
 from qtpy.QtCore import Qt, QProcess
@@ -18,11 +19,6 @@ from spyder_unittest.backend.runnerbase import (Category, TestResult,
                                                 COV_TEST_NAME)
 from spyder_unittest.widgets.configdialog import Config
 from spyder_unittest.widgets.unittestgui import UnitTestWidget
-
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock  # Python 2
 
 
 @pytest.fixture

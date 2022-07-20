@@ -11,6 +11,8 @@ The main entry point is `ask_for_config()`.
 
 # Standard library imports
 from collections import namedtuple
+from os import getcwd
+from pkgutil import find_loader as find_spec_or_loader
 import os.path as osp
 
 # Third party imports
@@ -20,13 +22,8 @@ from qtpy.QtWidgets import (QApplication, QComboBox, QDialog, QDialogButtonBox,
                             QHBoxLayout, QLabel, QLineEdit, QPushButton,
                             QVBoxLayout, QCheckBox)
 from spyder.config.base import get_translation
-from spyder.py3compat import getcwd, to_text_string
 from spyder.utils import icon_manager as ima
 
-try:
-    from importlib.util import find_spec as find_spec_or_loader
-except ImportError:  # Python 2
-    from pkgutil import find_loader as find_spec_or_loader
 
 try:
     _ = get_translation('spyder_unittest')
@@ -62,7 +59,7 @@ class ConfigDialog(QDialog):
             Initial configuration
         parent : QWidget
         """
-        super(ConfigDialog, self).__init__(parent)
+        super().__init__(parent)
         self.setWindowTitle(_('Configure tests'))
         layout = QVBoxLayout(self)
 
@@ -145,7 +142,7 @@ class ConfigDialog(QDialog):
 
     def select_directory(self):
         """Display dialog for user to select working directory."""
-        basedir = to_text_string(self.wdir_lineedit.text())
+        basedir = self.wdir_lineedit.text()
         if not osp.isdir(basedir):
             basedir = getcwd()
         title = _("Select directory")

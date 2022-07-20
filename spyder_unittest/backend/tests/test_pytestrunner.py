@@ -9,6 +9,7 @@
 import os
 import os.path as osp
 import sys
+from unittest.mock import Mock
 
 # Third party imports
 import pytest
@@ -19,11 +20,6 @@ from spyder_unittest.backend.pytestrunner import (PyTestRunner,
 from spyder_unittest.backend.runnerbase import (Category, TestResult,
                                                 COV_TEST_NAME)
 from spyder_unittest.widgets.configdialog import Config
-
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock  # Python 2
 
 
 def test_pytestrunner_is_installed():

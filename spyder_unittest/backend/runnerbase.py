@@ -10,14 +10,9 @@ import os
 import tempfile
 
 # Third party imports
+from importlib.util import find_spec as find_spec_or_loader
 from qtpy.QtCore import (QObject, QProcess, QProcessEnvironment, QTextCodec,
                          Signal)
-from spyder.py3compat import to_text_string
-
-try:
-    from importlib.util import find_spec as find_spec_or_loader
-except ImportError:  # Python 2
-    from pkgutil import find_loader as find_spec_or_loader
 
 
 # if generating coverage report, use this name for the TestResult
@@ -244,7 +239,7 @@ class RunnerBase(QObject):
         """Read and return all output from `self.process` as unicode."""
         qbytearray = self.process.readAllStandardOutput()
         locale_codec = QTextCodec.codecForLocale()
-        return to_text_string(locale_codec.toUnicode(qbytearray.data()))
+        return locale_codec.toUnicode(qbytearray.data())
 
     def stop_if_running(self):
         """Stop testing process if it is running."""
