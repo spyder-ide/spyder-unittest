@@ -65,7 +65,7 @@ def test_unittestwidget_config_with_unknown_framework_invalid(widget):
 
 def test_unittestwidget_process_finished_updates_results(widget):
     results = [TestResult(Category.OK, 'ok', 'hammodule.spam')]
-    widget.process_finished(results, 'output')
+    widget.process_finished(results, 'output', True)
     assert widget.testdatamodel.testresults == results
 
 def test_unittestwidget_replace_pending_with_not_run(widget):
@@ -143,8 +143,13 @@ def test_run_tests_with_pre_test_hook_returning_false(widget):
                            TestResult(Category.COVERAGE, '90%', COV_TEST_NAME)],
                           '0 tests failed, 1 passed, 90% coverage')])
 def test_unittestwidget_process_finished_updates_status_label(widget, results, label):
-    widget.process_finished(results, 'output')
+    widget.process_finished(results, 'output', True)
     assert widget.status_label.text() == '<b>{}</b>'.format(label)
+
+def test_unittestwidget_process_finished_abnormally_status_label(widget):
+    widget.process_finished([], 'output', False)
+    expected_text = '<b>{}</b>'.format('Test process exited abnormally')
+    assert widget.status_label.text() == expected_text
 
 @pytest.mark.parametrize('framework', ['pytest', 'nose'])
 def test_run_tests_and_display_results(qtbot, widget, tmpdir, monkeypatch, framework):

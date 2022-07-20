@@ -374,7 +374,7 @@ class UnitTestWidget(PluginMainWidget):
             button.clicked.connect(
                 lambda checked: self.maybe_configure_and_start())
 
-    def process_finished(self, testresults, output):
+    def process_finished(self, testresults, output, normal_exit):
         """
         Called when unit test process finished.
 
@@ -383,7 +383,11 @@ class UnitTestWidget(PluginMainWidget):
         Parameters
         ----------
         testresults : list of TestResult
+            Test results reported when the test process finished.
         output : str
+            Output from the test process.
+        normal_exit : bool
+            Whether test process exited normally.
         """
         self.output = output
         self.set_running_state(False)
@@ -392,6 +396,8 @@ class UnitTestWidget(PluginMainWidget):
         self.testdatamodel.add_testresults(testresults)
         self.replace_pending_with_not_run()
         self.sig_finished.emit()
+        if not normal_exit:
+            self.set_status_label(_('Test process exited abnormally'))
 
     def replace_pending_with_not_run(self):
         """Change status of pending tests to 'not run''."""
