@@ -136,17 +136,25 @@ class PyTestRunner(RunnerBase):
                 self.sig_collected.emit([row[1]])
                 self.sig_testresult.emit([file_cov])
 
-    def finished(self):
+    def finished(self, exitcode):
         """
         Called when the unit test process has finished.
 
         This function emits `sig_finished`.
+
+        Parameters
+        ----------
+        exitcode : int
+            Exit code of the test process.
         """
         self.reader.close()
         output = self.read_all_process_output()
         if self.config.coverage:
             self.process_coverage(output)
-        self.sig_finished.emit([], output, True)
+        normal_exit = exitcode in [0, 1, 2, 5]
+        # Meaning of exit codes: 0 = all tests passed, 1 = test failed,
+        # 2 = interrupted, 5 = no tests collected
+        self.sig_finished.emit([], output, normal_exit)
 
 
 def normalize_module_name(name):
