@@ -87,6 +87,7 @@ class UnitTestWidget(PluginMainWidget):
         Arguments are file name and line number (zero-based).
     """
 
+    CONF_SECTION = 'unittest'
     VERSION = '0.0.1'
 
     sig_finished = Signal()
