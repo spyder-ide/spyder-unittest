@@ -50,7 +50,7 @@ class NoseRunner(RunnerBase):
         """Called when the unit test process has finished."""
         output = self.read_all_process_output()
         testresults = self.load_data()
-        self.sig_finished.emit(testresults, output)
+        self.sig_finished.emit(testresults, output, True)
 
     def load_data(self):
         """

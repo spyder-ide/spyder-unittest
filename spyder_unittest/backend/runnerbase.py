@@ -99,9 +99,10 @@ class RunnerBase(QObject):
         Emitted just before tests are run.
     sig_testresult(list of TestResult)
         Emitted when tests are finished.
-    sig_finished(list of TestResult, str)
+    sig_finished(list of TestResult, str, bool)
         Emitted when test process finishes. First argument contains the test
-        results, second argument contains the output of the test process.
+        results, second argument contains the output of the test process,
+        third argument is True on normal exit, False on abnormal exit.
     sig_stop()
         Emitted when test process is being stopped.
     """
@@ -110,7 +111,7 @@ class RunnerBase(QObject):
     sig_collecterror = Signal(object)
     sig_starttest = Signal(object)
     sig_testresult = Signal(object)
-    sig_finished = Signal(object, str)
+    sig_finished = Signal(object, str, bool)
     sig_stop = Signal()
 
     def __init__(self, widget, resultfilename=None):

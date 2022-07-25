@@ -100,11 +100,11 @@ def test_pytestrunner_process_output_with_starttest(qtbot):
     assert blocker.args == [expected]
 
 
-@pytest.mark.parametrize('output,results', [
-    ('== 1 passed in 0.10s ==', None),
-    ('== no tests ran 0.01s ==', [])
-])
-def test_pytestrunner_finished(qtbot, output, results):
+@pytest.mark.parametrize('exitcode, normal_exit', 
+                         [(0, True), (1, True), (2, True), (3, False),
+                          (4, False), (5, True)])
+def test_pytestrunner_finished(qtbot, exitcode, normal_exit):
+    output = '== 1 passed in 0.10s =='
     mock_reader = Mock()
     mock_reader.close = lambda: None
     runner = PyTestRunner(None)
@@ -112,8 +112,9 @@ def test_pytestrunner_finished(qtbot, output, results):
     runner.read_all_process_output = lambda: output
     runner.config = Config('pytest', None, False)
     with qtbot.waitSignal(runner.sig_finished) as blocker:
-        runner.finished()
-    assert blocker.args == [results, output]
+        runner.finished(exitcode)
+    results = []
+    assert blocker.args == [results, output, normal_exit]
 
 
 def standard_logreport_output():
