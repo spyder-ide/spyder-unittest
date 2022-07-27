@@ -64,6 +64,7 @@ class TestDataView(QTreeView):
     """
 
     sig_edit_goto = Signal(str, int)
+    __test__ = False  # this is not a pytest test class
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -209,6 +210,7 @@ class TestDataModel(QAbstractItemModel):
     """
 
     sig_summary = Signal(str)
+    __test__ = False  # this is not a pytest test class
 
     def __init__(self, parent=None):
         """Constructor."""

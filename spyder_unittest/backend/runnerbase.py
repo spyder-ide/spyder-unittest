@@ -33,6 +33,8 @@ class Category:
 class TestResult:
     """Class representing the result of running a single test."""
 
+    __test__ = False  # this is not a pytest test class
+
     def __init__(self, category, status, name, message='', time=None,
                  extra_text='', filename=None, lineno=None):
         """
