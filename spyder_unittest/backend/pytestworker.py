@@ -21,10 +21,10 @@ import pytest
 # to execute in a different env with only spyder-kernel installed
 try:
     # this line is needed for the tests to succeed
-    from .zmqstream import ZmqStreamWriter
+    from .zmqwriter import ZmqStreamWriter
 except:
     # this line is needed for the plugin to work
-    from zmqstream import ZmqStreamWriter
+    from zmqwriter import ZmqStreamWriter
 
 class FileStub():
     """Stub for ZmqStreamWriter which instead writes to a file."""

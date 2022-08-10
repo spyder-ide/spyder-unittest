@@ -14,7 +14,7 @@ import re
 from spyder.config.base import get_translation
 from spyder_unittest.backend.runnerbase import (Category, RunnerBase,
                                                 TestResult, COV_TEST_NAME)
-from spyder_unittest.backend.zmqstream import ZmqStreamReader
+from spyder_unittest.backend.zmqreader import ZmqStreamReader
 
 try:
     _ = get_translation('spyder_unittest')

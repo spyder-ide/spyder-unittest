@@ -1,49 +1,21 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright © 2018 Spyder Project Contributors
+# Copyright © Spyder Project Contributors
 # Licensed under the terms of the MIT License
 # (see LICENSE.txt for details)
 """
-Reader and writer for sending stream of python objects over a ZMQ socket.
+Reader for sending stream of python objects over a ZMQ socket.
 
-The intended usage is that you construct a reader in one process and a writer
-(with the same port number as the reader) in a worker process. The worker
-process can then use the stream to send its result to the reader.
+The intended usage is that you construct a ZmqStreamReader in one process
+and a ZmqStreamWriter (with the same port number as the reader) in a worker
+process. The worker process can then use the stream to send its result to the
+reader.
 """
-
-# Standard library imports
-import sys
 
 # Third party imports
 from qtpy.QtCore import QObject, QProcess, QSocketNotifier, Signal
 from qtpy.QtWidgets import QApplication
 import zmq
-
-
-class ZmqStreamWriter:
-    """Writer for sending stream of Python object over a ZMQ stream."""
-
-    def __init__(self, port):
-        """
-        Constructor.
-
-        Arguments
-        ---------
-        port : int
-            TCP port number to be used for the stream. This should equal the
-            `port` attribute of the corresponding `ZmqStreamReader`.
-        """
-        context = zmq.Context()
-        self.socket = context.socket(zmq.PAIR)
-        self.socket.connect('tcp://localhost:{}'.format(port))
-
-    def write(self, obj):
-        """Write arbitrary Python object to stream."""
-        self.socket.send_pyobj(obj)
-
-    def close(self):
-        """Close stream."""
-        self.socket.close()
 
 
 class ZmqStreamReader(QObject):
@@ -98,16 +70,20 @@ class ZmqStreamReader(QObject):
 
 
 if __name__ == '__main__':
-    # For testing, construct a ZMQ stream between two processes and send
-    # the number 42 over the stream
-    if len(sys.argv) == 1:
-        app = QApplication(sys.argv)
-        manager = ZmqStreamReader()
-        manager.sig_received.connect(print)
-        process = QProcess()
-        process.start('python', [sys.argv[0], str(manager.port)])
-        process.finished.connect(app.quit)
-        sys.exit(app.exec_())
-    else:
-        worker = ZmqStreamWriter(sys.argv[1])
-        worker.write(42)
+    # Usage: python zmqreader.py
+    # Start zmqwriter.py in another process and construct a ZMQ stream between
+    # this process and the zmqwriter process. Read and print what zmqwriter
+    # sends over the ZMQ stream.
+
+    import os.path
+    import sys
+
+    app = QApplication(sys.argv)
+    manager = ZmqStreamReader()
+    manager.sig_received.connect(print)
+    process = QProcess()
+    dirname = os.path.dirname(sys.argv[0])
+    writer_name = os.path.join(dirname, 'zmqwriter.py')
+    process.start('python', [writer_name, str(manager.port)])
+    process.finished.connect(app.quit)
+    sys.exit(app.exec_())

@@ -6,7 +6,8 @@
 """Tests for zmqstream.py"""
 
 # Local imports
-from spyder_unittest.backend.zmqstream import ZmqStreamReader, ZmqStreamWriter
+from spyder_unittest.backend.zmqreader import ZmqStreamReader
+from spyder_unittest.backend.zmqwriter import ZmqStreamWriter
 
 
 def test_zmqstream(qtbot):
