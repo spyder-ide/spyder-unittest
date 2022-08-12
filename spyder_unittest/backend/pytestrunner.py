@@ -51,7 +51,8 @@ class PyTestRunner(RunnerBase):
 
     def create_argument_list(self, config, cov_path):
         """Create argument list for testing process."""
-        pyfile = os.path.join(os.path.dirname(__file__), 'pytestworker.py')
+        dirname = os.path.dirname(__file__)
+        pyfile = os.path.join(dirname, 'workers', 'pytestworker.py')
         arguments = [pyfile, str(self.reader.port)]
         if config.coverage:
             arguments += [f'--cov={cov_path}', '--cov-report=term-missing']

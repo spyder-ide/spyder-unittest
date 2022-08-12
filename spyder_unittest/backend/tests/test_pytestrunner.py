@@ -6,7 +6,6 @@
 """Tests for pytestrunner.py"""
 
 # Standard library imports
-import os
 import os.path as osp
 import sys
 from unittest.mock import Mock
@@ -40,7 +39,7 @@ def test_pytestrunner_create_argument_list(monkeypatch):
     monkeypatch.setattr('spyder_unittest.backend.pytestrunner.os.path.dirname',
                         lambda _: 'dir')
     pyfile, port, *coverage = runner.create_argument_list(config, cov_path)
-    assert pyfile == 'dir{}pytestworker.py'.format(os.sep)
+    assert pyfile == osp.join('dir', 'workers', 'pytestworker.py')
     assert port == '42'
 
 

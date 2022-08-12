@@ -7,7 +7,7 @@
 
 # Local imports
 from spyder_unittest.backend.zmqreader import ZmqStreamReader
-from spyder_unittest.backend.zmqwriter import ZmqStreamWriter
+from spyder_unittest.backend.workers.zmqwriter import ZmqStreamWriter
 
 
 def test_zmqstream(qtbot):

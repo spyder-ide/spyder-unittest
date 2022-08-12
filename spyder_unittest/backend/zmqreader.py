@@ -83,7 +83,7 @@ if __name__ == '__main__':
     manager.sig_received.connect(print)
     process = QProcess()
     dirname = os.path.dirname(sys.argv[0])
-    writer_name = os.path.join(dirname, 'zmqwriter.py')
+    writer_name = os.path.join(dirname, 'workers', 'zmqwriter.py')
     process.start('python', [writer_name, str(manager.port)])
     process.finished.connect(app.quit)
     sys.exit(app.exec_())

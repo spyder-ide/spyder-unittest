@@ -13,8 +13,8 @@ from unittest.mock import create_autospec, MagicMock, Mock
 import pytest
 
 # Local imports
-from spyder_unittest.backend.pytestworker import SpyderPlugin, main
-from spyder_unittest.backend.zmqwriter import ZmqStreamWriter
+from spyder_unittest.backend.workers.pytestworker import SpyderPlugin, main
+from spyder_unittest.backend.workers.zmqwriter import ZmqStreamWriter
 
 
 class EmptyClass:
@@ -315,7 +315,7 @@ def test_pytestworker_integration(monkeypatch, tmpdir):
     mock_writer = create_autospec(ZmqStreamWriter)
     MockZmqStreamWriter = Mock(return_value=mock_writer)
     monkeypatch.setattr(
-        'spyder_unittest.backend.pytestworker.ZmqStreamWriter',
+        'spyder_unittest.backend.workers.pytestworker.ZmqStreamWriter',
         MockZmqStreamWriter)
     main(['mockscriptname', '42', testfilename])
 
