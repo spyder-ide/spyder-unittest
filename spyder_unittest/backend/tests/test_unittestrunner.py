@@ -167,10 +167,3 @@ def test_try_parse_header_starting_with_digit():
     lines = ['0est_isupper (testfoo.TestStringMethods) ... ok']
     res = runner.try_parse_result(lines, 0)
     assert res is None
-
-
-def test_get_versions(monkeypatch):
-    import platform
-    monkeypatch.setattr(platform, 'python_version', lambda: '1.2.3')
-    runner = UnittestRunner(None)
-    assert runner.get_versions() == ['unittest 1.2.3']

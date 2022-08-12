@@ -6,8 +6,10 @@
 """Unit Testing widget."""
 
 # Standard library imports
+import ast
 import copy
 import os.path as osp
+import subprocess
 import sys
 
 # Third party imports
@@ -247,14 +249,25 @@ class UnitTestWidget(PluginMainWidget):
 
     def show_versions(self):
         """Show versions of frameworks and their plugins"""
+        executable = self.get_conf('executable', section='main_interpreter')
+        script = osp.join(osp.dirname(__file__), osp.pardir, 'backend',
+                          'workers', 'print_versions.py')
+        process = subprocess.run([executable, script],
+                                 capture_output=True, text=True)
+        all_info = ast.literal_eval(process.stdout)
+
         versions = [_('Versions of frameworks and their installed plugins:')]
-        for name, runner in sorted(self.framework_registry.frameworks.items()):
-            version = (runner.get_versions(self) if runner.is_installed()
-                       else None)
-            versions.append('\n'.join(version) if version else
-                            '{}: {}'.format(name, _('not available')))
+        for name, info in all_info.items():
+            if not info['available']:
+                versions.append('{}: {}'.format(name, _('not available')))
+            else:
+                version = f'{name} {info["version"]}'
+                plugins = [f'   {name} {version}'
+                           for name, version in info['plugins'].items()]
+                versions.append('\n'.join([version] + plugins))
+
         QMessageBox.information(self, _('Dependencies'),
-                                _('\n\n'.join(versions)))
+                                '\n\n'.join(versions))
 
     def configure(self):
         """Configure tests."""

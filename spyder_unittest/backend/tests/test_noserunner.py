@@ -74,27 +74,3 @@ def test_noserunner_load_data_passing_test_with_stdout(tmpdir):
     results = runner.load_data()
     assert results[0].extra_text == ['----- Captured stdout -----', 'stdout text']
 
-
-def test_get_versions_without_plugins(monkeypatch):
-    import nose
-    import pkg_resources
-    monkeypatch.setattr(nose, '__version__', '1.2.3')
-    monkeypatch.setattr(pkg_resources, 'iter_entry_points', lambda x: ())
-    runner = NoseRunner(None)
-    assert runner.get_versions() == ['nose 1.2.3']
-
-
-def test_get_versions_with_plugins(monkeypatch):
-    import nose
-    import pkg_resources
-    monkeypatch.setattr(nose, '__version__', '1.2.3')
-    dist = pkg_resources.Distribution(project_name='myPlugin',
-                                      version='4.5.6')
-    ep = pkg_resources.EntryPoint('name', 'module_name', dist=dist)
-    monkeypatch.setattr(pkg_resources,
-                        'iter_entry_points',
-                        lambda ept: (x for x in (ep,) if ept == nose.plugins
-                                     .manager.EntryPointPluginManager
-                                     .entry_points[0][0]))
-    runner = NoseRunner(None)
-    assert runner.get_versions() == ['nose 1.2.3', '   myPlugin 4.5.6']
