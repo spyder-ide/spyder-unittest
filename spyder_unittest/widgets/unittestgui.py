@@ -247,15 +247,18 @@ class UnitTestWidget(PluginMainWidget):
             te.show()
             te.exec_()
 
-    def show_versions(self):
-        """Show versions of frameworks and their plugins"""
+    def get_versions(self):
+        """Return versions of frameworks and their plugins"""
         executable = self.get_conf('executable', section='main_interpreter')
         script = osp.join(osp.dirname(__file__), osp.pardir, 'backend',
                           'workers', 'print_versions.py')
         process = subprocess.run([executable, script],
                                  capture_output=True, text=True)
-        all_info = ast.literal_eval(process.stdout)
+        return ast.literal_eval(process.stdout)
 
+    def show_versions(self):
+        """Show versions of frameworks and their plugins"""
+        all_info = self.get_versions()
         versions = [_('Versions of frameworks and their installed plugins:')]
         for name, info in all_info.items():
             if not info['available']:
@@ -265,7 +268,6 @@ class UnitTestWidget(PluginMainWidget):
                 plugins = [f'   {name} {version}'
                            for name, version in info['plugins'].items()]
                 versions.append('\n'.join([version] + plugins))
-
         QMessageBox.information(self, _('Dependencies'),
                                 '\n\n'.join(versions))
 
@@ -276,7 +278,8 @@ class UnitTestWidget(PluginMainWidget):
         else:
             oldconfig = Config(wdir=self.default_wdir)
         frameworks = self.framework_registry.frameworks
-        config = ask_for_config(frameworks, oldconfig, parent=self)
+        versions = self.get_versions()
+        config = ask_for_config(frameworks, oldconfig, versions, parent=self)
         if config:
             self.config = config
 

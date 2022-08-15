@@ -46,7 +46,7 @@ class ConfigDialog(QDialog):
     the OK button.
     """
 
-    def __init__(self, frameworks, config, parent=None):
+    def __init__(self, frameworks, config, versions, parent=None):
         """
         Construct a dialog window.
 
@@ -57,9 +57,12 @@ class ConfigDialog(QDialog):
             (assumed to be a subclass of RunnerBase)
         config : Config
             Initial configuration
+        versions : dict
+            Versions of testing frameworks and their plugins
         parent : QWidget
         """
         super().__init__(parent)
+        self.versions = versions
         self.setWindowTitle(_('Configure tests'))
         layout = QVBoxLayout(self)
 
@@ -69,7 +72,7 @@ class ConfigDialog(QDialog):
 
         self.framework_combobox = QComboBox(self)
         for ix, (name, runner) in enumerate(sorted(frameworks.items())):
-            installed = runner.is_installed()
+            installed = versions[name]['available']
             if installed:
                 label = name
             else:
@@ -131,9 +134,8 @@ class ConfigDialog(QDialog):
         if index != -1:
             self.ok_button.setEnabled(True)
             # Coverage is only implemented for pytest, and requires pytest_cov
-            if (str(self.framework_combobox.currentText()) in ['nose',
-                                                              'unittest']
-                    or find_spec_or_loader("pytest_cov") is None):
+            if (str(self.framework_combobox.currentText()) != 'pytest'
+                    or 'pytest-cov' not in self.versions['pytest']['plugins']):
                 self.coverage_checkbox.setEnabled(False)
                 self.coverage_checkbox.setChecked(False)
             else:
@@ -166,14 +168,14 @@ class ConfigDialog(QDialog):
                       coverage=self.coverage_checkbox.isChecked())
 
 
-def ask_for_config(frameworks, config, parent=None):
+def ask_for_config(frameworks, config, versions, parent=None):
     """
     Ask user to specify a test configuration.
 
     This is a convenience function which displays a modal dialog window
     of type `ConfigDialog`.
     """
-    dialog = ConfigDialog(frameworks, config, parent)
+    dialog = ConfigDialog(frameworks, config, versions, parent)
     result = dialog.exec_()
     if result == QDialog.Accepted:
         return dialog.get_config()
