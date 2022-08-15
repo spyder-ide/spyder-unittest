@@ -21,10 +21,6 @@ from spyder_unittest.backend.runnerbase import (Category, TestResult,
 from spyder_unittest.widgets.configdialog import Config
 
 
-def test_pytestrunner_is_installed():
-    assert PyTestRunner(None).is_installed()
-
-
 def test_pytestrunner_create_argument_list(monkeypatch):
     config = Config()
     cov_path = None

@@ -135,35 +135,6 @@ class RunnerBase(QObject):
         else:
             self.resultfilename = resultfilename
 
-    @classmethod
-    def is_installed(cls):
-        """
-        Check whether test framework is installed.
-
-        This function tests whether self.module is installed, but it does not
-        import it.
-
-        Returns
-        -------
-        bool
-            True if framework is installed, False otherwise.
-        """
-        return find_spec_or_loader(cls.module) is not None
-
-    def get_versions(self):
-        """
-        Return versions of framework and its installed plugins.
-
-        This function must only be called for installed frameworks.
-
-        Returns
-        -------
-        list of str
-            Strings with framework or plugin name, followed by
-            its version.
-        """
-        raise NotImplementedError
-
     def create_argument_list(self, config, cov_path):
         """
         Create argument list for testing process (dummy).
