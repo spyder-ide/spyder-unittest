@@ -127,20 +127,29 @@ class ConfigDialog(QDialog):
                 self.framework_combobox.setCurrentIndex(index)
         self.wdir_lineedit.setText(config.wdir)
         self.coverage_checkbox.setChecked(config.coverage)
+        self.enable_coverage_checkbox_if_available()
 
     @Slot(int)
     def framework_changed(self, index):
         """Called when selected framework changes."""
         if index != -1:
             self.ok_button.setEnabled(True)
-            # Coverage is only implemented for pytest, and requires pytest_cov
-            if (str(self.framework_combobox.currentText()) != 'pytest'
-                    or 'pytest-cov' not in self.versions['pytest']['plugins']):
-                self.coverage_checkbox.setEnabled(False)
-                self.coverage_checkbox.setChecked(False)
-            else:
-                self.coverage_checkbox.setEnabled(True)
+            self.enable_coverage_checkbox_if_available()
 
+    def enable_coverage_checkbox_if_available(self):
+        """
+        Enable coverage checkbox only if coverage is available.
+
+        Coverage is only implemented for pytest and requires pytest_cov.
+        Enable the coverage checkbox if these conditions are satisfied,
+        otherwise, disable and un-check the checkbox.
+        """
+        if (str(self.framework_combobox.currentText()) != 'pytest'
+                or 'pytest-cov' not in self.versions['pytest']['plugins']):
+            self.coverage_checkbox.setEnabled(False)
+            self.coverage_checkbox.setChecked(False)
+        else:
+            self.coverage_checkbox.setEnabled(True)
 
     def select_directory(self):
         """Display dialog for user to select working directory."""
