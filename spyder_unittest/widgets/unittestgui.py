@@ -69,6 +69,10 @@ class UnitTestWidget(PluginMainWidget):
         Configuration for running tests, or `None` if not set.
     default_wdir : str
         Default choice of working directory.
+    dependencies : dict or None
+        Cached dependencies, as returned by `self.get_versions()`.
+    environment_for_dependencies : str or None
+        Python interpreter for which `self.dependencies` is valid.
     framework_registry : FrameworkRegistry
         Registry of supported testing frameworks.
     pre_test_hook : function returning bool or None
@@ -101,12 +105,14 @@ class UnitTestWidget(PluginMainWidget):
         super().__init__(name, plugin, parent)
 
         self.config = None
-        self.pythonpath = None
         self.default_wdir = None
+        self.dependencies = None
+        self.environment_for_dependencies = None
+        self.output = None
         self.pre_test_hook = None
+        self.pythonpath = None
         self.testrunner = None
 
-        self.output = None
         self.testdataview = TestDataView(self)
         self.testdatamodel = TestDataModel(self)
         self.testdataview.setModel(self.testdatamodel)
@@ -247,18 +253,43 @@ class UnitTestWidget(PluginMainWidget):
             te.show()
             te.exec_()
 
-    def get_versions(self):
-        """Return versions of frameworks and their plugins"""
+    def get_versions(self, use_cached):
+        """
+        Return versions of frameworks and their plugins.
+
+        If `use_cached` is `True` and `self.environment_for_dependencies`
+        equals the Python interpreter set by the user in the Preferences,
+        then return the cached information in `self.dependencies`.
+
+        Otherwise, run the `print_versions.py` script in the target
+        environment to retrieve the dependencyy information. Store that
+        information in `self.dependencies` and return it.
+
+        Parameters
+        ----------
+        use_cached : bool
+            Whether to use the cached information, if possible.
+
+        Returns
+        -------
+        dict
+            Dependency information as returned by `print_versions.py`
+        """
         executable = self.get_conf('executable', section='main_interpreter')
+        if use_cached and self.environment_for_dependencies == executable:
+            return self.dependencies
+
         script = osp.join(osp.dirname(__file__), osp.pardir, 'backend',
                           'workers', 'print_versions.py')
         process = subprocess.run([executable, script],
                                  capture_output=True, text=True)
-        return ast.literal_eval(process.stdout)
+        self.dependencies = ast.literal_eval(process.stdout)
+        self.environment_for_dependencies = executable
+        return self.dependencies
 
     def show_versions(self):
         """Show versions of frameworks and their plugins"""
-        all_info = self.get_versions()
+        all_info = self.get_versions(use_cached=False)
         versions = [_('Versions of frameworks and their installed plugins:')]
         for name, info in all_info.items():
             if not info['available']:
@@ -278,7 +309,7 @@ class UnitTestWidget(PluginMainWidget):
         else:
             oldconfig = Config(wdir=self.default_wdir)
         frameworks = self.framework_registry.frameworks
-        versions = self.get_versions()
+        versions = self.get_versions(use_cached=True)
         config = ask_for_config(frameworks, oldconfig, versions, parent=self)
         if config:
             self.config = config
