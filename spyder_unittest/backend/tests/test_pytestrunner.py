@@ -6,7 +6,6 @@
 """Tests for pytestrunner.py"""
 
 # Standard library imports
-import os
 import os.path as osp
 import sys
 from unittest.mock import Mock
@@ -20,10 +19,6 @@ from spyder_unittest.backend.pytestrunner import (PyTestRunner,
 from spyder_unittest.backend.runnerbase import (Category, TestResult,
                                                 COV_TEST_NAME)
 from spyder_unittest.widgets.configdialog import Config
-
-
-def test_pytestrunner_is_installed():
-    assert PyTestRunner(None).is_installed()
 
 
 def test_pytestrunner_create_argument_list(monkeypatch):
@@ -40,7 +35,7 @@ def test_pytestrunner_create_argument_list(monkeypatch):
     monkeypatch.setattr('spyder_unittest.backend.pytestrunner.os.path.dirname',
                         lambda _: 'dir')
     pyfile, port, *coverage = runner.create_argument_list(config, cov_path)
-    assert pyfile == 'dir{}pytestworker.py'.format(os.sep)
+    assert pyfile == osp.join('dir', 'workers', 'pytestworker.py')
     assert port == '42'
 
 
@@ -273,31 +268,3 @@ def test_logreport_to_testresult_with_output(longrepr, prefix):
                           lineno=24)
     assert logreport_to_testresult(report, 'ham') == expected
 
-
-def test_get_versions_without_plugins(monkeypatch):
-    import pytest
-    monkeypatch.setattr(pytest, '__version__', '1.2.3')
-    from _pytest.config import PytestPluginManager
-    monkeypatch.setattr(
-        PytestPluginManager,
-        'list_plugin_distinfo', lambda _: ())
-
-    runner = PyTestRunner(None)
-    assert runner.get_versions() == ['pytest 1.2.3']
-
-
-def test_get_versions_with_plugins(monkeypatch):
-    import pytest
-    import pkg_resources
-    monkeypatch.setattr(pytest, '__version__', '1.2.3')
-    dist1 = pkg_resources.Distribution(project_name='myPlugin1',
-                                       version='4.5.6')
-    dist2 = pkg_resources.Distribution(project_name='myPlugin2',
-                                       version='7.8.9')
-    from _pytest.config import PytestPluginManager
-    monkeypatch.setattr(
-        PytestPluginManager,
-        'list_plugin_distinfo', lambda _: (('1', dist1), ('2', dist2)))
-    runner = PyTestRunner(None)
-    assert runner.get_versions() == ['pytest 1.2.3', '   myPlugin1 4.5.6',
-                                     '   myPlugin2 7.8.9']

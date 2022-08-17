@@ -7,14 +7,14 @@
 
 # Standard library imports
 import os
-from unittest.mock import call, create_autospec, MagicMock, Mock
+from unittest.mock import create_autospec, MagicMock, Mock
 
 # Third party imports
 import pytest
 
 # Local imports
-from spyder_unittest.backend.pytestworker import SpyderPlugin, main
-from spyder_unittest.backend.zmqstream import ZmqStreamWriter
+from spyder_unittest.backend.workers.pytestworker import SpyderPlugin, main
+from spyder_unittest.backend.workers.zmqwriter import ZmqStreamWriter
 
 
 class EmptyClass:
@@ -315,7 +315,7 @@ def test_pytestworker_integration(monkeypatch, tmpdir):
     mock_writer = create_autospec(ZmqStreamWriter)
     MockZmqStreamWriter = Mock(return_value=mock_writer)
     monkeypatch.setattr(
-        'spyder_unittest.backend.pytestworker.ZmqStreamWriter',
+        'spyder_unittest.backend.workers.pytestworker.ZmqStreamWriter',
         MockZmqStreamWriter)
     main(['mockscriptname', '42', testfilename])
 

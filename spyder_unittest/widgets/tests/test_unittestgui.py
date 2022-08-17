@@ -259,23 +259,39 @@ def test_show_versions(monkeypatch, widget):
     mockQMessageBox = Mock()
     monkeypatch.setattr('spyder_unittest.widgets.unittestgui.QMessageBox',
                         mockQMessageBox)
-    monkeypatch.setattr(widget.framework_registry.frameworks['nose'],
-                        'is_installed', lambda: False)
-    monkeypatch.setattr(widget.framework_registry.frameworks['pytest'],
-                        'is_installed', lambda: True)
-    monkeypatch.setattr(widget.framework_registry.frameworks['unittest'],
-                        'is_installed', lambda: True)
-    monkeypatch.setattr(widget.framework_registry.frameworks['nose'],
-                        'get_versions', lambda _: [])
-    monkeypatch.setattr(widget.framework_registry.frameworks['pytest'],
-                        'get_versions',
-                        lambda _: ['pytest 1.2.3', '   plugin1 4.5.6',
-                                   '   plugin2 7.8.9'])
-    monkeypatch.setattr(widget.framework_registry.frameworks['unittest'],
-                        'get_versions', lambda _: ['unittest 1.2.3'])
+    versions = """{
+       'nose': {'available': False},
+       'pytest': {'available': True, 'version': '1.2.3',
+                  'plugins': {'plugin1': '4.5.6', 'plugin2': '7.8.9'}},
+       'unittest': {'available': True, 'version': '1.2.3', 'plugins': {}}
+    }"""
+    mock_process = Mock(stdout=versions)
+    monkeypatch.setattr('spyder_unittest.widgets.unittestgui.subprocess.run',
+                        lambda *args, **kwargs: mock_process)
+
     widget.show_versions()
+
     expected = ('Versions of frameworks and their installed plugins:\n\n'
                 'nose: not available\n\npytest 1.2.3\n   plugin1 4.5.6\n   '
                 'plugin2 7.8.9\n\nunittest 1.2.3')
     mockQMessageBox.information.assert_called_with(widget, 'Dependencies',
                                                    expected)
+
+
+@pytest.mark.parametrize('use_cached, equal, expected',
+                         [(True, True, 'cached'),
+                          (True, False, 'new'),
+                          (False, True, 'new'),
+                          (False, False, 'new')])
+def test_get_versions(monkeypatch, widget, use_cached, equal, expected):
+    widget.dependencies = 'cached'
+    widget.environment_for_dependencies = 'old_env'
+    interpreter = 'old_env' if equal else 'new_env'
+    widget.get_conf = Mock(return_value=interpreter)
+    mock_process = Mock(stdout='"new"')
+    monkeypatch.setattr('spyder_unittest.widgets.unittestgui.subprocess.run',
+                        lambda *args, **kwargs: mock_process)
+
+    result = widget.get_versions(use_cached)
+
+    assert result == expected

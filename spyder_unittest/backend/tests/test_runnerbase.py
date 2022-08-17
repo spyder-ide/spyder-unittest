@@ -21,16 +21,11 @@ def test_runnerbase_with_nonexisting_module():
     class FooRunner(RunnerBase):
         module = 'nonexisiting'
 
-    assert not FooRunner.is_installed()
-
     foo_runner = FooRunner(None)
     config = Config(foo_runner.module, 'wdir', True)
 
     with pytest.raises(NotImplementedError):
         foo_runner.create_argument_list(config, 'cov_path')
-
-    with pytest.raises(NotImplementedError):
-        foo_runner.get_versions()
 
     with pytest.raises(NotImplementedError):
         foo_runner.finished()

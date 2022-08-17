@@ -25,20 +25,6 @@ class NoseRunner(RunnerBase):
     module = 'nose'
     name = 'nose'
 
-    def get_versions(self):
-        """Return versions of framework and its plugins."""
-        import nose
-        from pkg_resources import iter_entry_points
-
-        versions = ['nose {}'.format(nose.__version__)]
-
-        for entry_point, _ in (nose.plugins.manager.EntryPointPluginManager
-                               .entry_points):
-            for ep in iter_entry_points(entry_point):
-                versions.append(
-                    "   {} {}".format(ep.dist.project_name, ep.dist.version))
-        return versions
-
     def create_argument_list(self, config, cov_path):
         """Create argument list for testing process."""
         return [

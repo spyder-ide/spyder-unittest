@@ -14,7 +14,7 @@ import re
 from spyder.config.base import get_translation
 from spyder_unittest.backend.runnerbase import (Category, RunnerBase,
                                                 TestResult, COV_TEST_NAME)
-from spyder_unittest.backend.zmqstream import ZmqStreamReader
+from spyder_unittest.backend.zmqreader import ZmqStreamReader
 
 try:
     _ = get_translation('spyder_unittest')
@@ -29,29 +29,10 @@ class PyTestRunner(RunnerBase):
     module = 'pytest'
     name = 'pytest'
 
-    def get_versions(self):
-        """Return versions of framework and its plugins."""
-        import pytest
-        versions = ['pytest {}'.format(pytest.__version__)]
-
-        class GetPluginVersionsPlugin():
-            def pytest_cmdline_main(self, config):
-                nonlocal versions
-                plugininfo = config.pluginmanager.list_plugin_distinfo()
-                if plugininfo:
-                    for plugin, dist in plugininfo:
-                        versions.append("   {} {}".format(dist.project_name,
-                                                          dist.version))
-
-        # --capture=sys needed on Windows to avoid
-        # ValueError: saved filedescriptor not valid anymore
-        pytest.main(['-V', '--capture=sys'],
-                    plugins=[GetPluginVersionsPlugin()])
-        return versions
-
     def create_argument_list(self, config, cov_path):
         """Create argument list for testing process."""
-        pyfile = os.path.join(os.path.dirname(__file__), 'pytestworker.py')
+        dirname = os.path.dirname(__file__)
+        pyfile = os.path.join(dirname, 'workers', 'pytestworker.py')
         arguments = [pyfile, str(self.reader.port)]
         if config.coverage:
             arguments += [f'--cov={cov_path}', '--cov-report=term-missing']
