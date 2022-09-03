@@ -1,9 +1,25 @@
 # History of changes
 
+## Version 0.5.1 (2022/09/03)
+
+### New Features
+
+* Tests are executed using the Python interpreter set in Preferences (instead of the interpreter that Spyder runs under), by [@stevetracvc](https://github.com/stevetracvc) ([Issue 65](https://github.com/spyder-ide/spyder-unittest/issues/65), [PR 174](https://github.com/spyder-ide/spyder-unittest/pull/174))
+* You can display test coverage, though only for pytest; by [@stevetracvc](https://github.com/stevetracvc) ([Issue 33](https://github.com/spyder-ide/spyder-unittest/issues/33), [PR 175](https://github.com/spyder-ide/spyder-unittest/pull/175))
+
+### Bug Fixes and Maintenance
+
+* Use the correct environment when checking which testing frameworks are installed ([Issue 177](https://github.com/spyder-ide/spyder-unittest/issues/177), [PR 182](https://github.com/spyder-ide/spyder-unittest/pull/182))
+* A message is shown if pytest exits abnormally ([Issue 176](https://github.com/spyder-ide/spyder-unittest/issues/176), [PR 180](https://github.com/spyder-ide/spyder-unittest/pull/180))
+* The plugin no longer supports Python 2 ([Issue 156](https://github.com/spyder-ide/spyder-unittest/issues/156), [PR 179](https://github.com/spyder-ide/spyder-unittest/pull/179))
+* Resolve warnings emitted by test suite for spyder-unittest ([Issue 173](https://github.com/spyder-ide/spyder-unittest/issues/173), [PR 181](https://github.com/spyder-ide/spyder-unittest/pull/181))
+
+
 ## Version 0.5.0 (2022/01/20)
 
 * Update plugin for Spyder 5.2 ([Issue 163](https://github.com/spyder-ide/spyder-unittest/issues/163), [PR 166](https://github.com/spyder-ide/spyder-unittest/pull/166)). No version of the plugin is compatible with Spyder 5.0 or 5.1.
 * Add partial translations for Brazilian Portuguese, French and German ([Issue 30](https://github.com/spyder-ide/spyder-unittest/issues/30), [PR 168](https://github.com/spyder-ide/spyder-unittest/pull/168), [PR 169](https://github.com/spyder-ide/spyder-unittest/pull/169), [PR 170](https://github.com/spyder-ide/spyder-unittest/pull/170)).
+
 
 ## Version 0.4.1 (2020/05/23)
 
