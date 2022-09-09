@@ -15,6 +15,7 @@ from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal
 from qtpy.QtGui import QBrush, QColor, QFont
 from qtpy.QtWidgets import QMenu, QTreeView
 from spyder.config.base import get_translation
+from spyder.utils.palette import QStylePalette, SpyderPalette
 from spyder.utils.qthelpers import create_action
 
 # Local imports
@@ -28,19 +29,11 @@ except KeyError:
     _ = gettext.gettext
 
 COLORS = {
-    Category.OK: QBrush(QColor("#C1FFBA")),
-    Category.FAIL: QBrush(QColor("#FF5050")),
-    Category.SKIP: QBrush(QColor("#C5C5C5")),
-    Category.PENDING: QBrush(QColor("#C5C5C5")),
-    Category.COVERAGE: QBrush(QColor("#89CFF0"))
-}
-
-COLORS_DARK = {
-    Category.OK: QBrush(QColor("#008000")),
-    Category.FAIL: QBrush(QColor("#C6001E")),
-    Category.SKIP: QBrush(QColor("#505050")),
-    Category.PENDING: QBrush(QColor("#505050")),
-    Category.COVERAGE: QBrush(QColor("#0047AB"))
+    Category.OK:       SpyderPalette.COLOR_SUCCESS_1,
+    Category.FAIL:     SpyderPalette.COLOR_ERROR_1,
+    Category.SKIP:     SpyderPalette.COLOR_WARN_1,
+    Category.PENDING:  QStylePalette.COLOR_BACKGROUND_1,
+    Category.COVERAGE: QStylePalette.COLOR_ACCENT_1
 }
 
 STATUS_COLUMN = 0
@@ -339,10 +332,8 @@ class TestDataModel(QAbstractItemModel):
         elif role == Qt.BackgroundRole:
             if id == TOPLEVEL_ID:
                 testresult = self.testresults[row]
-                if self.is_dark_interface:
-                    return COLORS_DARK[testresult.category]
-                else:
-                    return COLORS[testresult.category]
+                color = COLORS[testresult.category]
+                return QBrush(QColor(color))
         elif role == Qt.TextAlignmentRole:
             if id == TOPLEVEL_ID and column == TIME_COLUMN:
                 return Qt.AlignRight
