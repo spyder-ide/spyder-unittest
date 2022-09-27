@@ -18,7 +18,7 @@
 
 *Copyright © 2014 Spyder Project Contributors*
 
-![Screenshot of spyder-unittest plugin showing test results](./screenshot.png)
+![Screenshot of spyder-unittest plugin showing test results](./doc/screenshot.png)
 
 ## Description
 

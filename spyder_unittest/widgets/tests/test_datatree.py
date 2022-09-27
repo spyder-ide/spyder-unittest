@@ -7,14 +7,14 @@
 
 # Third party imports
 from qtpy.QtCore import QModelIndex, QPoint, Qt
-from qtpy.QtGui import QContextMenuEvent
+from qtpy.QtGui import QBrush, QColor, QContextMenuEvent
 from unittest.mock import Mock
 import pytest
 
 # Local imports
 from spyder_unittest.backend.runnerbase import Category, TestResult
-from spyder_unittest.widgets.datatree import (COLORS, COLORS_DARK,
-                                              TestDataModel, TestDataView)
+from spyder_unittest.widgets.datatree import (
+    COLORS, TestDataModel, TestDataView)
 
 
 @pytest.fixture
@@ -152,19 +152,17 @@ def test_testdatamodel_shows_time_when_blank(qtmodeltester):
     model.testresults = [res]
     assert model.data(model.index(0, 3), Qt.DisplayRole) == ''
 
-@pytest.mark.parametrize('dark', [False, True])
-def test_testdatamodel_data_background(dark):
+def test_testdatamodel_data_background():
     model = TestDataModel()
-    if dark:
-        model.is_dark_interface = True
     res = [TestResult(Category.OK, 'status', 'foo.bar'),
            TestResult(Category.FAIL, 'error', 'foo.bar', 'kadoom')]
     model.testresults = res
     index = model.index(0, 0)
-    colors = COLORS_DARK if dark else COLORS
-    assert model.data(index, Qt.BackgroundRole) == colors[Category.OK]
+    expected = QBrush(QColor(COLORS[Category.OK]))
+    assert model.data(index, Qt.BackgroundRole) == expected
     index = model.index(1, 2)
-    assert model.data(index, Qt.BackgroundRole) == colors[Category.FAIL]
+    expected = QBrush(QColor(COLORS[Category.FAIL]))
+    assert model.data(index, Qt.BackgroundRole) == expected
 
 def test_testdatamodel_data_userrole():
     model = TestDataModel()
