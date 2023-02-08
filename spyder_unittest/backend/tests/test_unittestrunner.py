@@ -17,6 +17,8 @@ from spyder_unittest.backend.unittestrunner import UnittestRunner
 # test_fail (testing.test_unittest.MyTest) ... FAIL
 # but from Python 3.11, it reads:
 # test_fail (testing.test_unittest.MyTest.test_fail) ... FAIL
+# These tests only test the system executable; they do not test
+# the situation where the requested interpreter is different.
 IS_PY311_OR_GREATER = sys.version_info[:2] >= (3, 11)
 
 
@@ -39,6 +41,7 @@ OK
 """
     output = output11 if IS_PY311_OR_GREATER else output10
     runner = UnittestRunner(None)
+    runner.set_fullname_version()
     res = runner.load_data(output)
     assert len(res) == 2
 
@@ -72,6 +75,7 @@ OK
 """
     output = output11 if IS_PY311_OR_GREATER else output10
     runner = UnittestRunner(None)
+    runner.set_fullname_version()
     res = runner.load_data(output)
     assert len(res) == 1
     assert res[0].category == Category.OK
@@ -115,6 +119,7 @@ FAILED (failures=1)
 """
     output = output11 if IS_PY311_OR_GREATER else output10
     runner = UnittestRunner(None)
+    runner.set_fullname_version()
     res = runner.load_data(output)
     assert len(res) == 2
 
@@ -151,6 +156,7 @@ OK
 """
     output = output11 if IS_PY311_OR_GREATER else output10
     runner = UnittestRunner(None)
+    runner.set_fullname_version()
     res = runner.load_data(output)
     assert len(res) == 2
 
@@ -202,6 +208,7 @@ FAILED (failures=1)
 """
     output = output11 if IS_PY311_OR_GREATER else output10
     runner = UnittestRunner(None)
+    runner.set_fullname_version()
     res = runner.load_data(output)
     assert len(res) == 1
 
@@ -214,6 +221,7 @@ FAILED (failures=1)
 
 def test_try_parse_header_with_ok():
     runner = UnittestRunner(None)
+    runner.set_fullname_version()
     lines10 = ['test_isupper (testfoo.TestStringMethods) ... ok']
     lines11 = ['test_isupper (testfoo.TestStringMethods.test_isupper) ... ok']
     lines = lines11 if IS_PY311_OR_GREATER else lines10
@@ -223,6 +231,7 @@ def test_try_parse_header_with_ok():
 
 def test_try_parse_header_with_xfail():
     runner = UnittestRunner(None)
+    runner.set_fullname_version()
     lines10 = ['test_isupper (testfoo.TestStringMethods) ... expected failure']
     lines11 = ['test_isupper (testfoo.TestStringMethods.test_isupper) ... expected failure']
     lines = lines11 if IS_PY311_OR_GREATER else lines10
@@ -233,6 +242,7 @@ def test_try_parse_header_with_xfail():
 
 def test_try_parse_header_with_message():
     runner = UnittestRunner(None)
+    runner.set_fullname_version()
     lines10 = ["test_nothing (testfoo.Tests) ... skipped 'msg'"]
     lines11 = ["test_nothing (testfoo.Tests.test_nothing) ... skipped 'msg'"]
     lines = lines11 if IS_PY311_OR_GREATER else lines10
@@ -242,6 +252,7 @@ def test_try_parse_header_with_message():
 
 def test_try_parse_header_starting_with_digit():
     runner = UnittestRunner(None)
+    runner.set_fullname_version()
     lines10 = ['0est_isupper (testfoo.TestStringMethods) ... ok']
     lines11 = ['0est_isupper (testfoo.TestStringMethods.0est_isupper) ... ok']
     lines = lines11 if IS_PY311_OR_GREATER else lines10
