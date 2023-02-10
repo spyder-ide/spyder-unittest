@@ -7,25 +7,10 @@
 
 # Standard library imports
 import re
-import sys
+import subprocess
 
 # Local imports
 from spyder_unittest.backend.runnerbase import Category, RunnerBase, TestResult
-
-
-# Up to Python 3.10, unittest output read:
-# test_fail (testing.test_unittest.MyTest) ... FAIL
-# but from Python 3.11, it reads:
-# test_fail (testing.test_unittest.MyTest.test_fail) ... FAIL
-IS_PY311_OR_GREATER = sys.version_info[:2] >= (3, 11)
-
-
-def _get_fullname(fn_name, cls_name):
-    if IS_PY311_OR_GREATER:
-        function_fullname = cls_name
-    else:
-        function_fullname = '{}.{}'.format(cls_name, fn_name)
-    return function_fullname
 
 
 class UnittestRunner(RunnerBase):
@@ -33,6 +18,11 @@ class UnittestRunner(RunnerBase):
 
     module = 'unittest'
     name = 'unittest'
+
+    def __init__(self, widget, resultfilename=None):
+        super().__init__(widget, resultfilename)
+        # Set a sensible default
+        self.fullname_version = 'pre311'
 
     def create_argument_list(self, config, cov_path):
         """Create argument list for testing process."""
@@ -44,6 +34,7 @@ class UnittestRunner(RunnerBase):
 
         This function reads the results and emits `sig_finished`.
         """
+        self.set_fullname_version()
         output = self.read_all_process_output()
         testresults = self.load_data(output)
         self.sig_finished.emit(testresults, output, True)
@@ -113,7 +104,7 @@ class UnittestRunner(RunnerBase):
         regexp = r'([^\d\W]\w*) \(([^\d\W][\w.]*)\)'
         match = re.match(regexp, lines[line_index])
         if match:
-            function_fullname = _get_fullname(match.group(1), match.group(2))
+            function_fullname = self.get_fullname(match.group(1), match.group(2))
         else:
             return None
         while lines[line_index]:
@@ -155,5 +146,51 @@ class UnittestRunner(RunnerBase):
         while lines[line_index]:
             exception_text.append(lines[line_index])
             line_index += 1
-        function_fullname = _get_fullname(match.group(1), match.group(2))
+        function_fullname = self.get_fullname(match.group(1), match.group(2))
         return (line_index, function_fullname, exception_text)
+
+    def set_fullname_version(self):
+        script = 'import platform; print(platform.python_version())'
+        process = subprocess.run([self.executable, '-c', script],
+                                 capture_output=True, text=True)
+        if process.returncode != 0:
+            self.fullname_version = 'pre311'
+            return
+
+        # We only take the first two components as the third might
+        # be something like '0a3'.
+        exec_version_components = process.stdout.split('.')[:2]
+        exec_version = tuple(map(int, exec_version_components))
+        if exec_version < (3, 11):
+            self.fullname_version = 'pre311'
+        else:
+            self.fullname_version = '311'
+
+    def get_fullname(self, fn_name, parenthesised):
+        """
+        Determine the test name output by unittest.
+
+        Up to Python 3.10, unittest output read:
+        test_fail (testing.test_unittest.MyTest) ... FAIL
+        but from Python 3.11, it reads:
+        test_fail (testing.test_unittest.MyTest.test_fail) ... FAIL
+
+        Parameters
+        ----------
+        fn_name : str
+            Part prior to the parentheses (without spaces)
+        parenthesised : str
+            Part within the parentheses
+
+        Returns
+        -------
+        fullname : str
+            The full name of the class plus function,
+            "testing.test_unittest.MyTest.test_fail" in the above
+            example.
+        """
+        if self.fullname_version == 'pre311':
+            function_fullname = '{}.{}'.format(parenthesised, fn_name)
+        else:
+            function_fullname = parenthesised
+        return function_fullname

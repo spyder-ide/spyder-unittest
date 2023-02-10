@@ -7,6 +7,7 @@
 
 # Standard library imports
 import os
+import sys
 import tempfile
 
 # Third party imports
@@ -89,6 +90,9 @@ class RunnerBase(QObject):
         Process running the unit test suite.
     resultfilename : str
         Name of file in which test results are stored.
+    executable : str
+        Path to Python executable used for test.  This is required
+        by the UnittestRunner subclass.
 
     Signals
     -------
@@ -134,6 +138,8 @@ class RunnerBase(QObject):
                                                'unittest.results')
         else:
             self.resultfilename = resultfilename
+        # Set a sensible default
+        self.executable = sys.executable
 
     def create_argument_list(self, config, cov_path):
         """
@@ -189,6 +195,7 @@ class RunnerBase(QObject):
         RuntimeError
             If process failed to start.
         """
+        self.executable = executable
         self.process = self._prepare_process(config, pythonpath)
         p_args = self.create_argument_list(config, cov_path)
         try:
