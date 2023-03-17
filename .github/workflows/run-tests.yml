@@ -1,4 +1,4 @@
-name: Linux tests
+name: Run tests
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
     - master
 
 jobs:
-  linux:
+  main:
     strategy:
       fail-fast: false 
       matrix:
@@ -29,7 +29,7 @@ jobs:
           - OS: 'windows'
             PYTHON_VERSION: '3.9'
             SPYDER_SOURCE: 'git'
-    name: Tests ${{ matrix.OS }} py${{ matrix.PYTHON_VERSION }} spyder-from-${{ matrix.SPYDER_SOURCE }}
+    name: ${{ matrix.OS }} py${{ matrix.PYTHON_VERSION }} spyder-from-${{ matrix.SPYDER_SOURCE }}
     runs-on: ${{ matrix.OS }}-latest
     env:
       CI: True
