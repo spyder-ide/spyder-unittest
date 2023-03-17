@@ -31,7 +31,7 @@ jobs:
       - name: Install Conda
         uses: conda-incubator/setup-miniconda@v2
         with:
-           channels: conda-forge
+           miniforge-variant: Mambaforge
            auto-update-conda: true
            python-version: ${{ matrix.PYTHON_VERSION }} 
       - name: Checkout Spyder from git
@@ -44,28 +44,28 @@ jobs:
         if: matrix.SPYDER_SOURCE == 'git'
         shell: bash -l {0}
         run: |
-          conda env update --file spyder/requirements/main.yml -q
-          conda env update --file spyder/requirements/linux.yml -q
+          mamba env update --file spyder/requirements/main.yml -q
+          mamba env update --file spyder/requirements/linux.yml -q
       - name: Install Spyder from source
         if: matrix.SPYDER_SOURCE == 'git'
         shell: bash -l {0}
         run: pip install --no-deps -e spyder
       - name: Install plugin dependencies
         shell: bash -l {0}
-        run: conda install --file requirements/conda.txt -y -q
+        run: mamba install --file requirements/conda.txt -y -q
       - name: Install test dependencies
         shell: bash -l {0}
         run: |
-          conda install nomkl -y -q
-          conda install --file requirements/tests.txt -y -q
+          mamba install nomkl -y -q
+          mamba install --file requirements/tests.txt -y -q
       - name: Install plugin
         shell: bash -l {0}
         run: pip install --no-deps -e .
       - name: Show environment information
         shell: bash -l {0}
         run: |
-          conda info
-          conda list
+          mamba info
+          mamba list
       - name: Run tests
         shell: bash -l {0}
         run: xvfb-run --auto-servernum pytest spyder_unittest --cov=spyder_unittest -x -vv
