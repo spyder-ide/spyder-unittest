@@ -153,8 +153,8 @@ class UnitTestPlugin(SpyderDockablePlugin):
         """
         Connect to signal announcing that Python path changed.
         """
-        pythonpathManager = self.get_plugin(Plugins.PythonpathManager)
-        pythonpathManager.sig_pythonpath_changed.connect(self.update_pythonpath)
+        ppm = self.get_plugin(Plugins.PythonpathManager)
+        ppm.sig_pythonpath_changed.connect(self.update_pythonpath)
 
     @on_plugin_available(plugin=Plugins.WorkingDirectory)
     def on_working_directory_available(self):
@@ -179,8 +179,8 @@ class UnitTestPlugin(SpyderDockablePlugin):
         It synchronizes the Python path in the unittest widget with the Python
         path in Spyder.
         """
-        pythonpathManager = self.get_plugin(Plugins.PythonpathManager)
-        self.get_widget().pythonpath = pythonpathManager.get_spyder_pythonpath()
+        ppm = self.get_plugin(Plugins.PythonpathManager)
+        self.get_widget().pythonpath = ppm.get_spyder_pythonpath()
 
     def handle_project_change(self):
         """

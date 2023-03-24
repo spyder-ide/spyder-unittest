@@ -15,4 +15,3 @@ with open('requirements/conda.txt') as infile:
             if package_name != 'spyder':
                 outfile.write(line)
 
-
