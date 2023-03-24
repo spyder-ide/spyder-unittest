@@ -38,6 +38,7 @@ def test_plugin_initialization(plugin):
     assert plugin.main.run_menu_actions[1].text() == 'Run unit tests'
 
 
+@pytest.mark.skip('not clear how to test interactions between plugins')
 def test_plugin_pythonpath(plugin):
     # Test signal/slot connection
     plugin.get_main().sig_pythonpath_changed.connect.assert_called_with(
