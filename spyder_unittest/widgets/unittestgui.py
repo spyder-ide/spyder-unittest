@@ -22,7 +22,7 @@ from spyder.plugins.variableexplorer.widgets.texteditor import TextEditor
 
 # Local imports
 from spyder_unittest.backend.frameworkregistry import FrameworkRegistry
-from spyder_unittest.backend.noserunner import NoseRunner
+from spyder_unittest.backend.nose2runner import Nose2Runner
 from spyder_unittest.backend.pytestrunner import PyTestRunner
 from spyder_unittest.backend.runnerbase import Category, TestResult
 from spyder_unittest.backend.unittestrunner import UnittestRunner
@@ -37,7 +37,7 @@ except KeyError:
     _ = gettext.gettext
 
 # Supported testing frameworks
-FRAMEWORKS = {NoseRunner, PyTestRunner, UnittestRunner}
+FRAMEWORKS = {Nose2Runner, PyTestRunner, UnittestRunner}
 
 
 class UnitTestWidgetActions:

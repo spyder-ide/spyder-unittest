@@ -47,7 +47,7 @@ This is a plugin for the Spyder IDE that integrates popular unit test
 frameworks. It allows you to run tests and view the results.
 
 The plugin supports the `unittest` framework in the Python
-standard library and the `pytest` and `nose` testing frameworks.
+standard library and the `pytest` and `nose2` testing frameworks.
 """
 
 setup(

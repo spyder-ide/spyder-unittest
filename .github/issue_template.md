@@ -29,6 +29,6 @@
 * Version of spyder-unittest plugin:
 * Installation method for Spyder and the unittest plugin: Anaconda / pip / ...
 * Python version:
-* Testing framework used: nose / py.test / unittest
+* Testing framework used: nose2 / pytest / unittest
 * Testing framework version:
 * Operating system:

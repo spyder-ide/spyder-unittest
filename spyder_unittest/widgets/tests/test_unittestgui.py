@@ -151,15 +151,15 @@ def test_unittestwidget_process_finished_abnormally_status_label(widget):
     expected_text = '<b>{}</b>'.format('Test process exited abnormally')
     assert widget.status_label.text() == expected_text
 
-@pytest.mark.parametrize('framework', ['pytest', 'nose'])
+@pytest.mark.parametrize('framework', ['pytest', 'nose2'])
 def test_run_tests_and_display_results(qtbot, widget, tmpdir, monkeypatch, framework):
     """Basic integration test."""
     os.chdir(tmpdir.strpath)
     testfilename = tmpdir.join('test_foo.py').strpath
 
     with open(testfilename, 'w') as f:
-        f.write("def test_ok(): assert 1+1 == 2\n"
-                "def test_fail(): assert 1+1 == 3\n")
+        f.write("def test_fail(): assert 1+1 == 3\n"
+                "def test_ok(): assert 1+1 == 2\n")
 
     MockQMessageBox = Mock()
     monkeypatch.setattr('spyder_unittest.widgets.unittestgui.QMessageBox',
@@ -173,14 +173,14 @@ def test_run_tests_and_display_results(qtbot, widget, tmpdir, monkeypatch, frame
     model = widget.testdatamodel
     assert model.rowCount() == 2
     assert model.index(0, 0).data(
-        Qt.DisplayRole) == 'ok' if framework == 'nose' else 'passed'
-    assert model.index(0, 1).data(Qt.DisplayRole) == 't.test_ok'
-    assert model.index(0, 1).data(Qt.ToolTipRole) == 'test_foo.test_ok'
-    assert model.index(0, 2).data(Qt.DisplayRole) == ''
+        Qt.DisplayRole) == 'failure' if framework == 'nose2' else 'failed'
+    assert model.index(0, 1).data(Qt.DisplayRole) == 't.test_fail'
+    assert model.index(0, 1).data(Qt.ToolTipRole) == 'test_foo.test_fail'
     assert model.index(1, 0).data(
-        Qt.DisplayRole) == 'failure' if framework == 'nose' else 'failed'
-    assert model.index(1, 1).data(Qt.DisplayRole) == 't.test_fail'
-    assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.test_fail'
+        Qt.DisplayRole) == 'ok' if framework == 'nose2' else 'passed'
+    assert model.index(1, 1).data(Qt.DisplayRole) == 't.test_ok'
+    assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.test_ok'
+    assert model.index(1, 2).data(Qt.DisplayRole) == ''
 
 
 def test_run_tests_using_unittest_and_display_results(
@@ -215,7 +215,7 @@ def test_run_tests_using_unittest_and_display_results(
     assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_ok'
     assert model.index(1, 2).data(Qt.DisplayRole) == ''
 
-@pytest.mark.parametrize('framework', ['unittest', 'pytest', 'nose'])
+@pytest.mark.parametrize('framework', ['unittest', 'pytest', 'nose2'])
 def test_run_with_no_tests_discovered_and_display_results(
         qtbot, widget, tmpdir, monkeypatch, framework):
     """Basic integration test."""

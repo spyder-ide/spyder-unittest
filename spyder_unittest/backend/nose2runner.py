@@ -19,18 +19,18 @@ except KeyError:
     _ = gettext.gettext
 
 
-class NoseRunner(RunnerBase):
+class Nose2Runner(RunnerBase):
     """Class for running tests within Nose framework."""
 
-    module = 'nose'
-    name = 'nose'
+    module = 'nose2'
+    name = 'nose2'
 
     def create_argument_list(self, config, cov_path):
         """Create argument list for testing process."""
         return [
-            '-m', self.module, '--with-xunit',
-            '--xunit-file={}'.format(self.resultfilename),
-            ]
+            '-m', self.module, '--plugin=nose2.plugins.junitxml',
+            '--junit-xml', '--junit-xml-path={}'.format(self.resultfilename)
+        ]
 
     def finished(self):
         """Called when the unit test process has finished."""
@@ -81,7 +81,7 @@ class NoseRunner(RunnerBase):
                         message = type_
                     if child.text:
                         extras.append(child.text)
-                elif child.tag in ('system-out', 'system-err'):
+                elif child.tag in ('system-out', 'system-err') and child.text:
                     if child.tag == 'system-out':
                         heading = _('Captured stdout')
                     else:

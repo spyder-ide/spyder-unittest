@@ -6,7 +6,7 @@
 """Tests for print_versions.py"""
 
 from spyder_unittest.backend.workers.print_versions import (
-    get_nose_info, get_pytest_info, get_unittest_info)
+    get_nose2_info, get_pytest_info, get_unittest_info)
 
 
 def test_get_pytest_info_without_plugins(monkeypatch):
@@ -37,30 +37,11 @@ def test_get_pytest_info_with_plugins(monkeypatch):
     assert get_pytest_info() == expected
 
 
-def test_get_nose_info_without_plugins(monkeypatch):
-    import nose
-    import pkg_resources
-    monkeypatch.setattr(nose, '__version__', '1.2.3')
-    monkeypatch.setattr(pkg_resources, 'iter_entry_points', lambda x: ())
+def test_get_nose2_info(monkeypatch):
+    import nose2
+    monkeypatch.setattr(nose2, '__version__', '1.2.3')
     expected = {'available': True, 'version': '1.2.3', 'plugins': {}}
-    assert get_nose_info() == expected
-
-
-def test_get_nose_info_with_plugins(monkeypatch):
-    import nose
-    import pkg_resources
-    monkeypatch.setattr(nose, '__version__', '1.2.3')
-    dist = pkg_resources.Distribution(project_name='myPlugin',
-                                      version='4.5.6')
-    ep = pkg_resources.EntryPoint('name', 'module_name', dist=dist)
-    monkeypatch.setattr(pkg_resources,
-                        'iter_entry_points',
-                        lambda ept: (x for x in (ep,) if ept == nose.plugins
-                                     .manager.EntryPointPluginManager
-                                     .entry_points[0][0]))
-    expected = {'available': True, 'version': '1.2.3',
-                'plugins': {'myPlugin': '4.5.6'}}
-    assert get_nose_info() == expected
+    assert get_nose2_info() == expected
 
 
 def test_get_unittest_imfo(monkeypatch):
