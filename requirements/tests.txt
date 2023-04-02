@@ -4,4 +4,5 @@ nose
 pytest>=5
 pytest-cov
 pytest-mock
+pytest-order
 pytest-qt
