@@ -10,46 +10,40 @@ This contains the necessary definitions to make the main_window fixture
 available for integration tests.
 """
 
-# Standard library imports
-import os
-
 # Third-party imports
+from qtpy.QtWidgets import QApplication
 import pytest
 
-# This needs to be before any Spyder imports
-os.environ['SPYDER_PYTEST'] = 'True'
+# QtWebEngineWidgets must be imported
+# before a QCoreApplication instance is created
+from qtpy import QtWebEngineWidgets  # noqa
 
 # Spyder imports
-from spyder.app.tests.conftest import main_window
+from spyder.app import start
 from spyder.config.manager import CONF
 
 
-# Copied from spyder/app/tests/conftest.py
-@pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item, call):
-    # execute all other hooks to obtain the report object
-    outcome = yield
-    rep = outcome.get_result()
+@pytest.fixture
+def main_window(request, tmpdir, qtbot):
+    """Main Window fixture"""
 
-    # set a report attribute for each phase of a call, which can
-    # be "setup", "call", "teardown"
-    setattr(item, "rep_" + rep.when, rep)
+    # Don't show tours message
+    CONF.set('tours', 'show_tour_message', False)
+    QApplication.processEvents()
 
+    from spyder.api.plugin_registration.registry import PLUGIN_REGISTRY
+    PLUGIN_REGISTRY.reset()
 
-# Copied from spyder/app/tests/conftest.py
-@pytest.fixture(scope="session", autouse=True)
-def cleanup(request, qapp):
-    """Cleanup the testing setup once we are finished."""
+    # Start the window
+    window = start.main()
+    QApplication.processEvents()
 
-    def close_window():
-        # Close last used mainwindow and QApplication if needed
-        if hasattr(main_window, 'window') and main_window.window is not None:
-            window = main_window.window
-            main_window.window = None
-            window.close()
-            window = None
-            CONF.reset_to_defaults(notification=False)
-        if qapp.instance():
-            qapp.quit()
+    yield window
 
-    request.addfinalizer(close_window)
+    # Close main window
+    window.close()
+    CONF.reset_to_defaults(notification=False)
+
+    # Remove all dependencies (see spyder/dependencies.py)
+    import spyder.dependencies
+    spyder.dependencies.__dict__['DEPENDENCIES'] = []

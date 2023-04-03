@@ -154,8 +154,9 @@ def test_go_to_test_definition(main_window, tmpdir, qtbot):
     assert view.indexAt(point).data(Qt.DisplayRole).endswith('test_fail')
 
     # Double click on `test_fail`
+    unittest_plugin.switch_to_plugin()
     with qtbot.waitSignal(view.sig_edit_goto):
-        qtbot.mouseDClick(view.viewport(), Qt.LeftButton, pos=point, delay=100)
+        qtbot.mouseClick(view.viewport(), Qt.LeftButton, pos=point, delay=100)
         qtbot.mouseDClick(view.viewport(), Qt.LeftButton, pos=point)
 
     # Check that test file is opened in editor
