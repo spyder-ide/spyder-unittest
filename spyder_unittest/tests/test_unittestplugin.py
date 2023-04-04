@@ -31,7 +31,6 @@ from spyder_unittest.unittestplugin import UnitTestPlugin
 from spyder_unittest.widgets.configdialog import Config
 
 
-@pytest.mark.order('last')
 def test_menu_item(main_window):
     """
     Test that plugin adds item 'Run unit tests' to Run menu.
@@ -45,7 +44,6 @@ def test_menu_item(main_window):
     assert 'Run unit tests' in menu_items
 
 
-@pytest.mark.order('last')
 def test_pythonpath_change(main_window):
     """
     Test that pythonpath changes in Spyder propagate to UnitTestWidget.
@@ -60,7 +58,6 @@ def test_pythonpath_change(main_window):
     assert unittest_plugin.get_widget().pythonpath == [new_path]
 
 
-@pytest.mark.order('last')
 def test_default_working_dir(main_window, tmpdir):
     """
     Test that plugin's default working dir is current working directory.
@@ -82,7 +79,6 @@ def test_default_working_dir(main_window, tmpdir):
     assert unittest_plugin.get_widget().default_wdir == os.getcwd()
 
 
-@pytest.mark.order('last')
 def test_plugin_config(main_window, tmpdir, qtbot):
     """
     Test that plugin uses the project's config file if a project is open.
@@ -123,7 +119,6 @@ def test_plugin_config(main_window, tmpdir, qtbot):
     projects.close_project()
 
 
-@pytest.mark.order('last')
 def test_go_to_test_definition(main_window, tmpdir, qtbot):
     """
     Test that double clicking on a test result opens the file with the test

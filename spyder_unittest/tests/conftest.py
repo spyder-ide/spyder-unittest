@@ -24,8 +24,12 @@ from spyder.config.manager import CONF
 
 
 @pytest.fixture
-def main_window(request, tmpdir, qtbot):
+def main_window(request, monkeypatch):
     """Main Window fixture"""
+
+    # Disable loading of old third-party plugins
+    monkeypatch.setattr(
+        'spyder.app.mainwindow.get_spyderplugins_mods', lambda: [])
 
     # Don't show tours message
     CONF.set('tours', 'show_tour_message', False)
@@ -43,7 +47,3 @@ def main_window(request, tmpdir, qtbot):
     # Close main window
     window.close()
     CONF.reset_to_defaults(notification=False)
-
-    # Remove all dependencies (see spyder/dependencies.py)
-    import spyder.dependencies
-    spyder.dependencies.__dict__['DEPENDENCIES'] = []
