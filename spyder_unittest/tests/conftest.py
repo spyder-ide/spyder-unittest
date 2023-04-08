@@ -24,12 +24,8 @@ from spyder.config.manager import CONF
 
 
 @pytest.fixture
-def main_window(request, monkeypatch):
+def main_window(request):
     """Main Window fixture"""
-
-    # Disable loading of old third-party plugins
-    monkeypatch.setattr(
-        'spyder.app.mainwindow.get_spyderplugins_mods', lambda: [])
 
     # Don't show tours message
     CONF.set('tours', 'show_tour_message', False)
