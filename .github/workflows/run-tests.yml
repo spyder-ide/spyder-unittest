@@ -83,7 +83,7 @@ jobs:
       - name: Run tests (Linux)
         if: matrix.OS == 'ubuntu'
         shell: bash -l {0}
-        run: xvfb-run --auto-servernum pytest spyder_unittest --cov=spyder_unittest -x -vv
+        run: xvfb-run --auto-servernum pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
         timeout-minutes: 10
       - name: Run tests (Mac / Windows)
         if: matrix.OS != 'ubuntu'
@@ -92,5 +92,7 @@ jobs:
         timeout-minutes: 10
       - name: Upload coverage to Codecov
         if: matrix.OS == 'ubuntu' && matrix.PYTHON_VERSION == '3.10'
-        shell: bash -l {0}
-        run: codecov -t 3458851b-c7a5-4108-be5e-9d19066a2fde
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
