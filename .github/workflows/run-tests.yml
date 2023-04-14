@@ -15,20 +15,7 @@ jobs:
       matrix:
         OS: ['ubuntu', 'macos', 'windows']
         PYTHON_VERSION: ['3.8', '3.9', '3.10']
-        SPYDER_SOURCE: ['conda', 'git']
-        exclude:
-          - OS: 'macos'
-            PYTHON_VERSION: '3.8'
-            SPYDER_SOURCE: 'git'
-          - OS: 'macos'
-            PYTHON_VERSION: '3.9'
-            SPYDER_SOURCE: 'git'
-          - OS: 'windows'
-            PYTHON_VERSION: '3.8'
-            SPYDER_SOURCE: 'git'
-          - OS: 'windows'
-            PYTHON_VERSION: '3.9'
-            SPYDER_SOURCE: 'git'
+        SPYDER_SOURCE: ['git']
     name: ${{ matrix.OS }} py${{ matrix.PYTHON_VERSION }} spyder-from-${{ matrix.SPYDER_SOURCE }}
     runs-on: ${{ matrix.OS }}-latest
     env:
@@ -70,7 +57,14 @@ jobs:
         if: matrix.SPYDER_SOURCE == 'git'
         shell: bash -l {0}
         run: pip install --no-deps -e spyder
+      - name: Install plugin dependencies (without Spyder)
+        if: matrix.SPYDER_SOURCE == 'git'
+        shell: bash -l {0}
+        run: |
+          python .github/scripts/generate-without-spyder.py
+          mamba install --file requirements/without-spyder.txt -y
       - name: Install plugin dependencies
+        if: matrix.SPYDER_SOURCE == 'conda'
         shell: bash -l {0}
         run: mamba install --file requirements/conda.txt -y
       - name: Install test dependencies

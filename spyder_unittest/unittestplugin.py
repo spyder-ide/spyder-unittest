@@ -11,7 +11,8 @@ import os.path as osp
 
 # Third party imports
 from spyder.api.plugins import Plugins, SpyderDockablePlugin
-from spyder.api.plugin_registration.decorators import on_plugin_available
+from spyder.api.plugin_registration.decorators import (
+    on_plugin_available, on_plugin_teardown)
 from spyder.config.base import get_translation
 from spyder.config.gui import is_dark_interface
 from spyder.plugins.mainmenu.api import ApplicationMenus
@@ -33,7 +34,8 @@ class UnitTestPlugin(SpyderDockablePlugin):
     NAME = 'unittest'
     REQUIRES = []
     OPTIONAL = [Plugins.Editor, Plugins.MainMenu, Plugins.Preferences,
-                Plugins.Projects, Plugins.WorkingDirectory]
+                Plugins.Projects, Plugins.PythonpathManager,
+                Plugins.WorkingDirectory]
     TABIFY = [Plugins.VariableExplorer]
     WIDGET_CLASS = UnitTestWidget
 
@@ -86,7 +88,6 @@ class UnitTestPlugin(SpyderDockablePlugin):
         Setup the plugin.
         """
         self.update_pythonpath()
-        self.get_main().sig_pythonpath_changed.connect(self.update_pythonpath)
         self.get_widget().sig_newconfig.connect(self.save_config)
 
         self.create_action(
@@ -116,6 +117,14 @@ class UnitTestPlugin(SpyderDockablePlugin):
         self.get_widget().pre_test_hook = editor.save_all
         self.get_widget().sig_edit_goto.connect(self.goto_in_editor)
 
+    @on_plugin_teardown(plugin=Plugins.Editor)
+    def on_editor_teardown(self):
+        """
+        Disconnect from Editor plugin.
+        """
+        self.get_widget().pre_test_hook = None
+        self.get_widget().sig_edit_goto.disconnect(self.goto_in_editor)
+
     @on_plugin_available(plugin=Plugins.MainMenu)
     def on_main_menu_available(self):
         """
@@ -125,6 +134,15 @@ class UnitTestPlugin(SpyderDockablePlugin):
         run_action = self.get_action(UnitTestPluginActions.Run)
         mainmenu.add_item_to_application_menu(
             run_action, menu_id=ApplicationMenus.Run)
+
+    @on_plugin_teardown(plugin=Plugins.MainMenu)
+    def on_main_menu_teardown(self):
+        """
+        Remove 'Run unit tests; menu item from the application menu.
+        """
+        mainmenu = self.get_plugin(Plugins.MainMenu)
+        mainmenu.remove_item_from_application_menu(
+            UnitTestPluginActions.Run, menu_id=ApplicationMenus.Run)
 
     @on_plugin_available(plugin=Plugins.Preferences)
     def on_preferences_available(self):
@@ -148,6 +166,32 @@ class UnitTestPlugin(SpyderDockablePlugin):
         projects.sig_project_loaded.connect(self.handle_project_change)
         projects.sig_project_closed.connect(self.handle_project_change)
 
+    @on_plugin_teardown(plugin=Plugins.Projects)
+    def on_projects_teardown(self):
+        """
+        Disconnect from Projects plugin.
+        """
+        projects = self.get_plugin(Plugins.Projects)
+        projects.sig_project_created.disconnect(self.handle_project_change)
+        projects.sig_project_loaded.disconnect(self.handle_project_change)
+        projects.sig_project_closed.disconnect(self.handle_project_change)
+
+    @on_plugin_available(plugin=Plugins.PythonpathManager)
+    def on_pythonpath_manager_available(self):
+        """
+        Connect to signal announcing that Python path changed.
+        """
+        ppm = self.get_plugin(Plugins.PythonpathManager)
+        ppm.sig_pythonpath_changed.connect(self.update_pythonpath)
+
+    @on_plugin_teardown(plugin=Plugins.PythonpathManager)
+    def on_pythonpath_manager_teardown(self):
+        """
+        Disconnect from PythonpathManager plugin.
+        """
+        ppm = self.get_plugin(Plugins.PythonpathManager)
+        ppm.sig_pythonpath_changed.disconnect(self.update_pythonpath)
+
     @on_plugin_available(plugin=Plugins.WorkingDirectory)
     def on_working_directory_available(self):
         """
@@ -161,6 +205,15 @@ class UnitTestPlugin(SpyderDockablePlugin):
             self.update_default_wdir)
         self.update_default_wdir()
 
+    @on_plugin_teardown(plugin=Plugins.WorkingDirectory)
+    def on_working_directory_teardown(self):
+        """
+        Disconnect from WorkingDirectory plugin.
+        """
+        working_directory = self.get_plugin(Plugins.WorkingDirectory)
+        working_directory.sig_current_directory_changed.disconnect(
+            self.update_default_wdir)
+
     # --- UnitTestPlugin methods ----------------------------------------------
 
     def update_pythonpath(self):
@@ -171,7 +224,8 @@ class UnitTestPlugin(SpyderDockablePlugin):
         It synchronizes the Python path in the unittest widget with the Python
         path in Spyder.
         """
-        self.get_widget().pythonpath = self.get_main().get_spyder_pythonpath()
+        ppm = self.get_plugin(Plugins.PythonpathManager)
+        self.get_widget().pythonpath = ppm.get_spyder_pythonpath()
 
     def handle_project_change(self):
         """

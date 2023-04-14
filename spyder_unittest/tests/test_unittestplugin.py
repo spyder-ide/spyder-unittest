@@ -1,128 +1,165 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright © 2017 Spyder Project Contributors
+# Copyright © Spyder Project Contributors
 # Licensed under the terms of the MIT License
 # (see LICENSE.txt for details)
-"""Tests for unittestplugin.py"""
+"""
+Tests for the integration of the plugin with Spyder.
+
+All tests needs to be decorated with pytest.mark.order('last') to ensure
+that they are executed after all other tests because monkeypatching
+functions inside the plugin does not work after running these tests.
+
+The reason for this is not clear, but it may have to do with how plugins
+are imported in spyder/otherplugins.py.
+"""
+
+# Standard library imports
+from collections import OrderedDict
+import os
 
 # Third party imports
 import pytest
-from spyder.plugins.projects.api import EmptyProject
-from unittest.mock import MagicMock
+from qtpy.QtCore import Qt
+
+# Spyder imports
+from spyder.api.plugins import Plugins
+from spyder.plugins.mainmenu.api import ApplicationMenus
 
 # Local imports
 from spyder_unittest.unittestplugin import UnitTestPlugin
 from spyder_unittest.widgets.configdialog import Config
 
 
-class PluginForTesting(UnitTestPlugin):
-    CONF_FILE = False
+def test_menu_item(main_window):
+    """
+    Test that plugin adds item 'Run unit tests' to Run menu.
+    """
+    main_menu = main_window.get_plugin(Plugins.MainMenu)
+    run_menu = main_menu.get_application_menu(ApplicationMenus.Run)
 
-    def __init__(self, parent):
-        UnitTestPlugin.__init__(self, parent)
+    # Filter out seperators (indicated by action is None) and convert to text
+    menu_items = [action.text() for action in run_menu.get_actions() if action]
 
-
-@pytest.fixture
-def plugin(qtbot):
-    """Set up the unittest plugin."""
-    res = UnitTestPlugin(None, None)
-    res._main = MagicMock()
-    res._main.get_spyder_pythonpath = MagicMock(return_value='fakepythonpath')
-    res.initialize()
-    return res
+    assert 'Run unit tests' in menu_items
 
 
-@pytest.mark.skip('not clear how to test interactions between plugins')
-def test_plugin_initialization(plugin):
-    assert len(plugin.main.run_menu_actions) == 2
-    assert plugin.main.run_menu_actions[1].text() == 'Run unit tests'
+def test_pythonpath_change(main_window):
+    """
+    Test that pythonpath changes in Spyder propagate to UnitTestWidget.
+    """
+    ppm = main_window.get_plugin(Plugins.PythonpathManager)
+    unittest_plugin = main_window.get_plugin(UnitTestPlugin.NAME)
+
+    new_path = '/some/path'
+    new_path_dict = OrderedDict([(new_path, True)])
+    ppm.get_container()._update_python_path(new_path_dict)
+
+    assert unittest_plugin.get_widget().pythonpath == [new_path]
 
 
-def test_plugin_pythonpath(plugin):
-    # Test signal/slot connection
-    plugin.get_main().sig_pythonpath_changed.connect.assert_called_with(
-        plugin.update_pythonpath)
+def test_default_working_dir(main_window, tmpdir):
+    """
+    Test that plugin's default working dir is current working directory.
+    After creating a project, the plugin's default working dir should be the
+    same as the project directory. When the project is closed again, the 
+    plugin's default working dir should revert back to the current working
+    directory.
+    """
+    projects = main_window.get_plugin(Plugins.Projects)
+    unittest_plugin = main_window.get_plugin(UnitTestPlugin.NAME)
+    project_dir = str(tmpdir)
 
-    # Test pythonpath is set to path provided by Spyder
-    assert plugin.get_widget().pythonpath == 'fakepythonpath'
+    assert unittest_plugin.get_widget().default_wdir == os.getcwd()
 
-    # Test that change in path propagates
-    plugin.get_main().get_spyder_pythonpath = MagicMock(
-        return_value='anotherpath')
-    plugin.update_pythonpath()
-    assert plugin.get_widget().pythonpath == 'anotherpath'
+    projects._create_project(project_dir)
+    assert unittest_plugin.get_widget().default_wdir == project_dir
 
-
-@pytest.mark.skip('not clear how to test interactions between plugins')
-def test_plugin_wdir(plugin, monkeypatch, tmpdir):
-    # Test signal/slot connections
-    plugin.main.workingdirectory.sig_current_directory_changed.connect.assert_called_with(
-        plugin.update_default_wdir)
-    plugin.main.projects.sig_project_created.connect.assert_called_with(
-        plugin.handle_project_change)
-    plugin.main.projects.sig_project_loaded.connect.assert_called_with(
-        plugin.handle_project_change)
-    plugin.main.projects.sig_project_closed.connect.assert_called_with(
-        plugin.handle_project_change)
-
-    # Test default_wdir is set to current working dir
-    monkeypatch.setattr('spyder_unittest.unittestplugin.getcwd',
-                        lambda: 'fakecwd')
-    plugin.update_default_wdir()
-    assert plugin.unittestwidget.default_wdir == 'fakecwd'
-
-    # Test after opening project, default_wdir is set to project dir
-    project = EmptyProject(str(tmpdir))
-    plugin.main.projects.get_active_project = lambda: project
-    plugin.main.projects.get_active_project_path = lambda: project.root_path
-    plugin.handle_project_change()
-    assert plugin.unittestwidget.default_wdir == str(tmpdir)
-
-    # Test after closing project, default_wdir is set back to cwd
-    plugin.main.projects.get_active_project = lambda: None
-    plugin.main.projects.get_active_project_path = lambda: None
-    plugin.handle_project_change()
-    assert plugin.unittestwidget.default_wdir == 'fakecwd'
+    projects.close_project()
+    assert unittest_plugin.get_widget().default_wdir == os.getcwd()
 
 
-@pytest.mark.skip('not clear how to test interactions between plugins')
-def test_plugin_config(plugin, tmpdir, qtbot):
-    # Test config file does not exist and config is empty
+def test_plugin_config(main_window, tmpdir, qtbot):
+    """
+    Test that plugin uses the project's config file if a project is open.
+    """
+    projects = main_window.get_plugin(Plugins.Projects)
+    unittest_plugin = main_window.get_plugin(UnitTestPlugin.NAME)
+    unittest_widget = unittest_plugin.get_widget()
+    project_dir = str(tmpdir)
     config_file_path = tmpdir.join('.spyproject', 'config', 'unittest.ini')
+
+    # Test config file does not exist and config is empty
     assert not config_file_path.check()
-    assert plugin.unittestwidget.config is None
+    assert unittest_widget.config is None
 
     # Open project
-    project = EmptyProject(str(tmpdir))
-    plugin.main.projects.get_active_project = lambda: project
-    plugin.main.projects.get_active_project_path = lambda: project.root_path
-    plugin.handle_project_change()
+    projects._create_project(project_dir)
 
     # Test config file does exist but config is empty
     assert config_file_path.check()
     assert 'framework = ' in config_file_path.read().splitlines()
-    assert plugin.unittestwidget.config is None
+    assert unittest_widget.config is None
 
     # Set config and test that this is recorded in config file
     config = Config(framework='unittest', wdir=str(tmpdir))
-    with qtbot.waitSignal(plugin.unittestwidget.sig_newconfig):
-        plugin.unittestwidget.config = config
+    with qtbot.waitSignal(unittest_widget.sig_newconfig):
+        unittest_widget.config = config
     assert 'framework = unittest' in config_file_path.read().splitlines()
 
     # Close project and test that config is empty
-    plugin.main.projects.get_active_project = lambda: None
-    plugin.main.projects.get_active_project_path = lambda: None
-    plugin.handle_project_change()
-    assert plugin.unittestwidget.config is None
+    projects.close_project()
+    assert unittest_widget.config is None
 
     # Re-open project and test that config is correctly read
-    plugin.main.projects.get_active_project = lambda: project
-    plugin.main.projects.get_active_project_path = lambda: project.root_path
-    plugin.handle_project_change()
-    assert plugin.unittestwidget.config == config
+    projects.open_project(project_dir)
+    assert unittest_widget.config == config
+
+    # Close project before ending test, which removes the project dir
+    projects.close_project()
 
 
-@pytest.mark.skip('not clear how to test interactions between plugins')
-def test_plugin_goto_in_editor(plugin, qtbot):
-    plugin.unittestwidget.sig_edit_goto.emit('somefile', 42)
-    plugin.main.editor.load.assert_called_with('somefile', 43, '')
+def test_go_to_test_definition(main_window, tmpdir, qtbot):
+    """
+    Test that double clicking on a test result opens the file with the test
+    definition in the editor with the cursor on the test definition.
+    """
+    unittest_plugin = main_window.get_plugin(UnitTestPlugin.NAME)
+    unittest_widget = unittest_plugin.get_widget()
+    model = unittest_widget.testdatamodel
+    view = unittest_widget.testdataview
+
+    # Write test file
+    testdir_str = str(tmpdir)
+    testfile_str = tmpdir.join('test_foo.py').strpath
+    os.chdir(testdir_str)
+    with open(testfile_str, 'w') as f:
+        f.write("def test_ok(): assert 1+1 == 2\n"
+                "def test_fail(): assert 1+1 == 3\n")
+
+    # Run tests
+    config = Config(wdir=testdir_str, framework='pytest', coverage=False)
+    with qtbot.waitSignal(
+            unittest_widget.sig_finished, timeout=10000, raising=True):
+        unittest_widget.run_tests(config)
+
+    # Check that row 1 corresponds to `test_fail`
+    index = model.index(1, 1)
+    point = view.visualRect(index).center()
+    assert view.indexAt(point).data(Qt.DisplayRole).endswith('test_fail')
+
+    # Double click on `test_fail`
+    unittest_plugin.switch_to_plugin()
+    with qtbot.waitSignal(view.sig_edit_goto):
+        qtbot.mouseClick(view.viewport(), Qt.LeftButton, pos=point, delay=100)
+        qtbot.mouseDClick(view.viewport(), Qt.LeftButton, pos=point)
+
+    # Check that test file is opened in editor
+    editor = main_window.get_plugin(Plugins.Editor)
+    filename = editor.get_current_filename()
+    assert filename == testfile_str
+    
+    # Check that cursor is on line defining `test_fail`
+    cursor = editor.get_current_editor().textCursor()
+    line = cursor.block().text()
+    assert line.startswith('def test_fail')
