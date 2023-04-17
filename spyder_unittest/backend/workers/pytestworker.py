@@ -17,14 +17,11 @@ import sys
 # Third party imports
 import pytest
 
-# Local imports, needs to be relative otherwise it will fail if trying
-# to execute in a different env with only spyder-kernel installed
-try:
-    # this line is needed for the tests to succeed
-    from .zmqwriter import ZmqStreamWriter
-except:
-    # this line is needed for the plugin to work
-    from zmqwriter import ZmqStreamWriter
+# Local imports
+# Note that the script can be run in an environment that does not contain
+# spyder_unittest so `from spyder_unittest.xxx import xxx` does not work.
+from zmqwriter import ZmqStreamWriter
+
 
 class FileStub():
     """Stub for ZmqStreamWriter which instead writes to a file."""
