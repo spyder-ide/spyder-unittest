@@ -82,15 +82,34 @@ jobs:
           mamba list
       - name: Run tests (Linux)
         if: matrix.OS == 'ubuntu'
-        shell: bash -l {0}
-        run: xvfb-run --auto-servernum pytest spyder_unittest --cov=spyder_unittest -x -vv
-        timeout-minutes: 10
-      - name: Run tests (Mac / Windows)
-        if: matrix.OS != 'ubuntu'
-        shell: bash -l {0}
-        run: pytest spyder_unittest -x -vv
-        timeout-minutes: 10
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          shell: bash
+          command: |
+            . ~/.profile
+            xvfb-run --auto-servernum pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
+      - name: Run tests (MacOS)
+        if: matrix.OS == 'macos'
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          shell: bash
+          command: |
+            . ~/.profile
+            pytest spyder_unittest -x -vv
+      - name: Run tests (Windows)
+        if: matrix.OS == 'windows'
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: pytest spyder_unittest -x -vv
       - name: Upload coverage to Codecov
         if: matrix.OS == 'ubuntu' && matrix.PYTHON_VERSION == '3.10'
-        shell: bash -l {0}
-        run: codecov -t 3458851b-c7a5-4108-be5e-9d19066a2fde
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+

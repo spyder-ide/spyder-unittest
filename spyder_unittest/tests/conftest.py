@@ -24,7 +24,7 @@ from spyder.config.manager import CONF
 
 
 @pytest.fixture
-def main_window(request):
+def main_window():
     """Main Window fixture"""
 
     # Don't show tours message
