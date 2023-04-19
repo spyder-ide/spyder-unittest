@@ -26,7 +26,7 @@ Spyder-unittest is a plugin that integrates popular unit test frameworks
 with Spyder, allowing you to run test suites and view the results in the IDE.
 
 The plugin supports the `unittest` module in the Python standard library
-as well as the `pytest` and `nose` testing frameworks.
+as well as the `pytest` and `nose2` testing frameworks.
 Support for `pytest` is most complete at the moment.
 
 
@@ -76,10 +76,10 @@ The plugin has the following dependencies:
 * [spyder](https://github.com/spyder-ide/spyder) (obviously), at least version 4.0
 * [lxml](http://lxml.de/)
 * the testing framework that you will be using: [pytest](https://pytest.org)
-  and/or [nose](https://nose.readthedocs.io)
+  and/or [nose2](https://docs.nose2.io)
 
 In order to run the tests distributed with this plugin, you need
-[nose](https://nose.readthedocs.io), [pytest](https://pytest.org)
+[nose2](https://docs.nose2.io), [pytest](https://pytest.org)
 and [pytest-qt](https://github.com/pytest-dev/pytest-qt). If you use Python 2,
 you also need [mock](https://github.com/testing-cabal/mock).
 

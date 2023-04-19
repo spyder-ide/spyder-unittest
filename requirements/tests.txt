@@ -1,5 +1,5 @@
 flaky
-nose
+nose2
 pytest>=5
 pytest-cov
 pytest-qt

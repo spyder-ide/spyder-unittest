@@ -37,23 +37,21 @@ def get_pytest_info():
             'plugins': plugins}
 
 
-def get_nose_info():
-    """Return information about nose."""
-    from pkg_resources import iter_entry_points
+def get_nose2_info():
+    """
+    Return information about nose2.
+
+    This only returns the version of nose2. The function does not gather any
+    information about plugins.
+    """
     try:
-        import nose
+        import nose2
     except ImportError:
         return {'available': False}
 
-    plugins = {}
-    for entry_point, _ in (nose.plugins.manager.EntryPointPluginManager
-                           .entry_points):
-        for ep in iter_entry_points(entry_point):
-            plugins[ep.dist.project_name] = ep.dist.version
-
     return {'available': True,
-            'version': nose.__version__,
-            'plugins': plugins}
+            'version': nose2.__version__,
+            'plugins': {}}
 
 
 def get_unittest_info():
@@ -75,11 +73,11 @@ def get_all_info():
     Information is returned as a dictionary like the following:
     {'pytest': {'available': True, 'version': '7.1.1',
                 'plugins': {'flaky': '3.7.0', 'pytest-mock': '3.6.1'}},
-     'nose': {'available': False},
+     'nose2': {'available': False},
      'unittest': {'available': True, 'version': '3.10.5', 'plugins': {}}}
     """
     return {'pytest': get_pytest_info(),
-            'nose': get_nose_info(),
+            'nose2': get_nose2_info(),
             'unittest': get_unittest_info()}
 
 
