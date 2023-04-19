@@ -5,6 +5,8 @@
 # (see LICENSE.txt for details)
 """Support for unittest framework."""
 
+from __future__ import annotations
+
 # Standard library imports
 import os.path as osp
 

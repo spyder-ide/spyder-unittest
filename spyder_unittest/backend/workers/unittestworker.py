@@ -16,6 +16,8 @@ Here, port is the port number of the ZMQ socket. Use `file` to store the
 results in the file `unittestworker.json`.
 """
 
+from __future__ import annotations
+
 # Standard library imports
 import sys
 from typing import ClassVar
