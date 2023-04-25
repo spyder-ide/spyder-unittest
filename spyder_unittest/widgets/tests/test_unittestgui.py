@@ -206,14 +206,46 @@ def test_run_tests_using_unittest_and_display_results(
     MockQMessageBox.assert_not_called()
     model = widget.testdatamodel
     assert model.rowCount() == 2
-    assert model.index(0, 0).data(Qt.DisplayRole) == 'FAIL'
+    assert model.index(0, 0).data(Qt.DisplayRole) == 'failure'
     assert model.index(0, 1).data(Qt.DisplayRole) == 't.M.test_fail'
     assert model.index(0, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_fail'
-    assert model.index(0, 2).data(Qt.DisplayRole) == ''
-    assert model.index(1, 0).data(Qt.DisplayRole) == 'ok'
+    assert model.index(1, 0).data(Qt.DisplayRole) == 'success'
     assert model.index(1, 1).data(Qt.DisplayRole) == 't.M.test_ok'
     assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_ok'
     assert model.index(1, 2).data(Qt.DisplayRole) == ''
+
+def test_run_tests_with_print_using_unittest_and_display_results(
+        qtbot, widget, tmpdir, monkeypatch):
+    """
+    Run a failing test which print to stderr using unittest and check
+    that it is displayed as a failing test.
+    Regression test for spyder-ide/spyder-unittest#160.
+    """
+    os.chdir(tmpdir.strpath)
+    testfilename = tmpdir.join('test_foo.py').strpath
+
+    with open(testfilename, 'w') as f:
+        f.write("import sys\n"
+                "import unittest\n"
+                "class MyTest(unittest.TestCase):\n"
+                "    def test_fail(self):\n"
+                "        print('text', file=sys.stderr)\n"
+                "        self.assertEqual(1+1, 3)\n"
+                "    def test_ok(self): self.assertEqual(1+1, 2)\n")
+
+    MockQMessageBox = Mock()
+    monkeypatch.setattr('spyder_unittest.widgets.unittestgui.QMessageBox',
+                        MockQMessageBox)
+
+    config = Config(wdir=tmpdir.strpath, framework='unittest', coverage=False)
+    with qtbot.waitSignal(widget.sig_finished, timeout=10000, raising=True):
+        widget.run_tests(config)
+
+    MockQMessageBox.assert_not_called()
+    model = widget.testdatamodel
+    assert model.rowCount() == 2
+    assert model.index(0, 0).data(Qt.DisplayRole) == 'failure'
+    assert model.index(1, 0).data(Qt.DisplayRole) == 'success'
 
 @pytest.mark.parametrize('framework', ['unittest', 'pytest', 'nose2'])
 def test_run_with_no_tests_discovered_and_display_results(

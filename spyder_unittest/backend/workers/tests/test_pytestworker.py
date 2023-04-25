@@ -7,14 +7,22 @@
 
 # Standard library imports
 import os
+import os.path as osp
+import sys
 from unittest.mock import create_autospec, MagicMock, Mock
 
 # Third party imports
 import pytest
 
 # Local imports
+# Local imports
+# Modules in spyder_unittest.backend.workers assume that their directory
+# is in `sys.path`, so add that directory to the path.
+old_path = sys.path
+sys.path.insert(0, osp.join(osp.dirname(__file__), osp.pardir))
 from spyder_unittest.backend.workers.pytestworker import SpyderPlugin, main
 from spyder_unittest.backend.workers.zmqwriter import ZmqStreamWriter
+sys.path = old_path
 
 
 class EmptyClass:

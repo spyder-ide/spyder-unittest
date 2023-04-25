@@ -22,13 +22,13 @@ import zmq
 class ZmqStreamWriter:
     """Writer for sending stream of Python object over a ZMQ stream."""
 
-    def __init__(self, port):
+    def __init__(self, port: str) -> None:
         """
         Constructor.
 
         Arguments
         ---------
-        port : int
+        port : str
             TCP port number to be used for the stream. This should equal the
             `port` attribute of the corresponding `ZmqStreamReader`.
         """
@@ -36,13 +36,29 @@ class ZmqStreamWriter:
         self.socket = context.socket(zmq.PAIR)
         self.socket.connect('tcp://localhost:{}'.format(port))
 
-    def write(self, obj):
+    def write(self, obj: object) -> None:
         """Write arbitrary Python object to stream."""
         self.socket.send_pyobj(obj)
 
-    def close(self):
+    def close(self) -> None:
         """Close stream."""
         self.socket.close()
+
+
+class FileStub(ZmqStreamWriter):
+    """Stub for ZmqStreamWriter which instead writes to a file."""
+
+    def __init__(self, filename: str) -> None:
+        """Constructor; connect to specified filename."""
+        self.file = open(filename, 'w')
+
+    def write(self, obj: object) -> None:
+        """Write Python object to file."""
+        self.file.write(str(obj) + '\n')
+
+    def close(self) -> None:
+        """Close file."""
+        self.file.close()
 
 
 if __name__ == '__main__':
