@@ -5,13 +5,6 @@
 # (see LICENSE.txt for details)
 """
 Tests for the integration of the plugin with Spyder.
-
-All tests needs to be decorated with pytest.mark.order('last') to ensure
-that they are executed after all other tests because monkeypatching
-functions inside the plugin does not work after running these tests.
-
-The reason for this is not clear, but it may have to do with how plugins
-are imported in spyder/otherplugins.py.
 """
 
 # Standard library imports
@@ -19,7 +12,6 @@ from collections import OrderedDict
 import os
 
 # Third party imports
-import pytest
 from qtpy.QtCore import Qt
 
 # Spyder imports
