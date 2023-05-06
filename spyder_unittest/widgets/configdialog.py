@@ -12,7 +12,6 @@ The main entry point is `ask_for_config()`.
 # Standard library imports
 from collections import namedtuple
 from os import getcwd
-from pkgutil import find_loader as find_spec_or_loader
 import os.path as osp
 
 # Third party imports
@@ -192,6 +191,14 @@ def ask_for_config(frameworks, config, versions, parent=None):
 
 if __name__ == '__main__':
     app = QApplication([])
-    frameworks = ['nose', 'pytest', 'unittest']
-    config = Config(framework=None, wdir=getcwd(), coverage=False)
-    print(ask_for_config(frameworks, config))
+    frameworks = {
+        'nose2': object,
+        'unittest': object,
+        'pytest': object}
+    versions = {
+        'nose2': {'available': False},
+        'unittest': {'available': True},
+        'pytest': {'available': True, 'plugins': {'pytest-cov', '3.1.4'}}
+    }
+    config = Config(wdir=getcwd())
+    print(ask_for_config(frameworks, config, versions))
