@@ -27,10 +27,12 @@ class Nose2Runner(RunnerBase):
 
     def create_argument_list(self, config, cov_path):
         """Create argument list for testing process."""
-        return [
+        arguments = [
             '-m', self.module, '--plugin=nose2.plugins.junitxml',
             '--junit-xml', '--junit-xml-path={}'.format(self.resultfilename)
         ]
+        arguments += config.args
+        return arguments
 
     def finished(self):
         """Called when the unit test process has finished."""

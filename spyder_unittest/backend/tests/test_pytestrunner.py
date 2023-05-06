@@ -22,7 +22,7 @@ from spyder_unittest.widgets.configdialog import Config
 
 
 def test_pytestrunner_create_argument_list(monkeypatch):
-    config = Config()
+    config = Config(args=['--extra-arg'])
     cov_path = None
     MockZMQStreamReader = Mock()
     monkeypatch.setattr(
@@ -34,9 +34,11 @@ def test_pytestrunner_create_argument_list(monkeypatch):
     runner.reader = mock_reader
     monkeypatch.setattr('spyder_unittest.backend.pytestrunner.os.path.dirname',
                         lambda _: 'dir')
-    pyfile, port, *coverage = runner.create_argument_list(config, cov_path)
+    arg_list = runner.create_argument_list(config, cov_path)
+    pyfile, port, *coverage, last = arg_list
     assert pyfile == osp.join('dir', 'workers', 'pytestworker.py')
     assert port == '42'
+    assert last == '--extra-arg'
 
 
 def test_pytestrunner_start(monkeypatch):
