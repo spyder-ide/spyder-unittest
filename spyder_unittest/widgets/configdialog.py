@@ -9,9 +9,12 @@ Functionality for asking the user to specify the test configuration.
 The main entry point is `ask_for_config()`.
 """
 
+from __future__ import annotations
+
 # Standard library imports
 from os import getcwd
 import os.path as osp
+import shlex
 from typing import Optional, NamedTuple
 
 # Third party imports
@@ -34,6 +37,7 @@ class Config(NamedTuple):
     framework: Optional[str] = None
     wdir: str = ''
     coverage: bool = False
+    args: list[str] = []
 
 
 class ConfigDialog(QDialog):
@@ -97,6 +101,17 @@ class ConfigDialog(QDialog):
 
         layout.addSpacing(10)
 
+        args_layout = QHBoxLayout()
+        args_label = QLabel(_('Extra arguments:'))
+        args_layout.addWidget(args_label)
+        self.args_lineedit = QLineEdit(self)
+        args_toolTip = _('Extra command-line arguments when running tests')
+        self.args_lineedit.setToolTip(args_toolTip)
+        args_layout.addWidget(self.args_lineedit)
+        layout.addLayout(args_layout)
+
+        layout.addSpacing(10)
+
         wdir_label = QLabel(_('Directory from which to run tests'))
         layout.addWidget(wdir_label)
         wdir_layout = QHBoxLayout()
@@ -126,9 +141,10 @@ class ConfigDialog(QDialog):
             index = self.framework_combobox.findText(config.framework)
             if index != -1:
                 self.framework_combobox.setCurrentIndex(index)
-        self.wdir_lineedit.setText(config.wdir)
         self.coverage_checkbox.setChecked(config.coverage)
         self.enable_coverage_checkbox_if_available()
+        self.args_lineedit.setText(shlex.join(config.args))
+        self.wdir_lineedit.setText(config.wdir)
 
     @Slot(int)
     def framework_changed(self, index):
@@ -174,8 +190,12 @@ class ConfigDialog(QDialog):
         framework = self.framework_combobox.currentText()
         if framework == '':
             framework = None
+
+        args = self.args_lineedit.text()
+        args = shlex.split(args)
+
         return Config(framework=framework, wdir=self.wdir_lineedit.text(),
-                      coverage=self.coverage_checkbox.isChecked())
+                      coverage=self.coverage_checkbox.isChecked(), args=args)
 
 
 def ask_for_config(frameworks, config, versions, parent=None):
