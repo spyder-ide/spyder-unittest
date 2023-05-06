@@ -10,9 +10,9 @@ The main entry point is `ask_for_config()`.
 """
 
 # Standard library imports
-from collections import namedtuple
 from os import getcwd
 import os.path as osp
+from typing import Optional, NamedTuple
 
 # Third party imports
 from qtpy.compat import getexistingdirectory
@@ -30,8 +30,10 @@ except KeyError:
     import gettext
     _ = gettext.gettext
 
-Config = namedtuple('Config', ['framework', 'wdir', 'coverage'])
-Config.__new__.__defaults__ = (None, '', False)
+class Config(NamedTuple):
+    framework: Optional[str] = None
+    wdir: str = ''
+    coverage: bool = False
 
 
 class ConfigDialog(QDialog):
