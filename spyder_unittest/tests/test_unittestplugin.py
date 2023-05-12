@@ -72,7 +72,7 @@ def test_default_working_dir(main_window, tmpdir):
 
     assert unittest_plugin.get_widget().default_wdir == os.getcwd()
 
-    projects._create_project(project_dir)
+    projects.create_project(project_dir)
     assert unittest_plugin.get_widget().default_wdir == project_dir
 
     projects.close_project()
@@ -94,7 +94,7 @@ def test_plugin_config(main_window, tmpdir, qtbot):
     assert unittest_widget.config is None
 
     # Open project
-    projects._create_project(project_dir)
+    projects.create_project(project_dir)
 
     # Test config file does exist but config is empty
     assert config_file_path.check()

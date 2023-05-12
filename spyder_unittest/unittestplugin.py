@@ -10,6 +10,9 @@ from os import getcwd
 import os.path as osp
 
 # Third party imports
+from qtpy.QtCore import Qt
+
+# Spyder imports
 from spyder.api.plugins import Plugins, SpyderDockablePlugin
 from spyder.api.plugin_registration.decorators import (
     on_plugin_available, on_plugin_teardown)
@@ -41,11 +44,13 @@ class UnitTestPlugin(SpyderDockablePlugin):
 
     CONF_SECTION = NAME
     CONF_DEFAULTS = [(CONF_SECTION,
-                      {'framework': '', 'wdir': '', 'coverage': False})]
+                      {'framework': '', 'wdir': '', 'coverage': False}),
+                     ('shortcuts',
+                      {'unittest/Run tests': 'Alt+Shift+F11'})]
     CONF_NAMEMAP = {CONF_SECTION: [(CONF_SECTION,
                                     ['framework', 'wdir', 'coverage'])]}
     CONF_FILE = True
-    CONF_VERSION = '0.1.0'
+    CONF_VERSION = '0.2.0'
 
     # --- Mandatory SpyderDockablePlugin methods ------------------------------
 
@@ -96,8 +101,8 @@ class UnitTestPlugin(SpyderDockablePlugin):
             tip=_('Run unit tests'),
             icon=self.create_icon('profiler'),
             triggered=self.maybe_configure_and_start,
+            context=Qt.ApplicationShortcut,
             register_shortcut=True)
-        #  TODO: shortcut="Shift+Alt+F11"
 
     # ----- Set up interactions with other plugins ----------------------------
 
