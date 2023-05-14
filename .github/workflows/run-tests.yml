@@ -83,6 +83,7 @@ jobs:
       - name: Run tests (Linux)
         shell: bash -l {0}
         run: |
+          ulimit -c unlimited
           xvfb-run --auto-servernum python -m pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
           xvfb-run --auto-servernum python -m pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
           xvfb-run --auto-servernum python -m pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
@@ -90,6 +91,7 @@ jobs:
         if: always()
         shell: bash -l {0}
         run: |
+          ls -l
           find . \( -name "*.core" -o -name core \) -exec gdb --batch --quiet -ex "thread apply all bt" "$(readlink -f $(which python))" {} \;
       - name: Run tests (MacOS)
         if: matrix.OS == 'macos'
