@@ -84,9 +84,9 @@ jobs:
         shell: bash -l {0}
         run: |
           ulimit -c unlimited
-          python -m pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
-          python -m pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
-          python -m pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
+          xvfb-run --auto-servernum python -m pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
+          xvfb-run --auto-servernum python -m pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
+          xvfb-run --auto-servernum python -m pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
       - name: Run gdb (Linux)
         if: always()
         shell: bash -l {0}
