@@ -90,6 +90,9 @@ jobs:
         shell: bash -l {0}
         run: |
           ls -l
+          ls -l /var/lib/apport/coredump
+          ls -l /var/crash
+          cat /var/log/apport.log
           find . \( -name "*.core" -o -name core \) -exec gdb --batch --quiet -ex "thread apply all bt" "$(readlink -f $(which python))" {} \;
       - name: Run tests (MacOS)
         if: matrix.OS == 'macos'
