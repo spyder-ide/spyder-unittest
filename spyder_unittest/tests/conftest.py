@@ -19,8 +19,11 @@ import pytest
 from qtpy import QtWebEngineWidgets  # noqa
 
 # Spyder imports
+from spyder import dependencies
+from spyder.api.plugin_registration.registry import PLUGIN_REGISTRY
 from spyder.app import start
 from spyder.config.manager import CONF
+
 
 
 @pytest.fixture
@@ -31,7 +34,8 @@ def main_window():
     CONF.set('tours', 'show_tour_message', False)
     QApplication.processEvents()
 
-    from spyder.api.plugin_registration.registry import PLUGIN_REGISTRY
+    # Reset global state
+    dependencies.DEPENDENCIES = []
     PLUGIN_REGISTRY.reset()
 
     # Start the window
