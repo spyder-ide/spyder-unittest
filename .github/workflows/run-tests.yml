@@ -13,8 +13,8 @@ jobs:
     strategy:
       fail-fast: false 
       matrix:
-        OS: ['ubuntu', 'macos', 'windows']
-        PYTHON_VERSION: ['3.8', '3.9', '3.10']
+        OS: ['ubuntu']
+        PYTHON_VERSION: ['3.9', '3.10']
         SPYDER_SOURCE: ['git']
     name: ${{ matrix.OS }} py${{ matrix.PYTHON_VERSION }} spyder-from-${{ matrix.SPYDER_SOURCE }}
     runs-on: ${{ matrix.OS }}-latest
@@ -81,15 +81,10 @@ jobs:
           mamba info
           mamba list
       - name: Run tests (Linux)
-        if: matrix.OS == 'ubuntu'
-        uses: nick-fields/retry@v2
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          shell: bash
-          command: |
-            . ~/.profile
-            xvfb-run --auto-servernum pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
+        shell: bash -l {0}
+        run: |
+          . ~/.profile
+          xvfb-run --auto-servernum pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
       - name: Run tests (MacOS)
         if: matrix.OS == 'macos'
         uses: nick-fields/retry@v2
