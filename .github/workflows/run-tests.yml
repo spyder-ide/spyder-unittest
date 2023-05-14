@@ -84,7 +84,7 @@ jobs:
         shell: bash -l {0}
         run: |
           . ~/.profile
-          xvfb-run --auto-servernum python -m pytest -p no:faulthandler spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
+          xvfb-run --auto-servernum python -m pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
       - name: Run tests (MacOS)
         if: matrix.OS == 'macos'
         uses: nick-fields/retry@v2
