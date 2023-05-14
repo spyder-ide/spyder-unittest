@@ -87,7 +87,7 @@ jobs:
           xvfb-run --auto-servernum python -m pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
           xvfb-run --auto-servernum python -m pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
           xvfb-run --auto-servernum python -m pytest spyder_unittest --cov=spyder_unittest --cov-report=xml -vv
-	  find . \( -name "*.core" -o -name core \) -exec gdb --batch --quiet -ex "thread apply all bt" "$(readlink -f $(which python))" {} \;`
+          find . \( -name "*.core" -o -name core \) -exec gdb --batch --quiet -ex "thread apply all bt" "$(readlink -f $(which python))" {} \;`
       - name: Run tests (MacOS)
         if: matrix.OS == 'macos'
         uses: nick-fields/retry@v2
