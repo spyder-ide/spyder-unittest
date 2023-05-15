@@ -12,6 +12,7 @@ available for integration tests.
 
 # Third-party imports
 from qtpy.QtWidgets import QApplication
+from unittest import patch
 import pytest
 
 # QtWebEngineWidgets must be imported
@@ -39,8 +40,9 @@ def main_window():
     PLUGIN_REGISTRY.reset()
 
     # Start the window
-    window = start.main()
-    QApplication.processEvents()
+    with patch.object('spyder.app.mainwindow.MainWindow', 'start_open_files_server'):
+        window = start.main()
+        QApplication.processEvents()
 
     yield window
 
