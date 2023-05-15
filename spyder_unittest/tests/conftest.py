@@ -12,7 +12,7 @@ available for integration tests.
 
 # Third-party imports
 from qtpy.QtWidgets import QApplication
-from unittest import patch
+from unittest.mock import patch
 import pytest
 
 # QtWebEngineWidgets must be imported
@@ -24,7 +24,6 @@ from spyder import dependencies
 from spyder.api.plugin_registration.registry import PLUGIN_REGISTRY
 from spyder.app import start
 from spyder.config.manager import CONF
-
 
 
 @pytest.fixture
@@ -40,7 +39,7 @@ def main_window():
     PLUGIN_REGISTRY.reset()
 
     # Start the window
-    with patch.object('spyder.app.mainwindow.MainWindow', 'start_open_files_server'):
+    with patch('spyder.app.mainwindow.MainWindow.start_open_files_server'):
         window = start.main()
         QApplication.processEvents()
 
