@@ -47,4 +47,5 @@ def main_window():
 
     # Close main window
     window.close()
+    window = None
     CONF.reset_to_defaults(notification=False)
