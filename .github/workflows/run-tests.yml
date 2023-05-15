@@ -82,9 +82,9 @@ jobs:
         shell: bash -l {0}
         run: |
           ulimit -c unlimited
-          xvfb-run --auto-servernum python -X faulthandler -m pytest spyder_unittest -vv
-          xvfb-run --auto-servernum python -X faulthandler -m pytest spyder_unittest -vv
-          xvfb-run --auto-servernum python -X faulthandler -m pytest spyder_unittest -vv
+          xvfb-run --auto-servernum python -X dev -m pytest spyder_unittest -vv
+          xvfb-run --auto-servernum python -X dev -m pytest spyder_unittest -vv
+          xvfb-run --auto-servernum python -X dev -m pytest spyder_unittest -vv
       - name: Run gdb (Linux)
         if: always()
         shell: bash -l {0}
