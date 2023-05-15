@@ -13,7 +13,6 @@
 [![Windows status](https://github.com/spyder-ide/spyder-unittest/workflows/Windows%20tests/badge.svg)](https://github.com/spyder-ide/spyder-notebook/actions?query=workflow%3A%22Windows+tests%22)
 [![Linux status](https://github.com/spyder-ide/spyder-unittest/workflows/Linux%20tests/badge.svg)](https://github.com/spyder-ide/spyder-notebook/actions?query=workflow%3A%22Linux+tests%22)
 [![MacOS status](https://github.com/spyder-ide/spyder-unittest/workflows/Macos%20tests/badge.svg)](https://github.com/spyder-ide/spyder-notebook/actions?query=workflow%3A%22Macos+tests%22)
-[![codecov](https://codecov.io/gh/spyder-ide/spyder-unittest/branch/master/graph/badge.svg)](https://codecov.io/gh/spyder-ide/spyder-notebook/branch/master)
 [![Crowdin](https://badges.crowdin.net/spyder-unittest/localized.svg)](https://crowdin.com/project/spyder-unittest)
 
 *Copyright © 2014 Spyder Project Contributors*
