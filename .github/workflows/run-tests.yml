@@ -109,3 +109,9 @@ jobs:
           timeout_minutes: 10
           max_attempts: 3
           command: pytest spyder_unittest -x -vv
+      - name: Upload coverage to Codecov
+        if: matrix.OS == 'ubuntu' && matrix.PYTHON_VERSION == '3.10'
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
