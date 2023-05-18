@@ -20,9 +20,9 @@ from typing import Optional, NamedTuple
 # Third party imports
 from qtpy.compat import getexistingdirectory
 from qtpy.QtCore import Slot
-from qtpy.QtWidgets import (QApplication, QComboBox, QDialog, QDialogButtonBox,
-                            QHBoxLayout, QLabel, QLineEdit, QPushButton,
-                            QVBoxLayout, QCheckBox)
+from qtpy.QtWidgets import (
+    QApplication, QComboBox, QDialog, QDialogButtonBox, QGridLayout,
+    QHBoxLayout, QLabel, QLineEdit, QPushButton, QVBoxLayout, QCheckBox)
 from spyder.config.base import get_translation
 from spyder.utils import icon_manager as ima
 
@@ -51,6 +51,13 @@ class ConfigDialog(QDialog):
     the OK button.
     """
 
+    # Width of strut in the layout of the dialog window; this determines
+    # the width of the dialog
+    STRUT_WIDTH = 400
+
+    # Extra vertical space added between elements in the dialog
+    EXTRA_SPACE = 10
+
     def __init__(self, frameworks, config, versions, parent=None):
         """
         Construct a dialog window.
@@ -70,10 +77,14 @@ class ConfigDialog(QDialog):
         self.versions = versions
         self.setWindowTitle(_('Configure tests'))
         layout = QVBoxLayout(self)
+        layout.addStrut(self.STRUT_WIDTH)
 
-        framework_layout = QHBoxLayout()
-        framework_label = QLabel(_('Test framework'))
-        framework_layout.addWidget(framework_label)
+        grid_layout = QGridLayout()
+
+        # Combo box for selecting the test framework
+
+        framework_label = QLabel(_('Test framework:'))
+        grid_layout.addWidget(framework_label, 0, 0)
 
         self.framework_combobox = QComboBox(self)
         for ix, (name, runner) in enumerate(sorted(frameworks.items())):
@@ -84,11 +95,25 @@ class ConfigDialog(QDialog):
                 label = '{} ({})'.format(name, _('not available'))
             self.framework_combobox.addItem(label)
             self.framework_combobox.model().item(ix).setEnabled(installed)
+        grid_layout.addWidget(self.framework_combobox, 0, 1)
 
-        framework_layout.addWidget(self.framework_combobox)
-        layout.addLayout(framework_layout)
+        # Line edit field for adding extra command-line arguments
 
-        layout.addSpacing(10)
+        args_label = QLabel(_('Command-line arguments:'))
+        grid_layout.addWidget(args_label, 1, 0)
+
+        self.args_lineedit = QLineEdit(self)
+        args_toolTip = _('Extra command-line arguments when running tests')
+        self.args_lineedit.setToolTip(args_toolTip)
+        grid_layout.addWidget(self.args_lineedit, 1, 1)
+
+        layout.addLayout(grid_layout)
+        spacing = grid_layout.verticalSpacing() + self.EXTRA_SPACE
+        grid_layout.setVerticalSpacing(spacing)
+
+        layout.addSpacing(self.EXTRA_SPACE)
+
+        # Checkbox for enabling coverage report
 
         coverage_label = _('Include coverage report in output')
         coverage_toolTip = _('Works only for pytest, requires pytest-cov')
@@ -99,20 +124,11 @@ class ConfigDialog(QDialog):
         coverage_layout.addWidget(self.coverage_checkbox)
         layout.addLayout(coverage_layout)
 
-        layout.addSpacing(10)
+        layout.addSpacing(self.EXTRA_SPACE)
 
-        args_layout = QHBoxLayout()
-        args_label = QLabel(_('Extra arguments:'))
-        args_layout.addWidget(args_label)
-        self.args_lineedit = QLineEdit(self)
-        args_toolTip = _('Extra command-line arguments when running tests')
-        self.args_lineedit.setToolTip(args_toolTip)
-        args_layout.addWidget(self.args_lineedit)
-        layout.addLayout(args_layout)
+        # Line edit field for selecting directory
 
-        layout.addSpacing(10)
-
-        wdir_label = QLabel(_('Directory from which to run tests'))
+        wdir_label = QLabel(_('Directory from which to run tests:'))
         layout.addWidget(wdir_label)
         wdir_layout = QHBoxLayout()
         self.wdir_lineedit = QLineEdit(self)
@@ -123,7 +139,9 @@ class ConfigDialog(QDialog):
         wdir_layout.addWidget(self.wdir_button)
         layout.addLayout(wdir_layout)
 
-        layout.addSpacing(20)
+        layout.addSpacing(2 * self.EXTRA_SPACE)
+
+        # OK and Cancel buttons at the bottom
 
         self.buttons = QDialogButtonBox(QDialogButtonBox.Ok |
                                         QDialogButtonBox.Cancel)
@@ -135,6 +153,8 @@ class ConfigDialog(QDialog):
         self.ok_button.setEnabled(False)
         self.framework_combobox.currentIndexChanged.connect(
             self.framework_changed)
+
+        # Set initial values to agree with the given config
 
         self.framework_combobox.setCurrentIndex(-1)
         if config.framework:
