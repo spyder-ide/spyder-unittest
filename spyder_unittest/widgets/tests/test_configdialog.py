@@ -49,7 +49,7 @@ versions = {
 
 
 def default_config():
-    return Config(framework=None, wdir=os.getcwd(), coverage=False)
+    return Config(framework=None, wdir=os.getcwd(), coverage=False, args=[])
 
 
 def test_configdialog_uses_frameworks(qtbot):
@@ -76,12 +76,13 @@ def test_configdialog_disables_unavailable_frameworks(qtbot):
 
 
 def test_configdialog_sets_initial_config(qtbot):
-    config = default_config()
+    config = Config(framework='pytest', wdir='/some/dir',
+                    coverage=True, args=['some', 'arg'])
     configdialog = ConfigDialog(frameworks, config, versions)
     assert configdialog.get_config() == config
 
 
-def test_configdialog_click_ham(qtbot):
+def test_configdialog_click_pytest(qtbot):
     configdialog = ConfigDialog(frameworks, default_config(), versions)
     qtbot.addWidget(configdialog)
     configdialog.framework_combobox.setCurrentIndex(1)
@@ -123,6 +124,13 @@ def test_configdialog_coverage_checkbox_pytestcov_noinstall(qtbot, monkeypatch):
     qtbot.addWidget(configdialog)
     configdialog.framework_combobox.setCurrentIndex(1)
     assert configdialog.coverage_checkbox.isEnabled() is False
+
+
+def test_configdialog_args_lineedit(qtbot):
+    configdialog = ConfigDialog(frameworks, default_config(), versions)
+    qtbot.addWidget(configdialog)
+    configdialog.args_lineedit.setText('-x "ham and" spam')
+    assert configdialog.get_config().args == ['-x', 'ham and', 'spam']
 
 
 def test_configdialog_wdir_lineedit(qtbot):

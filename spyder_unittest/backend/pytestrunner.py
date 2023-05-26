@@ -36,8 +36,8 @@ class PyTestRunner(RunnerBase):
         arguments = [pyfile, str(self.reader.port)]
         if config.coverage:
             arguments += [f'--cov={cov_path}', '--cov-report=term-missing']
+        arguments += config.args
         return arguments
-
 
     def start(self, config, cov_path, executable, pythonpath):
         """Start process which will run the unit test suite."""

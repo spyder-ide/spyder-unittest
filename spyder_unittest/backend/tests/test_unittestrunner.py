@@ -20,7 +20,7 @@ def test_unittestrunner_create_argument_list(monkeypatch):
     """
     Test that UnittestRunner.createArgumentList() returns the expected list.
     """
-    config = Config()
+    config = Config(args=['--extra-arg'])
     cov_path = None
     MockZMQStreamReader = Mock()
     monkeypatch.setattr(
@@ -37,7 +37,7 @@ def test_unittestrunner_create_argument_list(monkeypatch):
     result = runner.create_argument_list(config, cov_path)
 
     pyfile = osp.join('dir', 'workers', 'unittestworker.py')
-    assert result == [pyfile, '42']
+    assert result == [pyfile, '42', '--extra-arg']
 
 
 def test_unittestrunner_start(monkeypatch):

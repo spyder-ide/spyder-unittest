@@ -27,6 +27,7 @@ class UnittestRunner(RunnerBase):
         dirname = osp.dirname(__file__)
         pyfile = osp.join(dirname, 'workers', 'unittestworker.py')
         arguments = [pyfile, str(self.reader.port)]
+        arguments += config.args
         return arguments
 
     def start(self, config: Config, cov_path: str, executable: str,
