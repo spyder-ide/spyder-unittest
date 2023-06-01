@@ -92,7 +92,6 @@ class UnitTestPlugin(SpyderDockablePlugin):
         """
         Setup the plugin.
         """
-        self.update_pythonpath()
         self.get_widget().sig_newconfig.connect(self.save_config)
 
         self.create_action(
