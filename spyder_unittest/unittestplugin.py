@@ -48,7 +48,7 @@ class UnitTestPlugin(SpyderDockablePlugin):
                       {'framework': '',
                        'wdir': '',
                        'coverage': False,
-                       'abbrev_test_names': True}),
+                       'abbrev_test_names': False}),
                      ('shortcuts',
                       {'unittest/Run tests': 'Alt+Shift+F11'})]
     CONF_NAMEMAP = {CONF_SECTION: [(CONF_SECTION,

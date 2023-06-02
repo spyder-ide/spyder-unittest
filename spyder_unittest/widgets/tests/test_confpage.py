@@ -159,14 +159,14 @@ def test_unittestconfigpage(config_dialog):
     widget = config_dialog.get_page()
 
     # Assert default value of option in True
-    assert widget.get_option('abbrev_test_names') is True
+    assert widget.get_option('abbrev_test_names') is False
 
     # Toggle checkbox and assert that option value is now False
     widget.abbrev_box.click()
     dlg.apply_btn.click()
-    assert widget.get_option('abbrev_test_names') is False
+    assert widget.get_option('abbrev_test_names') is True
 
     # Reset options to default and check that option value is True again
     # Note: it is necessary to specify the section in reset_to_defaults()
     CONF.reset_to_defaults(section='unittest', notification=False)
-    assert widget.get_option('abbrev_test_names') is True
+    assert widget.get_option('abbrev_test_names') is False

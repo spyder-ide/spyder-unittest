@@ -321,7 +321,7 @@ class TestDataModel(QAbstractItemModel, SpyderConfigurationAccessor):
                 # don't abbreviate for the code coverage filename
                 if self.testresults[row].category == Category.COVERAGE:
                     return name
-                if self.get_conf('abbrev_test_names', True):
+                if self.get_conf('abbrev_test_names', False):
                     return self.abbreviator.abbreviate(name)
                 else:
                     return name
