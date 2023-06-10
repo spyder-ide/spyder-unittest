@@ -10,6 +10,7 @@ from os import getcwd
 import os.path as osp
 
 # Third party imports
+import qtawesome
 from qtpy.QtCore import Qt
 
 # Spyder imports
@@ -19,6 +20,7 @@ from spyder.api.plugin_registration.decorators import (
 from spyder.config.base import get_translation
 from spyder.config.gui import is_dark_interface
 from spyder.plugins.mainmenu.api import ApplicationMenus
+from spyder.utils.palette import SpyderPalette
 
 # Local imports
 from spyder_unittest.widgets.configdialog import Config
@@ -91,7 +93,7 @@ class UnitTestPlugin(SpyderDockablePlugin):
         QIcon
             QIcon instance
         """
-        return self.create_icon('profiler')
+        return qtawesome.icon('mdi.test-tube', color=SpyderPalette.ICON_1)
 
     def on_initialize(self):
         """
@@ -103,7 +105,7 @@ class UnitTestPlugin(SpyderDockablePlugin):
             UnitTestPluginActions.Run,
             text=_('Run unit tests'),
             tip=_('Run unit tests'),
-            icon=self.create_icon('profiler'),
+            icon=self.get_icon(),
             triggered=self.maybe_configure_and_start,
             context=Qt.ApplicationShortcut,
             register_shortcut=True)
