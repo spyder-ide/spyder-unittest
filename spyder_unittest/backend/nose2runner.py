@@ -5,12 +5,19 @@
 # (see LICENSE.txt for details)
 """Support for Nose framework."""
 
+from __future__ import annotations
+
+# Standard library imports
+from typing import Optional, TYPE_CHECKING
+
 # Third party imports
 from lxml import etree
 from spyder.config.base import get_translation
 
 # Local imports
 from spyder_unittest.backend.runnerbase import Category, RunnerBase, TestResult
+if TYPE_CHECKING:
+    from spyder_unittest.widgets.configdialog import Config
 
 try:
     _ = get_translation('spyder_unittest')
@@ -25,7 +32,8 @@ class Nose2Runner(RunnerBase):
     module = 'nose2'
     name = 'nose2'
 
-    def create_argument_list(self, config, cov_path):
+    def create_argument_list(self, config: Config,
+                             cov_path: Optional[str]) -> list[str]:
         """Create argument list for testing process."""
         arguments = [
             '-m', self.module, '--plugin=nose2.plugins.junitxml',
@@ -34,13 +42,13 @@ class Nose2Runner(RunnerBase):
         arguments += config.args
         return arguments
 
-    def finished(self):
+    def finished(self, exitcode: int) -> None:
         """Called when the unit test process has finished."""
         output = self.read_all_process_output()
         testresults = self.load_data()
         self.sig_finished.emit(testresults, output, True)
 
-    def load_data(self):
+    def load_data(self) -> list[TestResult]:
         """
         Read and parse unit test results.
 
@@ -56,7 +64,7 @@ class Nose2Runner(RunnerBase):
         try:
             data = etree.parse(self.resultfilename).getroot()
         except OSError:
-            data = []
+            return []
 
         testresults = []
         for testcase in data:

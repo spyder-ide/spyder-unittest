@@ -5,13 +5,22 @@
 # (see LICENSE.txt for details)
 """Classes for running tests within various frameworks."""
 
+from __future__ import annotations
+
 # Standard library imports
+from enum import IntEnum
 import os
 import tempfile
+from typing import ClassVar, Optional, TYPE_CHECKING
 
 # Third party imports
-from qtpy.QtCore import (QObject, QProcess, QProcessEnvironment, QTextCodec,
-                         Signal)
+from qtpy.QtCore import (
+    QObject, QProcess, QProcessEnvironment, QTextCodec, Signal)
+
+# Local imports
+if TYPE_CHECKING:
+    from spyder_unittest.widgets.configdialog import Config
+    from spyder_unittest.widgets.unittestgui import UnitTestWidget
 
 
 # if generating coverage report, use this name for the TestResult
@@ -19,7 +28,7 @@ from qtpy.QtCore import (QObject, QProcess, QProcessEnvironment, QTextCodec,
 COV_TEST_NAME = 'Total Test Coverage'
 
 
-class Category:
+class Category(IntEnum):
     """Enum type representing category of test result."""
 
     FAIL = 1
@@ -34,21 +43,12 @@ class TestResult:
 
     __test__ = False  # this is not a pytest test class
 
-    def __init__(self, category, status, name, message='', time=None,
-                 extra_text='', filename=None, lineno=None):
+    def __init__(self, category: Category, status: str, name: str,
+                 message: str = '', time: Optional[float] = None,
+                 extra_text: str = '', filename: Optional[str] = None,
+                 lineno: Optional[int] = None):
         """
         Construct a test result.
-
-        Parameters
-        ----------
-        category : Category
-        status : str
-        name : str
-        message : str
-        time : float or None
-        extra_text : str
-        filename : str or None
-        lineno : int or None
         """
         self.category = category
         self.status = status
@@ -63,8 +63,10 @@ class TestResult:
         self.filename = filename
         self.lineno = lineno
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """Test for equality."""
+        if not isinstance(other, TestResult):
+            return NotImplemented
         return self.__dict__ == other.__dict__
 
 
@@ -108,6 +110,9 @@ class RunnerBase(QObject):
         Emitted when test process is being stopped.
     """
 
+    module: ClassVar[str]
+    name: ClassVar[str]
+
     sig_collected = Signal(object)
     sig_collecterror = Signal(object)
     sig_starttest = Signal(object)
@@ -115,7 +120,8 @@ class RunnerBase(QObject):
     sig_finished = Signal(object, str, bool)
     sig_stop = Signal()
 
-    def __init__(self, widget, resultfilename=None):
+    def __init__(self, widget: UnitTestWidget,
+                 resultfilename: Optional[str] = None):
         """
         Construct test runner.
 
@@ -127,14 +133,15 @@ class RunnerBase(QObject):
             Name of file in which to store test results. If None, use default.
         """
         QObject.__init__(self, widget)
-        self.process = None
+        self.process: Optional[QProcess] = None
         if resultfilename is None:
             self.resultfilename = os.path.join(tempfile.gettempdir(),
                                                'unittest.results')
         else:
             self.resultfilename = resultfilename
 
-    def create_argument_list(self, config, cov_path):
+    def create_argument_list(self, config: Config,
+                             cov_path: Optional[str]) -> list[str]:
         """
         Create argument list for testing process (dummy).
 
@@ -142,7 +149,8 @@ class RunnerBase(QObject):
         """
         raise NotImplementedError
 
-    def _prepare_process(self, config, pythonpath):
+    def _prepare_process(self, config: Config,
+                         pythonpath: list[str]) -> QProcess:
         """
         Prepare and return process for running the unit test suite.
 
@@ -154,7 +162,7 @@ class RunnerBase(QObject):
         process.finished.connect(self.finished)
         if pythonpath:
             env = QProcessEnvironment.systemEnvironment()
-            old_python_path = env.value('PYTHONPATH', None)
+            old_python_path = env.value('PYTHONPATH', '')
             python_path_str = os.pathsep.join(pythonpath)
             if old_python_path:
                 python_path_str += os.pathsep + old_python_path
@@ -162,7 +170,8 @@ class RunnerBase(QObject):
             process.setProcessEnvironment(env)
         return process
 
-    def start(self, config, cov_path, executable, pythonpath):
+    def start(self, config: Config, cov_path: Optional[str],
+              executable: str, pythonpath: list[str]) -> None:
         """
         Start process which will run the unit test suite.
 
@@ -174,7 +183,7 @@ class RunnerBase(QObject):
 
         Parameters
         ----------
-        config : TestConfig
+        config : Config
             Unit test configuration.
         cov_path : str or None
             Path to filter source for coverage report
@@ -199,7 +208,7 @@ class RunnerBase(QObject):
         if not running:
             raise RuntimeError
 
-    def finished(self):
+    def finished(self, exitcode: int) -> None:
         """
         Called when the unit test process has finished.
 
@@ -208,13 +217,14 @@ class RunnerBase(QObject):
         """
         raise NotImplementedError
 
-    def read_all_process_output(self):
+    def read_all_process_output(self) -> str:
         """Read and return all output from `self.process` as unicode."""
+        assert self.process is not None
         qbytearray = self.process.readAllStandardOutput()
         locale_codec = QTextCodec.codecForLocale()
         return locale_codec.toUnicode(qbytearray.data())
 
-    def stop_if_running(self):
+    def stop_if_running(self) -> None:
         """Stop testing process if it is running."""
         if self.process and self.process.state() == QProcess.Running:
             self.process.kill()

@@ -28,7 +28,7 @@ def test_runnerbase_with_nonexisting_module():
         foo_runner.create_argument_list(config, 'cov_path')
 
     with pytest.raises(NotImplementedError):
-        foo_runner.finished()
+        foo_runner.finished(0)
 
 
 @pytest.mark.parametrize('pythonpath,env_pythonpath', [

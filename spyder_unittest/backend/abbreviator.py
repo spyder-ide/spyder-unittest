@@ -5,6 +5,23 @@
 # (see LICENSE.txt for details)
 """Class for abbreviating test names."""
 
+from __future__ import annotations
+
+# Standard imports
+from dataclasses import dataclass
+
+@dataclass
+class Abbreviation:
+    """
+    Abbreviation for one component of a test name.
+
+    Abbreviations are defined recursively, so `.head` is the abbreviation
+    for the first component and `.tail` specifies the abbreviations for the
+    second and later components.
+    """
+    head: str
+    tail: Abbreviator
+
 
 class Abbreviator:
     """
@@ -26,7 +43,7 @@ class Abbreviator:
         the higher-level components as its second element.
     """
 
-    def __init__(self, names=[]):
+    def __init__(self, names: list[str]=[]) -> None:
         """
         Constructor.
 
@@ -35,11 +52,11 @@ class Abbreviator:
         names : list of str
             list of words which needs to be abbreviated.
         """
-        self.dic = {}
+        self.dic: dict[str, Abbreviation] = {}
         for name in names:
             self.add(name)
 
-    def add(self, name):
+    def add(self, name: str) -> None:
         """
         Add name to list of names to be abbreviated.
 
@@ -61,18 +78,18 @@ class Abbreviator:
                        and len_abbrev < len(other)):
                     len_abbrev += 1
                 if len_abbrev == len(start):
-                    self.dic[other][0] = other[:len_abbrev + 1]
+                    self.dic[other].head = other[:len_abbrev + 1]
                 elif len_abbrev == len(other):
-                    self.dic[other][0] = other
+                    self.dic[other].head = other
                     len_abbrev += 1
                 else:
-                    if len(self.dic[other][0]) < len_abbrev:
-                        self.dic[other][0] = other[:len_abbrev]
+                    if len(self.dic[other].head) < len_abbrev:
+                        self.dic[other].head = other[:len_abbrev]
         else:
-            self.dic[start] = [start[:len_abbrev], Abbreviator()]
-        self.dic[start][1].add(rest)
+            self.dic[start] = Abbreviation(start[:len_abbrev], Abbreviator())
+        self.dic[start].tail.add(rest)
 
-    def abbreviate(self, name):
+    def abbreviate(self, name: str) -> str:
         """Return abbreviation of name."""
         if '[' in name:
             name, parameters = name.split('[', 1)
@@ -81,8 +98,8 @@ class Abbreviator:
             parameters = ''
         if '.' in name:
             start, rest = name.split('.', 1)
-            res = (self.dic[start][0]
-                   + '.' + self.dic[start][1].abbreviate(rest))
+            res = (self.dic[start].head
+                   + '.' + self.dic[start].tail.abbreviate(rest))
         else:
             res = name
         return res + parameters

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 # Standard library imports
 import os.path as osp
+from typing import Any, Optional
 
 # Local imports
 from spyder_unittest.widgets.configdialog import Config
@@ -22,7 +23,8 @@ class UnittestRunner(RunnerBase):
     module = 'unittest'
     name = 'unittest'
 
-    def create_argument_list(self, config: Config, cov_path: str) -> list[str]:
+    def create_argument_list(self, config: Config,
+                             cov_path: Optional[str]) -> list[str]:
         """Create argument list for testing process."""
         dirname = osp.dirname(__file__)
         pyfile = osp.join(dirname, 'workers', 'unittestworker.py')
@@ -30,15 +32,15 @@ class UnittestRunner(RunnerBase):
         arguments += config.args
         return arguments
 
-    def start(self, config: Config, cov_path: str, executable: str,
-              pythonpath: str) -> None:
+    def start(self, config: Config, cov_path: Optional[str],
+              executable: str, pythonpath: list[str]) -> None:
         """Start process which will run the unit test suite."""
         self.config = config
         self.reader = ZmqStreamReader()
         self.reader.sig_received.connect(self.process_output)
         super().start(config, cov_path, executable, pythonpath)
 
-    def finished(self) -> None:
+    def finished(self, exitcode: int) -> None:
         """
         Called when the unit test process has finished.
 
@@ -48,7 +50,7 @@ class UnittestRunner(RunnerBase):
         output = self.read_all_process_output()
         self.sig_finished.emit([], output, True)
 
-    def process_output(self, output: list[dict]) -> None:
+    def process_output(self, output: list[dict[str, Any]]) -> None:
         """
         Process output of test process.
 
@@ -78,7 +80,7 @@ class UnittestRunner(RunnerBase):
             self.sig_testresult.emit(result_list)
 
 
-def add_event_to_testresult(event: dict) -> TestResult:
+def add_event_to_testresult(event: dict[str, Any]) -> TestResult:
     """Convert an addXXX event sent by test process to a TestResult."""
     status = event['event'][3].lower() + event['event'][4:]
     if status in ('error', 'failure', 'unexpectedSuccess'):

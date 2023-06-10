@@ -36,7 +36,7 @@ class ZmqStreamReader(QObject):
 
     sig_received = Signal(object)
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Constructor; also constructs ZMQ stream."""
         super().__init__()
         self.context = zmq.Context()
@@ -46,7 +46,7 @@ class ZmqStreamReader(QObject):
         self.notifier = QSocketNotifier(fid, QSocketNotifier.Read, self)
         self.notifier.activated.connect(self.received_message)
 
-    def received_message(self):
+    def received_message(self) -> None:
         """Called when a message is received."""
         self.notifier.setEnabled(False)
         messages = []
@@ -61,7 +61,7 @@ class ZmqStreamReader(QObject):
         if messages:
             self.sig_received.emit(messages)
 
-    def close(self):
+    def close(self) -> None:
         """Read any remaining messages and close stream."""
         self.received_message()  # Flush remaining messages
         self.notifier.setEnabled(False)
