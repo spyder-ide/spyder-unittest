@@ -141,7 +141,8 @@ class RunnerBase(QObject):
             self.resultfilename = resultfilename
 
     def create_argument_list(self, config: Config,
-                             cov_path: Optional[str]) -> list[str]:
+                             cov_path: Optional[str],
+                             single_test: Optional[str]) -> list[str]:
         """
         Create argument list for testing process (dummy).
 
@@ -171,7 +172,8 @@ class RunnerBase(QObject):
         return process
 
     def start(self, config: Config, cov_path: Optional[str],
-              executable: str, pythonpath: list[str]) -> None:
+              executable: str, pythonpath: list[str],
+              single_test: Optional[str]) -> None:
         """
         Start process which will run the unit test suite.
 
@@ -183,14 +185,17 @@ class RunnerBase(QObject):
 
         Parameters
         ----------
-        config : Config
+        config
             Unit test configuration.
-        cov_path : str or None
+        cov_path
             Path to filter source for coverage report
-        executable : str
+        executable
             Path to Python executable
-        pythonpath : list of str
+        pythonpath
             List of directories to be added to the Python path
+        single_test
+            If None, run all tests; otherwise, it is the name of the only test
+            to be run.
 
         Raises
         ------
@@ -198,7 +203,7 @@ class RunnerBase(QObject):
             If process failed to start.
         """
         self.process = self._prepare_process(config, pythonpath)
-        p_args = self.create_argument_list(config, cov_path)
+        p_args = self.create_argument_list(config, cov_path, single_test)
         try:
             os.remove(self.resultfilename)
         except OSError:

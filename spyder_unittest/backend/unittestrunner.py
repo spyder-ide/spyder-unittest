@@ -24,7 +24,8 @@ class UnittestRunner(RunnerBase):
     name = 'unittest'
 
     def create_argument_list(self, config: Config,
-                             cov_path: Optional[str]) -> list[str]:
+                             cov_path: Optional[str],
+                             single_test: Optional[str]) -> list[str]:
         """Create argument list for testing process."""
         dirname = osp.dirname(__file__)
         pyfile = osp.join(dirname, 'workers', 'unittestworker.py')
@@ -33,12 +34,13 @@ class UnittestRunner(RunnerBase):
         return arguments
 
     def start(self, config: Config, cov_path: Optional[str],
-              executable: str, pythonpath: list[str]) -> None:
+              executable: str, pythonpath: list[str],
+              single_test: Optional[str]) -> None:
         """Start process which will run the unit test suite."""
         self.config = config
         self.reader = ZmqStreamReader()
         self.reader.sig_received.connect(self.process_output)
-        super().start(config, cov_path, executable, pythonpath)
+        super().start(config, cov_path, executable, pythonpath, single_test)
 
     def finished(self, exitcode: int) -> None:
         """

@@ -35,7 +35,8 @@ class PyTestRunner(RunnerBase):
     name = 'pytest'
 
     def create_argument_list(self, config: Config,
-                             cov_path: Optional[str]) -> list[str]:
+                             cov_path: Optional[str],
+                             single_test: Optional[str]) -> list[str]:
         """Create argument list for testing process."""
         dirname = os.path.dirname(__file__)
         pyfile = os.path.join(dirname, 'workers', 'pytestworker.py')
@@ -46,12 +47,13 @@ class PyTestRunner(RunnerBase):
         return arguments
 
     def start(self, config: Config, cov_path: Optional[str],
-              executable: str, pythonpath: list[str]) -> None:
+              executable: str, pythonpath: list[str],
+              single_test: Optional[str]) -> None:
         """Start process which will run the unit test suite."""
         self.config = config
         self.reader = ZmqStreamReader()
         self.reader.sig_received.connect(self.process_output)
-        RunnerBase.start(self, config, cov_path, executable, pythonpath)
+        super().start(config, cov_path, executable, pythonpath, single_test)
 
     def process_output(self, output: list[dict[str, Any]]) -> None:
         """

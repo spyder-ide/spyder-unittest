@@ -33,7 +33,8 @@ class Nose2Runner(RunnerBase):
     name = 'nose2'
 
     def create_argument_list(self, config: Config,
-                             cov_path: Optional[str]) -> list[str]:
+                             cov_path: Optional[str],
+                             single_test: Optional[str]) -> list[str]:
         """Create argument list for testing process."""
         arguments = [
             '-m', self.module, '--plugin=nose2.plugins.junitxml',

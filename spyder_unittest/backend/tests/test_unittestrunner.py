@@ -34,7 +34,7 @@ def test_unittestrunner_create_argument_list(monkeypatch):
         'spyder_unittest.backend.unittestrunner.osp.dirname',
         lambda _: 'dir')
 
-    result = runner.create_argument_list(config, cov_path)
+    result = runner.create_argument_list(config, cov_path, None)
 
     pyfile = osp.join('dir', 'workers', 'unittestworker.py')
     assert result == [pyfile, '42', '--extra-arg']
@@ -58,14 +58,14 @@ def test_unittestrunner_start(monkeypatch):
     config = Config()
     cov_path = None
 
-    runner.start(config, cov_path, sys.executable, ['pythondir'])
+    runner.start(config, cov_path, sys.executable, ['pythondir'], None)
 
     assert runner.config is config
     assert runner.reader is mock_reader
     runner.reader.sig_received.connect.assert_called_once_with(
         runner.process_output)
     mock_base_start.assert_called_once_with(
-        config, cov_path, sys.executable, ['pythondir'])
+        config, cov_path, sys.executable, ['pythondir'], None)
 
 
 def test_unittestrunner_process_output_with_collected(qtbot):

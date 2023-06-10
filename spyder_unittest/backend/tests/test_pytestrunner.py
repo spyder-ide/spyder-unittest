@@ -41,7 +41,7 @@ def test_pytestrunner_create_argument_list(monkeypatch, runner):
     runner.reader = mock_reader
     monkeypatch.setattr('spyder_unittest.backend.pytestrunner.os.path.dirname',
                         lambda _: 'dir')
-    arg_list = runner.create_argument_list(config, cov_path)
+    arg_list = runner.create_argument_list(config, cov_path, None)
     pyfile, port, *coverage, last = arg_list
     assert pyfile == osp.join('dir', 'workers', 'pytestworker.py')
     assert port == '42'
@@ -55,20 +55,20 @@ def test_pytestrunner_start(monkeypatch):
         MockZMQStreamReader)
     mock_reader = MockZMQStreamReader()
 
-    MockRunnerBase = Mock(name='RunnerBase')
-    monkeypatch.setattr('spyder_unittest.backend.pytestrunner.RunnerBase',
-                        MockRunnerBase)
+    mock_base_start = Mock()
+    monkeypatch.setattr('spyder_unittest.backend.unittestrunner.RunnerBase.start',
+                        mock_base_start)
 
     runner = PyTestRunner(None, 'results')
     config = Config()
     cov_path = None
-    runner.start(config, cov_path, sys.executable, ['pythondir'])
+    runner.start(config, cov_path, sys.executable, ['pythondir'], None)
     assert runner.config is config
     assert runner.reader is mock_reader
     runner.reader.sig_received.connect.assert_called_once_with(
         runner.process_output)
-    MockRunnerBase.start.assert_called_once_with(
-        runner, config, cov_path, sys.executable, ['pythondir'])
+    mock_base_start.assert_called_once_with(
+        config, cov_path, sys.executable, ['pythondir'], None)
 
 
 def test_pytestrunner_process_output_with_collected(qtbot, runner):

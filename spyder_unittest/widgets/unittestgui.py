@@ -387,7 +387,7 @@ class UnitTestWidget(PluginMainWidget):
         executable = self.get_conf('executable', section='main_interpreter')
         try:
             self.testrunner.start(
-                config, cov_path, executable, pythonpath)
+                config, cov_path, executable, pythonpath, single_test)
         except RuntimeError:
             QMessageBox.critical(self,
                                  _("Error"), _("Process failed to start"))
