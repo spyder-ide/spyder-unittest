@@ -192,11 +192,6 @@ class TestDataModel(QAbstractItemModel, SpyderConfigurationAccessor):
     a tuple (row, column, id). The id is TOPLEVEL_ID for top-level items.
     For level-2 items, the id is the index of the test in `self.testresults`.
 
-    Attributes
-    ----------
-    is_dark_interface : bool
-        Whether to use colours appropriate for a dark user interface.
-
     Signals
     -------
     sig_summary(str)
@@ -212,7 +207,6 @@ class TestDataModel(QAbstractItemModel, SpyderConfigurationAccessor):
         """Constructor."""
         QAbstractItemModel.__init__(self, parent)
         self.abbreviator = Abbreviator()
-        self.is_dark_interface = False
         self.testresults = []
         try:
             self.monospace_font = parent.window().editor.get_plugin_font()

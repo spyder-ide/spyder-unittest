@@ -238,10 +238,6 @@ class UnitTestWidget(PluginMainWidget):
         """Set test configuration but do not emit any signal."""
         self._config = new_config
 
-    def use_dark_interface(self, flag):
-        """Set whether widget should use colours appropriate for dark UI."""
-        self.testdatamodel.is_dark_interface = flag
-
     def show_log(self):
         """Show output of testing process."""
         if self.output:
