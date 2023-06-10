@@ -67,6 +67,12 @@ def test_go_to_test_definition_with_lineno_none(view_and_model, qtbot):
         view.go_to_test_definition(model.index(1, 0))
     assert blocker.args == ['ham.py', 0]
 
+def test_run_single_test(view_and_model, qtbot):
+    view, model = view_and_model
+    with qtbot.waitSignal(view.sig_single_test_run_requested) as blocker:
+        view.run_single_test(model.index(1, 0))
+    assert blocker.args == ['foo.bar']
+
 def test_make_index_canonical_with_index_in_column2(view_and_model):
     view, model = view_and_model
     index = model.index(1, 2)
@@ -88,20 +94,33 @@ def test_make_index_canonical_with_invalid_index(view_and_model):
 def test_build_context_menu(view_and_model):
     view, model = view_and_model
     menu = view.build_context_menu(model.index(0, 0))
+    assert len(menu.actions()) == 3
     assert menu.actions()[0].text() == 'Expand'
     assert menu.actions()[1].text() == 'Go to definition'
+    assert menu.actions()[2].text() == 'Run only this test'
 
 def test_build_context_menu_with_disabled_entries(view_and_model):
     view, model = view_and_model
     menu = view.build_context_menu(model.index(0, 0))
     assert menu.actions()[0].isEnabled() == False
     assert menu.actions()[1].isEnabled() == False
+    assert menu.actions()[2].isEnabled() == True
 
 def test_build_context_menu_with_enabled_entries(view_and_model):
     view, model = view_and_model
     menu = view.build_context_menu(model.index(1, 0))
     assert menu.actions()[0].isEnabled() == True
     assert menu.actions()[1].isEnabled() == True
+    assert menu.actions()[2].isEnabled() == True
+
+def test_build_context_menu_with_coverage_entry(view_and_model):
+    view, model = view_and_model
+    testresult = TestResult(Category.COVERAGE, 'coverage', 'foo')
+    model.testresults.append(testresult)
+    menu = view.build_context_menu(model.index(2, 0))
+    assert menu.actions()[0].isEnabled() == False
+    assert menu.actions()[1].isEnabled() == False
+    assert menu.actions()[2].isEnabled() == False
 
 def test_build_context_menu_with_expanded_entry(view_and_model):
     view, model = view_and_model

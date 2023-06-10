@@ -117,6 +117,8 @@ class UnitTestWidget(PluginMainWidget):
         self.testdatamodel = TestDataModel(self)
         self.testdataview.setModel(self.testdatamodel)
         self.testdataview.sig_edit_goto.connect(self.sig_edit_goto)
+        self.testdataview.sig_single_test_run_requested.connect(
+            self.run_single_test)
         self.testdatamodel.sig_summary.connect(self.set_status_label)
 
         self.framework_registry = FrameworkRegistry()
@@ -337,14 +339,15 @@ class UnitTestWidget(PluginMainWidget):
         if self.config_is_valid():
             self.run_tests()
 
-    def run_tests(self, config=None):
+    def run_tests(self, config=None, single_test=None):
         """
         Run unit tests.
 
         First, run `self.pre_test_hook` if it is set, and abort if its return
         value is `False`.
 
-        Then, run the unit tests.
+        Then, run the unit tests. If `single_test` is not None, then only run
+        that test.
 
         The process's output is consumed by `read_output()`.
         When the process finishes, the `finish` signal is emitted.
@@ -354,6 +357,9 @@ class UnitTestWidget(PluginMainWidget):
         config : Config or None
             configuration for unit tests. If None, use `self.config`.
             In either case, configuration should be valid.
+        single_test : str or None
+            If None, run all tests; otherwise, it is the name of the only test
+            to be run.
         """
         if self.pre_test_hook:
             if self.pre_test_hook() is False:
@@ -380,7 +386,8 @@ class UnitTestWidget(PluginMainWidget):
         cov_path = config.wdir if cov_path == 'None' else cov_path
         executable = self.get_conf('executable', section='main_interpreter')
         try:
-            self.testrunner.start(config, cov_path, executable, pythonpath)
+            self.testrunner.start(
+                config, cov_path, executable, pythonpath)
         except RuntimeError:
             QMessageBox.critical(self,
                                  _("Error"), _("Process failed to start"))
@@ -493,6 +500,12 @@ class UnitTestWidget(PluginMainWidget):
         msg: str
         """
         self.status_label.setText('<b>{}</b>'.format(msg))
+
+    def run_single_test(self, test_name: str) -> None:
+        """
+        Run a single test with the given name.
+        """
+        self.run_tests(single_test=test_name)
 
 
 def test():

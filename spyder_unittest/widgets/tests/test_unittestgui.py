@@ -8,7 +8,7 @@
 # Standard library imports
 import os
 import sys
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 # Third party imports
 from qtpy.QtCore import Qt, QProcess
@@ -150,6 +150,11 @@ def test_unittestwidget_process_finished_abnormally_status_label(widget):
     widget.process_finished([], 'output', False)
     expected_text = '<b>{}</b>'.format('Test process exited abnormally')
     assert widget.status_label.text() == expected_text
+
+def test_unittestwidget_handles_sig_single_test_run_requested(widget):
+    with patch.object(widget, 'run_tests') as mock_run_tests:
+        widget.testdataview.sig_single_test_run_requested.emit('testname')
+        mock_run_tests.assert_called_once_with(single_test='testname')
 
 @pytest.mark.parametrize('framework', ['pytest', 'nose2'])
 def test_run_tests_and_display_results(qtbot, widget, tmpdir, monkeypatch, framework):
