@@ -7,11 +7,9 @@
 
 # Standard library imports
 import os
-import sys
 import tempfile
 
 # Third party imports
-from importlib.util import find_spec as find_spec_or_loader
 from qtpy.QtCore import (QObject, QProcess, QProcessEnvironment, QTextCodec,
                          Signal)
 
