@@ -137,6 +137,20 @@ def test_normalize_module_name(runner, wdir, expected):
         assert result == expected
 
 
+def test_convert_nodeid_to_testname(runner):
+    nodeid = 'spam/eggs.py::test_foo'
+    testname = 'spam.eggs.test_foo'
+    result = runner.convert_nodeid_to_testname(nodeid)
+    assert result == testname
+
+
+def test_convert_testname_to_nodeid(runner):
+    nodeid = 'spam/eggs.py::test_foo'
+    testname = 'spam.eggs.test_foo'
+    result = runner.convert_testname_to_nodeid(testname)
+    assert result == nodeid
+
+
 def standard_logreport_output():
     return {
         'event': 'logreport',

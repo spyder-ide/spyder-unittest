@@ -9,6 +9,7 @@ from __future__ import annotations
 
 # Standard library imports
 from enum import IntEnum
+import logging
 import os
 import tempfile
 from typing import ClassVar, Optional, TYPE_CHECKING
@@ -22,6 +23,9 @@ if TYPE_CHECKING:
     from spyder_unittest.widgets.configdialog import Config
     from spyder_unittest.widgets.unittestgui import UnitTestWidget
 
+
+# Logging
+logger = logging.getLogger(__name__)
 
 # if generating coverage report, use this name for the TestResult
 # it's here in case we can get coverage results from unittest too
@@ -208,6 +212,7 @@ class RunnerBase(QObject):
             os.remove(self.resultfilename)
         except OSError:
             pass
+        logger.debug(f'Starting Python process with arguments {p_args}')
         self.process.start(executable, p_args)
         running = self.process.waitForStarted()
         if not running:

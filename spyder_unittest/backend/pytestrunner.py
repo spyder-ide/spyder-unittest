@@ -43,6 +43,8 @@ class PyTestRunner(RunnerBase):
         arguments = [pyfile, str(self.reader.port)]
         if config.coverage:
             arguments += [f'--cov={cov_path}', '--cov-report=term-missing']
+        if single_test:
+            arguments.append(self.convert_testname_to_nodeid(single_test))
         arguments += config.args
         return arguments
 
@@ -178,6 +180,20 @@ class PyTestRunner(RunnerBase):
         module, name = nodeid.split('::', 1)
         module = self.normalize_module_name(module)
         return '{}.{}'.format(module, name)
+
+    def convert_testname_to_nodeid(self, testname: str) -> str:
+        """
+        Convert a test name to a nodeid relative to wdir.
+
+        A true nodeid is relative to the pytest root dir. The return value of
+        this function is like a nodeid but relative to the wdir (i.e., the
+        directory from which test are run). This is the format that pytest
+        expects when running single tests.
+        """
+        *path_parts, last_part = testname.split('.')
+        path_parts[-1] += '.py'
+        nodeid = '/'.join(path_parts) + '::' + last_part
+        return nodeid
 
     def logreport_collecterror_to_tuple(
             self, report: dict[str, Any]) -> tuple[str, str]:

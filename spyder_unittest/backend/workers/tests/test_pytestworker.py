@@ -313,49 +313,66 @@ def test_pytest_runtest_logfinish_handles_longrepr(plugin_ini, self_longrepr,
     })
 
 
-def test_pytestworker_integration(monkeypatch, tmpdir):
-    os.chdir(tmpdir.strpath)
-    testfilename = tmpdir.join('test_foo.py').strpath
-    with open(testfilename, 'w') as f:
-        f.write("def test_ok(): assert 1+1 == 2\n"
-                "def test_fail(): assert 1+1 == 3\n")
+@pytest.fixture(scope='module')
+def testfile_path(tmp_path_factory):
+    tmp_path = tmp_path_factory.mktemp('pytestworker')
+    res = tmp_path / 'test_pytestworker_foo.py'
+    res.write_text('def test_ok(): assert 1+1 == 2\n'
+                   'def test_fail(): assert 1+1 == 3\n')
+    return res
 
+
+@pytest.mark.parametrize('alltests', [True, False])
+def test_pytestworker_integration(monkeypatch, testfile_path, alltests):
     mock_writer = create_autospec(ZmqStreamWriter)
     MockZmqStreamWriter = Mock(return_value=mock_writer)
     monkeypatch.setattr(
         'spyder_unittest.backend.workers.pytestworker.ZmqStreamWriter',
         MockZmqStreamWriter)
-    main(['mockscriptname', '42', testfilename])
+
+    os.chdir(testfile_path.parent)
+    testfilename = testfile_path.name
+    pytest_args = ['mockscriptname', '42']
+    if not alltests:
+        pytest_args.append(f'{testfilename}::test_ok')
+    main(pytest_args)
 
     args = mock_writer.write.call_args_list
+    messages = [arg[0][0] for arg in args]
+    assert len(messages) == 7 if alltests else 4
 
-    assert args[0][0][0]['event'] == 'config'
-    assert 'rootdir' in args[0][0][0]
+    assert messages[0]['event'] == 'config'
+    assert 'rootdir' in messages[0]
 
-    assert args[1][0][0]['event'] == 'collected'
-    assert args[1][0][0]['nodeid'] == 'test_foo.py::test_ok'
+    assert messages[1]['event'] == 'collected'
+    assert messages[1]['nodeid'] == f'{testfilename}::test_ok'
 
-    assert args[2][0][0]['event'] == 'collected'
-    assert args[2][0][0]['nodeid'] == 'test_foo.py::test_fail'
+    if alltests:
+        n = 3
+        assert messages[2]['event'] == 'collected'
+        assert messages[2]['nodeid'] == f'{testfilename}::test_fail'
+    else:
+        n = 2
 
-    assert args[3][0][0]['event'] == 'starttest'
-    assert args[3][0][0]['nodeid'] == 'test_foo.py::test_ok'
+    assert messages[n]['event'] == 'starttest'
+    assert messages[n]['nodeid'] == f'{testfilename}::test_ok'
 
-    assert args[4][0][0]['event'] == 'logreport'
-    assert args[4][0][0]['outcome'] == 'passed'
-    assert args[4][0][0]['nodeid'] == 'test_foo.py::test_ok'
-    assert args[4][0][0]['sections'] == []
-    assert args[4][0][0]['filename'] == 'test_foo.py'
-    assert args[4][0][0]['lineno'] == 0
-    assert 'duration' in args[4][0][0]
+    assert messages[n+1]['event'] == 'logreport'
+    assert messages[n+1]['outcome'] == 'passed'
+    assert messages[n+1]['nodeid'] == f'{testfilename}::test_ok'
+    assert messages[n+1]['sections'] == []
+    assert messages[n+1]['filename'] == testfilename
+    assert messages[n+1]['lineno'] == 0
+    assert 'duration' in messages[n+1]
 
-    assert args[5][0][0]['event'] == 'starttest'
-    assert args[5][0][0]['nodeid'] == 'test_foo.py::test_fail'
+    if alltests:
+        assert messages[n+2]['event'] == 'starttest'
+        assert messages[n+2]['nodeid'] == f'{testfilename}::test_fail'
 
-    assert args[6][0][0]['event'] == 'logreport'
-    assert args[6][0][0]['outcome'] == 'failed'
-    assert args[6][0][0]['nodeid'] == 'test_foo.py::test_fail'
-    assert args[6][0][0]['sections'] == []
-    assert args[6][0][0]['filename'] == 'test_foo.py'
-    assert args[6][0][0]['lineno'] == 1
-    assert 'duration' in args[6][0][0]
+        assert messages[n+3]['event'] == 'logreport'
+        assert messages[n+3]['outcome'] == 'failed'
+        assert messages[n+3]['nodeid'] == f'{testfilename}::test_fail'
+        assert messages[n+3]['sections'] == []
+        assert messages[n+3]['filename'] == testfilename
+        assert messages[n+3]['lineno'] == 1
+        assert 'duration' in messages[n+3]
