@@ -154,7 +154,19 @@ class PyTestRunner(RunnerBase):
 
         This function strips the .py suffix and replaces '/' by '.', so that
         'ham/spam.py' becomes 'ham.spam'.
+
+        The result is relative to the directory from which tests are run and
+        not the pytest root dir.
         """
+        wdir = osp.realpath(self.config.wdir)
+        if wdir != self.rootdir:
+            abspath = osp.join(self.rootdir, name)
+            try:
+                name = osp.relpath(abspath, start=wdir)
+            except ValueError:
+                # Happens on Windows if paths are on different drives
+                pass
+
         if name.endswith('.py'):
             name = name[:-3]
         return name.replace('/', '.')
