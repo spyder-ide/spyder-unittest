@@ -70,15 +70,16 @@ class PyTestRunner(RunnerBase):
             if result_item['event'] == 'config':
                 self.rootdir = result_item['rootdir']
             elif result_item['event'] == 'collected':
-                testname = convert_nodeid_to_testname(result_item['nodeid'])
-                collected_list.append(testname)
+                name = self.convert_nodeid_to_testname(result_item['nodeid'])
+                collected_list.append(name)
             elif result_item['event'] == 'collecterror':
-                tupl = logreport_collecterror_to_tuple(result_item)
+                tupl = self.logreport_collecterror_to_tuple(result_item)
                 collecterror_list.append(tupl)
             elif result_item['event'] == 'starttest':
-                starttest_list.append(logreport_starttest_to_str(result_item))
+                name = self.logreport_starttest_to_str(result_item)
+                starttest_list.append(name)
             elif result_item['event'] == 'logreport':
-                testresult = logreport_to_testresult(result_item, self.rootdir)
+                testresult = self.logreport_to_testresult(result_item)
                 result_list.append(testresult)
 
         if collected_list:
@@ -147,56 +148,52 @@ class PyTestRunner(RunnerBase):
         # 2 = interrupted, 5 = no tests collected
         self.sig_finished.emit([], output, normal_exit)
 
+    def normalize_module_name(self, name: str) -> str:
+        """
+        Convert module name reported by pytest to Python conventions.
 
-def normalize_module_name(name: str) -> str:
-    """
-    Convert module name reported by pytest to Python conventions.
+        This function strips the .py suffix and replaces '/' by '.', so that
+        'ham/spam.py' becomes 'ham.spam'.
+        """
+        if name.endswith('.py'):
+            name = name[:-3]
+        return name.replace('/', '.')
 
-    This function strips the .py suffix and replaces '/' by '.', so that
-    'ham/spam.py' becomes 'ham.spam'.
-    """
-    if name.endswith('.py'):
-        name = name[:-3]
-    return name.replace('/', '.')
+    def convert_nodeid_to_testname(self, nodeid: str) -> str:
+        """Convert a nodeid to a test name."""
+        module, name = nodeid.split('::', 1)
+        module = self.normalize_module_name(module)
+        return '{}.{}'.format(module, name)
 
+    def logreport_collecterror_to_tuple(
+            self, report: dict[str, Any]) -> tuple[str, str]:
+        """Convert a 'collecterror' logreport to a (str, str) tuple."""
+        module = self.normalize_module_name(report['nodeid'])
+        return (module, report['longrepr'])
 
-def convert_nodeid_to_testname(nodeid: str) -> str:
-    """Convert a nodeid to a test name."""
-    module, name = nodeid.split('::', 1)
-    module = normalize_module_name(module)
-    return '{}.{}'.format(module, name)
+    def logreport_starttest_to_str(self, report: dict[str, Any]) -> str:
+        """Convert a 'starttest' logreport to a str."""
+        return self.convert_nodeid_to_testname(report['nodeid'])
 
-
-def logreport_collecterror_to_tuple(report: dict[str, Any]) -> tuple[str, str]:
-    """Convert a 'collecterror' logreport to a (str, str) tuple."""
-    module = normalize_module_name(report['nodeid'])
-    return (module, report['longrepr'])
-
-
-def logreport_starttest_to_str(report: dict[str, Any]) -> str:
-    """Convert a 'starttest' logreport to a str."""
-    return convert_nodeid_to_testname(report['nodeid'])
-
-
-def logreport_to_testresult(report: dict[str, Any], rootdir: str) -> TestResult:
-    """Convert a logreport sent by test process to a TestResult."""
-    status = report['outcome']
-    if report['outcome'] in ('failed', 'xpassed') or report['witherror']:
-        cat = Category.FAIL
-    elif report['outcome'] in ('passed', 'xfailed'):
-        cat = Category.OK
-    else:
-        cat = Category.SKIP
-    testname = convert_nodeid_to_testname(report['nodeid'])
-    message = report.get('message', '')
-    extra_text = report.get('longrepr', '')
-    if 'sections' in report:
-        if extra_text:
-            extra_text +=  '\n'
-        for (heading, text) in report['sections']:
-            extra_text += '----- {} -----\n{}'.format(heading, text)
-    filename = osp.join(rootdir, report['filename'])
-    result = TestResult(cat, status, testname, message=message,
-                        time=report['duration'], extra_text=extra_text,
-                        filename=filename, lineno=report['lineno'])
-    return result
+    def logreport_to_testresult(self, report: dict[str, Any]) -> TestResult:
+        """Convert a logreport sent by test process to a TestResult."""
+        status = report['outcome']
+        if report['outcome'] in ('failed', 'xpassed') or report['witherror']:
+            cat = Category.FAIL
+        elif report['outcome'] in ('passed', 'xfailed'):
+            cat = Category.OK
+        else:
+            cat = Category.SKIP
+        testname = self.convert_nodeid_to_testname(report['nodeid'])
+        message = report.get('message', '')
+        extra_text = report.get('longrepr', '')
+        if 'sections' in report:
+            if extra_text:
+                extra_text +=  '\n'
+            for (heading, text) in report['sections']:
+                extra_text += '----- {} -----\n{}'.format(heading, text)
+        filename = osp.join(self.rootdir, report['filename'])
+        result = TestResult(cat, status, testname, message=message,
+                            time=report['duration'], extra_text=extra_text,
+                            filename=filename, lineno=report['lineno'])
+        return result

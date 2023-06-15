@@ -14,8 +14,7 @@ from unittest.mock import Mock
 import pytest
 
 # Local imports
-from spyder_unittest.backend.pytestrunner import (PyTestRunner,
-                                                  logreport_to_testresult)
+from spyder_unittest.backend.pytestrunner import PyTestRunner
 from spyder_unittest.backend.runnerbase import (Category, TestResult,
                                                 COV_TEST_NAME)
 from spyder_unittest.widgets.configdialog import Config
@@ -232,7 +231,9 @@ def test_logreport_to_testresult_with_outcome_and_possible_error(outcome,
     report['witherror'] = witherror
     expected = TestResult(category, outcome, 'foo.bar', time=42,
                           filename=osp.join('ham', 'foo.py'), lineno=24)
-    assert logreport_to_testresult(report, 'ham') == expected
+    runner = PyTestRunner(None)
+    runner.rootdir = 'ham'
+    assert runner.logreport_to_testresult(report) == expected
 
 
 def test_logreport_to_testresult_with_message():
@@ -241,7 +242,9 @@ def test_logreport_to_testresult_with_message():
     expected = TestResult(Category.OK, 'passed', 'foo.bar', message='msg',
                           time=42, filename=osp.join('ham', 'foo.py'),
                           lineno=24)
-    assert logreport_to_testresult(report, 'ham') == expected
+    runner = PyTestRunner(None)
+    runner.rootdir = 'ham'
+    assert runner.logreport_to_testresult(report) == expected
 
 
 def test_logreport_to_testresult_with_extratext():
@@ -250,7 +253,9 @@ def test_logreport_to_testresult_with_extratext():
     expected = TestResult(Category.OK, 'passed', 'foo.bar', time=42,
                           extra_text='long msg',
                           filename=osp.join('ham', 'foo.py'), lineno=24)
-    assert logreport_to_testresult(report, 'ham') == expected
+    runner = PyTestRunner(None)
+    runner.rootdir = 'ham'
+    assert runner.logreport_to_testresult(report) == expected
 
 
 @pytest.mark.parametrize('longrepr,prefix', [
@@ -268,5 +273,6 @@ def test_logreport_to_testresult_with_output(longrepr, prefix):
     expected = TestResult(Category.OK, 'passed', 'foo.bar', time=42,
                           extra_text=txt, filename=osp.join('ham', 'foo.py'),
                           lineno=24)
-    assert logreport_to_testresult(report, 'ham') == expected
-
+    runner = PyTestRunner(None)
+    runner.rootdir = 'ham'
+    assert runner.logreport_to_testresult(report) == expected
