@@ -131,46 +131,61 @@ def test_unittestworker_report_collected():
     assert mock_writer.write.mock_calls == expected
 
 
-def test_unittestworker_main(monkeypatch, tmpdir):
+@pytest.fixture(scope='module')
+def testfile_path(tmp_path_factory):
+    tmp_path = tmp_path_factory.mktemp('unittestworker')
+    res = tmp_path / 'test_unittestworker_foo.py'
+    res.write_text('import unittest\n'
+                   'class MyTest(unittest.TestCase):\n'
+                   '   def test_ok(self): self.assertEqual(1+1, 2)\n'
+                   '   def test_fail(self): self.assertEqual(1+1, 3)\n')
+    return res
+
+
+@pytest.mark.parametrize('alltests', [True, False])
+def test_unittestworker_main(monkeypatch, testfile_path, alltests):
     """
     Test that the main function with some tests writes the expected
     output to the ZMQ stream.
     """
-    os.chdir(tmpdir.strpath)
-    testfilename = tmpdir.join('test_foo_unittestworker.py').strpath
-    with open(testfilename, 'w') as f:
-        f.write("import unittest\n"
-                "class MyTest(unittest.TestCase):\n"
-                "   def test_ok(self): self.assertEqual(1+1, 2)\n"
-                "   def test_fail(self): self.assertEqual(1+1, 3)\n")
-
     mock_writer = create_autospec(ZmqStreamWriter)
     MockZmqStreamWriter = Mock(return_value=mock_writer)
     monkeypatch.setattr(
         'spyder_unittest.backend.workers.unittestworker.ZmqStreamWriter',
         MockZmqStreamWriter)
 
-    main(['mockscriptname', '42'])
+    os.chdir(testfile_path.parent)
+    testfilename = testfile_path.stem  # `stem` removes the .py suffix
+    main_args = ['mockscriptname', '42']
+    if not alltests:
+        main_args.append(f'{testfilename}.MyTest.test_fail')
+    main(main_args)
 
     args = mock_writer.write.call_args_list
-    # args[N][0][0] is dict sent over ZMQ stream in function call N
+    messages = [arg[0][0] for arg in args]
+    assert len(messages) == (6 if alltests else 3)
 
-    assert args[0][0][0]['event'] == 'collected'
-    assert args[0][0][0]['id'] == 'test_foo_unittestworker.MyTest.test_fail'
+    assert messages[0]['event'] == 'collected'
+    assert messages[0]['id'] == f'{testfilename}.MyTest.test_fail'
 
-    assert args[1][0][0]['event'] == 'collected'
-    assert args[1][0][0]['id'] == 'test_foo_unittestworker.MyTest.test_ok'
+    if alltests:
+        n = 2
+        assert messages[1]['event'] == 'collected'
+        assert messages[1]['id'] == f'{testfilename}.MyTest.test_ok'
+    else:
+        n = 1
 
-    assert args[2][0][0]['event'] == 'startTest'
-    assert args[2][0][0]['id'] == 'test_foo_unittestworker.MyTest.test_fail'
+    assert messages[n]['event'] == 'startTest'
+    assert messages[n]['id'] == f'{testfilename}.MyTest.test_fail'
 
-    assert args[3][0][0]['event'] == 'addFailure'
-    assert args[3][0][0]['id'] == 'test_foo_unittestworker.MyTest.test_fail'
-    assert 'AssertionError' in args[3][0][0]['reason']
-    assert 'assertEqual(1+1, 3)' in args[3][0][0]['err']
+    assert messages[n+1]['event'] == 'addFailure'
+    assert messages[n+1]['id'] == f'{testfilename}.MyTest.test_fail'
+    assert 'AssertionError' in messages[n+1]['reason']
+    assert 'assertEqual(1+1, 3)' in messages[n+1]['err']
 
-    assert args[4][0][0]['event'] == 'startTest'
-    assert args[4][0][0]['id'] == 'test_foo_unittestworker.MyTest.test_ok'
+    if alltests:
+        assert messages[n+2]['event'] == 'startTest'
+        assert messages[n+2]['id'] == f'{testfilename}.MyTest.test_ok'
 
-    assert args[5][0][0]['event'] == 'addSuccess'
-    assert args[5][0][0]['id'] == 'test_foo_unittestworker.MyTest.test_ok'
+        assert messages[n+3]['event'] == 'addSuccess'
+        assert messages[n+3]['id'] == f'{testfilename}.MyTest.test_ok'

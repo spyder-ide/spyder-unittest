@@ -195,8 +195,9 @@ def test_run_tests_and_display_results(qtbot, widget, tmpdir, monkeypatch,
         assert model.index(1, 2).data(Qt.DisplayRole) == ''
 
 
+@pytest.mark.parametrize('alltests', [True, False])
 def test_run_tests_using_unittest_and_display_results(
-        qtbot, widget, tmpdir, monkeypatch):
+        qtbot, widget, tmpdir, monkeypatch, alltests):
     """Basic check."""
     os.chdir(tmpdir.strpath)
     testfilename = tmpdir.join('test_foo.py').strpath
@@ -213,18 +214,22 @@ def test_run_tests_using_unittest_and_display_results(
 
     config = Config(wdir=tmpdir.strpath, framework='unittest', coverage=False)
     with qtbot.waitSignal(widget.sig_finished, timeout=10000, raising=True):
-        widget.run_tests(config)
+        if alltests:
+            widget.run_tests(config)
+        else:
+            widget.run_tests(config, single_test='test_foo.MyTest.test_fail')
 
     MockQMessageBox.assert_not_called()
     model = widget.testdatamodel
-    assert model.rowCount() == 2
+    assert model.rowCount() == (2 if alltests else 1)
     assert model.index(0, 0).data(Qt.DisplayRole) == 'failure'
     assert model.index(0, 1).data(Qt.DisplayRole) == 'test_foo.MyTest.test_fail'
     assert model.index(0, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_fail'
-    assert model.index(1, 0).data(Qt.DisplayRole) == 'success'
-    assert model.index(1, 1).data(Qt.DisplayRole) == 'test_foo.MyTest.test_ok'
-    assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_ok'
-    assert model.index(1, 2).data(Qt.DisplayRole) == ''
+    if alltests:
+        assert model.index(1, 0).data(Qt.DisplayRole) == 'success'
+        assert model.index(1, 1).data(Qt.DisplayRole) == 'test_foo.MyTest.test_ok'
+        assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_ok'
+        assert model.index(1, 2).data(Qt.DisplayRole) == ''
 
 def test_run_tests_with_print_using_unittest_and_display_results(
         qtbot, widget, tmpdir, monkeypatch):

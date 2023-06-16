@@ -30,6 +30,8 @@ class UnittestRunner(RunnerBase):
         dirname = osp.dirname(__file__)
         pyfile = osp.join(dirname, 'workers', 'unittestworker.py')
         arguments = [pyfile, str(self.reader.port)]
+        if single_test:
+            arguments.append(single_test)
         arguments += config.args
         return arguments
 
