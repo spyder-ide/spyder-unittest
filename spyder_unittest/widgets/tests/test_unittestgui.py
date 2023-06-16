@@ -156,9 +156,8 @@ def test_unittestwidget_handles_sig_single_test_run_requested(widget):
         widget.testdataview.sig_single_test_run_requested.emit('testname')
         mock_run_tests.assert_called_once_with(single_test='testname')
 
-@pytest.mark.parametrize(
-    'framework, alltests',
-    [('pytest', True), ('pytest', False), ('nose2', True)])
+@pytest.mark.parametrize('framework', ['pytest', 'nose2'])
+@pytest.mark.parametrize('alltests', [True, False])
 def test_run_tests_and_display_results(qtbot, widget, tmpdir, monkeypatch,
                                        framework, alltests):
     """Basic integration test."""

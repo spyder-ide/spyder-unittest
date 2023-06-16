@@ -40,6 +40,8 @@ class Nose2Runner(RunnerBase):
             '-m', self.module, '--plugin=nose2.plugins.junitxml',
             '--junit-xml', '--junit-xml-path={}'.format(self.resultfilename)
         ]
+        if single_test:
+            arguments.append(single_test)
         arguments += config.args
         return arguments
 
