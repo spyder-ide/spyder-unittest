@@ -120,8 +120,8 @@ def test_pytestrunner_finished(qtbot, exitcode, normal_exit):
 
 @pytest.mark.parametrize('wdir, expected', [
     ('ham', 'spam.eggs'),
-    ('ham/spam', 'eggs'),
-    ('link-to-ham/spam', 'eggs')])
+    (osp.join('ham', 'spam'), 'eggs'),
+    (osp.join('link-to-ham', 'spam'), 'eggs')])
 def test_normalize_module_name(runner, wdir, expected):
     def new_realpath(name):
         """Simulate link from `link-to-ham` to `ham`"""
@@ -133,19 +133,19 @@ def test_normalize_module_name(runner, wdir, expected):
     with patch('spyder_unittest.backend.pytestrunner.osp.realpath',
                side_effect=new_realpath):
         runner.config = Config(wdir=wdir)
-        result = runner.normalize_module_name('spam/eggs.py')
+        result = runner.normalize_module_name(osp.join('spam', 'eggs.py'))
         assert result == expected
 
 
 def test_convert_nodeid_to_testname(runner):
-    nodeid = 'spam/eggs.py::test_foo'
+    nodeid = osp.join('spam', 'eggs.py') + '::test_foo'
     testname = 'spam.eggs.test_foo'
     result = runner.convert_nodeid_to_testname(nodeid)
     assert result == testname
 
 
 def test_convert_testname_to_nodeid(runner):
-    nodeid = 'spam/eggs.py::test_foo'
+    nodeid = osp.join('spam', 'eggs.py') + '::test_foo'
     testname = 'spam.eggs.test_foo'
     result = runner.convert_testname_to_nodeid(testname)
     assert result == nodeid

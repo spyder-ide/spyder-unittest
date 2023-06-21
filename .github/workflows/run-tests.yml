@@ -112,11 +112,11 @@ jobs:
           shell: bash
           command: |
             . ~/.profile
-            pytest spyder_unittest -x -vv
+            pytest spyder_unittest -vv
       - name: Run tests (Windows)
         if: matrix.OS == 'windows'
         uses: nick-fields/retry@v2
         with:
           timeout_minutes: 10
           max_attempts: 3
-          command: pytest spyder_unittest -x -vv
+          command: pytest spyder_unittest -vv

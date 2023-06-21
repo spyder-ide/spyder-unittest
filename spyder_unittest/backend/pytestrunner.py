@@ -173,7 +173,7 @@ class PyTestRunner(RunnerBase):
 
         if name.endswith('.py'):
             name = name[:-3]
-        return name.replace('/', '.')
+        return name.replace(osp.sep, '.')
 
     def convert_nodeid_to_testname(self, nodeid: str) -> str:
         """Convert a nodeid to a test name."""
@@ -192,7 +192,7 @@ class PyTestRunner(RunnerBase):
         """
         *path_parts, last_part = testname.split('.')
         path_parts[-1] += '.py'
-        nodeid = '/'.join(path_parts) + '::' + last_part
+        nodeid = osp.join(*path_parts) + '::' + last_part
         return nodeid
 
     def logreport_collecterror_to_tuple(
