@@ -14,6 +14,7 @@ from qtpy import PYQT4
 from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal
 from qtpy.QtGui import QBrush, QColor, QFont
 from qtpy.QtWidgets import QMenu, QTreeView
+from spyder.api.config.mixins import SpyderConfigurationAccessor
 from spyder.config.base import get_translation
 from spyder.utils.palette import QStylePalette, SpyderPalette
 from spyder.utils.qthelpers import create_action
@@ -179,7 +180,7 @@ class TestDataView(QTreeView):
                 self.setFirstColumnSpanned(i, index, True)
 
 
-class TestDataModel(QAbstractItemModel):
+class TestDataModel(QAbstractItemModel, SpyderConfigurationAccessor):
     """
     Model class storing test results for display.
 
@@ -201,6 +202,8 @@ class TestDataModel(QAbstractItemModel):
     sig_summary(str)
        Emitted with new summary if test results change.
     """
+
+    CONF_SECTION = 'unittest'
 
     sig_summary = Signal(str)
     __test__ = False  # this is not a pytest test class
@@ -314,10 +317,14 @@ class TestDataModel(QAbstractItemModel):
             elif column == STATUS_COLUMN:
                 return self.testresults[row].status
             elif column == NAME_COLUMN:
+                name = self.testresults[row].name
                 # don't abbreviate for the code coverage filename
                 if self.testresults[row].category == Category.COVERAGE:
-                    return self.testresults[row].name
-                return self.abbreviator.abbreviate(self.testresults[row].name)
+                    return name
+                if self.get_conf('abbrev_test_names', False):
+                    return self.abbreviator.abbreviate(name)
+                else:
+                    return name
             elif column == MESSAGE_COLUMN:
                 return self.testresults[row].message
             elif column == TIME_COLUMN:

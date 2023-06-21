@@ -10,6 +10,7 @@ from os import getcwd
 import os.path as osp
 
 # Third party imports
+import qtawesome
 from qtpy.QtCore import Qt
 
 # Spyder imports
@@ -19,9 +20,11 @@ from spyder.api.plugin_registration.decorators import (
 from spyder.config.base import get_translation
 from spyder.config.gui import is_dark_interface
 from spyder.plugins.mainmenu.api import ApplicationMenus
+from spyder.utils.palette import SpyderPalette
 
 # Local imports
 from spyder_unittest.widgets.configdialog import Config
+from spyder_unittest.widgets.confpage import UnitTestConfigPage
 from spyder_unittest.widgets.unittestgui import UnitTestWidget
 
 _ = get_translation('spyder_unittest')
@@ -44,13 +47,17 @@ class UnitTestPlugin(SpyderDockablePlugin):
 
     CONF_SECTION = NAME
     CONF_DEFAULTS = [(CONF_SECTION,
-                      {'framework': '', 'wdir': '', 'coverage': False}),
+                      {'framework': '',
+                       'wdir': '',
+                       'coverage': False,
+                       'abbrev_test_names': False}),
                      ('shortcuts',
                       {'unittest/Run tests': 'Alt+Shift+F11'})]
     CONF_NAMEMAP = {CONF_SECTION: [(CONF_SECTION,
                                     ['framework', 'wdir', 'coverage'])]}
     CONF_FILE = True
     CONF_VERSION = '0.2.0'
+    CONF_WIDGET_CLASS = UnitTestConfigPage
 
     # --- Mandatory SpyderDockablePlugin methods ------------------------------
 
@@ -86,20 +93,19 @@ class UnitTestPlugin(SpyderDockablePlugin):
         QIcon
             QIcon instance
         """
-        return self.create_icon('profiler')
+        return qtawesome.icon('mdi.test-tube', color=SpyderPalette.ICON_1)
 
     def on_initialize(self):
         """
         Setup the plugin.
         """
-        self.update_pythonpath()
         self.get_widget().sig_newconfig.connect(self.save_config)
 
         self.create_action(
             UnitTestPluginActions.Run,
             text=_('Run unit tests'),
             tip=_('Run unit tests'),
-            icon=self.create_icon('profiler'),
+            icon=self.get_icon(),
             triggered=self.maybe_configure_and_start,
             context=Qt.ApplicationShortcut,
             register_shortcut=True)
@@ -154,10 +160,21 @@ class UnitTestPlugin(SpyderDockablePlugin):
         """
         Use config when Preferences plugin available.
 
-        Specifically, find out whether Spyder uses a dark interface and
-        communicate this to the unittest widget.
+        Specifically, register the unittest plugin preferences, and find out
+        whether Spyder uses a dark interface and communicate this to the
+        unittest widget.
         """
+        preferences = self.get_plugin(Plugins.Preferences)
+        preferences.register_plugin_preferences(self)
         self.get_widget().use_dark_interface(is_dark_interface())
+
+    @on_plugin_teardown(plugin=Plugins.Preferences)
+    def on_preferences_teardown(self):
+        """
+        De-register unittest plugin preferences.
+        """
+        preferences = self.get_plugin(Plugins.Preferences)
+        preferences.deregister_plugin_preferences(self)
 
     @on_plugin_available(plugin=Plugins.Projects)
     def on_projects_available(self):

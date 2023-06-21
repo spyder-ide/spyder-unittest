@@ -118,12 +118,17 @@ def test_testdatamodel_using_qtmodeltester(qtmodeltester):
     model.testresults = res
     qtmodeltester.check(model)
 
-def test_testdatamodel_shows_abbreviated_name_in_table(qtbot):
+@pytest.mark.parametrize('config, result',
+                         [(False, 'foo.bar'), (True, 'f.bar')])
+def test_testdatamodel_shows_abbreviated_name_in_table(qtbot, config, result):
     model = TestDataModel()
+    old_config = model.get_conf('abbrev_test_names')
+    model.set_conf('abbrev_test_names', config)
     res = TestResult(Category.OK, 'status', 'foo.bar', '', 0, '')
     model.testresults = [res]
     index = model.index(0, 1)
-    assert model.data(index, Qt.DisplayRole) == 'f.bar'
+    assert model.data(index, Qt.DisplayRole) == result
+    model.set_conf('abbrev_test_names', old_config)
 
 def test_testdatamodel_shows_full_name_in_tooltip(qtbot):
     model = TestDataModel()
