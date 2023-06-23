@@ -10,15 +10,17 @@ This script is meant to be run in a separate process by a UnittestRunner.
 It runs tests via the unittest framework and transmits the results over a ZMQ
 socket so that the UnittestRunner can read them.
 
-Usage: python unittestworker.py port
+Usage: python unittestworker.py port [testname]
 
-Here, port is the port number of the ZMQ socket. Use `file` to store the
-results in the file `unittestworker.json`.
+Here, `port` is the port number of the ZMQ socket. Use `file` to store the
+results in the file `unittestworker.json`. The optional argument `testname`
+is the test to run; if omitted, run all tests.
 """
 
 from __future__ import annotations
 
 # Standard library imports
+import os
 import sys
 from typing import ClassVar
 from unittest import (
@@ -116,7 +118,7 @@ def report_collected(writer: ZmqStreamWriter, test_suite: TestSuite) -> None:
 
 def main(args: list[str]) -> None:
     """Run unittest tests."""
-    # Parse command line arguments and create writer
+    # Parse first command line argument and create writer
     if args[1] != 'file':
         writer = ZmqStreamWriter(args[1])
     else:
@@ -124,7 +126,12 @@ def main(args: list[str]) -> None:
     SpyderTestResult.writer = writer
 
     # Gather tests
-    test_suite = defaultTestLoader.discover('.')
+    if args[2:]:
+        # Add cwd to path so that modules can be found
+        sys.path = [os.getcwd()] + sys.path
+        test_suite = defaultTestLoader.loadTestsFromNames(args[2:])
+    else:
+        test_suite = defaultTestLoader.discover('.')
     report_collected(writer, test_suite)
 
     # Run tests

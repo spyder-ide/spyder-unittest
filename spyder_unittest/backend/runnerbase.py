@@ -5,23 +5,34 @@
 # (see LICENSE.txt for details)
 """Classes for running tests within various frameworks."""
 
+from __future__ import annotations
+
 # Standard library imports
+from enum import IntEnum
+import logging
 import os
-import sys
 import tempfile
+from typing import ClassVar, Optional, TYPE_CHECKING
 
 # Third party imports
-from importlib.util import find_spec as find_spec_or_loader
-from qtpy.QtCore import (QObject, QProcess, QProcessEnvironment, QTextCodec,
-                         Signal)
+from qtpy.QtCore import (
+    QObject, QProcess, QProcessEnvironment, QTextCodec, Signal)
 
+# Local imports
+if TYPE_CHECKING:
+    from spyder_unittest.widgets.configdialog import Config
+    from spyder_unittest.widgets.unittestgui import UnitTestWidget
+
+
+# Logging
+logger = logging.getLogger(__name__)
 
 # if generating coverage report, use this name for the TestResult
 # it's here in case we can get coverage results from unittest too
 COV_TEST_NAME = 'Total Test Coverage'
 
 
-class Category:
+class Category(IntEnum):
     """Enum type representing category of test result."""
 
     FAIL = 1
@@ -36,21 +47,12 @@ class TestResult:
 
     __test__ = False  # this is not a pytest test class
 
-    def __init__(self, category, status, name, message='', time=None,
-                 extra_text='', filename=None, lineno=None):
+    def __init__(self, category: Category, status: str, name: str,
+                 message: str = '', time: Optional[float] = None,
+                 extra_text: str = '', filename: Optional[str] = None,
+                 lineno: Optional[int] = None):
         """
         Construct a test result.
-
-        Parameters
-        ----------
-        category : Category
-        status : str
-        name : str
-        message : str
-        time : float or None
-        extra_text : str
-        filename : str or None
-        lineno : int or None
         """
         self.category = category
         self.status = status
@@ -65,8 +67,10 @@ class TestResult:
         self.filename = filename
         self.lineno = lineno
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """Test for equality."""
+        if not isinstance(other, TestResult):
+            return NotImplemented
         return self.__dict__ == other.__dict__
 
 
@@ -75,7 +79,7 @@ class RunnerBase(QObject):
     Base class for running tests with a framework that uses JUnit XML.
 
     This is an abstract class, meant to be subclassed before being used.
-    Concrete subclasses should define executable and create_argument_list(),
+    Concrete subclasses should define create_argument_list() and finished().
 
     All communication back to the caller is done via signals.
 
@@ -90,9 +94,6 @@ class RunnerBase(QObject):
         Process running the unit test suite.
     resultfilename : str
         Name of file in which test results are stored.
-    executable : str
-        Path to Python executable used for test.  This is required
-        by the UnittestRunner subclass.
 
     Signals
     -------
@@ -113,6 +114,9 @@ class RunnerBase(QObject):
         Emitted when test process is being stopped.
     """
 
+    module: ClassVar[str]
+    name: ClassVar[str]
+
     sig_collected = Signal(object)
     sig_collecterror = Signal(object)
     sig_starttest = Signal(object)
@@ -120,7 +124,8 @@ class RunnerBase(QObject):
     sig_finished = Signal(object, str, bool)
     sig_stop = Signal()
 
-    def __init__(self, widget, resultfilename=None):
+    def __init__(self, widget: UnitTestWidget,
+                 resultfilename: Optional[str] = None):
         """
         Construct test runner.
 
@@ -132,16 +137,16 @@ class RunnerBase(QObject):
             Name of file in which to store test results. If None, use default.
         """
         QObject.__init__(self, widget)
-        self.process = None
+        self.process: Optional[QProcess] = None
         if resultfilename is None:
             self.resultfilename = os.path.join(tempfile.gettempdir(),
                                                'unittest.results')
         else:
             self.resultfilename = resultfilename
-        # Set a sensible default
-        self.executable = sys.executable
 
-    def create_argument_list(self, config, cov_path):
+    def create_argument_list(self, config: Config,
+                             cov_path: Optional[str],
+                             single_test: Optional[str]) -> list[str]:
         """
         Create argument list for testing process (dummy).
 
@@ -149,7 +154,8 @@ class RunnerBase(QObject):
         """
         raise NotImplementedError
 
-    def _prepare_process(self, config, pythonpath):
+    def _prepare_process(self, config: Config,
+                         pythonpath: list[str]) -> QProcess:
         """
         Prepare and return process for running the unit test suite.
 
@@ -161,7 +167,7 @@ class RunnerBase(QObject):
         process.finished.connect(self.finished)
         if pythonpath:
             env = QProcessEnvironment.systemEnvironment()
-            old_python_path = env.value('PYTHONPATH', None)
+            old_python_path = env.value('PYTHONPATH', '')
             python_path_str = os.pathsep.join(pythonpath)
             if old_python_path:
                 python_path_str += os.pathsep + old_python_path
@@ -169,7 +175,9 @@ class RunnerBase(QObject):
             process.setProcessEnvironment(env)
         return process
 
-    def start(self, config, cov_path, executable, pythonpath):
+    def start(self, config: Config, cov_path: Optional[str],
+              executable: str, pythonpath: list[str],
+              single_test: Optional[str]) -> None:
         """
         Start process which will run the unit test suite.
 
@@ -181,33 +189,36 @@ class RunnerBase(QObject):
 
         Parameters
         ----------
-        config : TestConfig
+        config
             Unit test configuration.
-        cov_path : str or None
+        cov_path
             Path to filter source for coverage report
-        executable : str
+        executable
             Path to Python executable
-        pythonpath : list of str
+        pythonpath
             List of directories to be added to the Python path
+        single_test
+            If None, run all tests; otherwise, it is the name of the only test
+            to be run.
 
         Raises
         ------
         RuntimeError
             If process failed to start.
         """
-        self.executable = executable
         self.process = self._prepare_process(config, pythonpath)
-        p_args = self.create_argument_list(config, cov_path)
+        p_args = self.create_argument_list(config, cov_path, single_test)
         try:
             os.remove(self.resultfilename)
         except OSError:
             pass
+        logger.debug(f'Starting Python process with arguments {p_args}')
         self.process.start(executable, p_args)
         running = self.process.waitForStarted()
         if not running:
             raise RuntimeError
 
-    def finished(self):
+    def finished(self, exitcode: int) -> None:
         """
         Called when the unit test process has finished.
 
@@ -216,13 +227,14 @@ class RunnerBase(QObject):
         """
         raise NotImplementedError
 
-    def read_all_process_output(self):
+    def read_all_process_output(self) -> str:
         """Read and return all output from `self.process` as unicode."""
+        assert self.process is not None
         qbytearray = self.process.readAllStandardOutput()
         locale_codec = QTextCodec.codecForLocale()
         return locale_codec.toUnicode(qbytearray.data())
 
-    def stop_if_running(self):
+    def stop_if_running(self) -> None:
         """Stop testing process if it is running."""
         if self.process and self.process.state() == QProcess.Running:
             self.process.kill()

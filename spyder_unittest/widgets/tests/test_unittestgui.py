@@ -8,7 +8,7 @@
 # Standard library imports
 import os
 import sys
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 # Third party imports
 from qtpy.QtCore import Qt, QProcess
@@ -151,8 +151,15 @@ def test_unittestwidget_process_finished_abnormally_status_label(widget):
     expected_text = '<b>{}</b>'.format('Test process exited abnormally')
     assert widget.status_label.text() == expected_text
 
+def test_unittestwidget_handles_sig_single_test_run_requested(widget):
+    with patch.object(widget, 'run_tests') as mock_run_tests:
+        widget.testdataview.sig_single_test_run_requested.emit('testname')
+        mock_run_tests.assert_called_once_with(single_test='testname')
+
 @pytest.mark.parametrize('framework', ['pytest', 'nose2'])
-def test_run_tests_and_display_results(qtbot, widget, tmpdir, monkeypatch, framework):
+@pytest.mark.parametrize('alltests', [True, False])
+def test_run_tests_and_display_results(qtbot, widget, tmpdir, monkeypatch,
+                                       framework, alltests):
     """Basic integration test."""
     os.chdir(tmpdir.strpath)
     testfilename = tmpdir.join('test_foo.py').strpath
@@ -167,24 +174,29 @@ def test_run_tests_and_display_results(qtbot, widget, tmpdir, monkeypatch, frame
 
     config = Config(wdir=tmpdir.strpath, framework=framework, coverage=False)
     with qtbot.waitSignal(widget.sig_finished, timeout=10000, raising=True):
-        widget.run_tests(config)
+        if alltests:
+            widget.run_tests(config)
+        else:
+            widget.run_tests(config, single_test='test_foo.test_fail')
 
     MockQMessageBox.assert_not_called()
     model = widget.testdatamodel
-    assert model.rowCount() == 2
+    assert model.rowCount() == (2 if alltests else 1)
     assert model.index(0, 0).data(
         Qt.DisplayRole) == 'failure' if framework == 'nose2' else 'failed'
     assert model.index(0, 1).data(Qt.DisplayRole) == 'test_foo.test_fail'
     assert model.index(0, 1).data(Qt.ToolTipRole) == 'test_foo.test_fail'
-    assert model.index(1, 0).data(
-        Qt.DisplayRole) == 'ok' if framework == 'nose2' else 'passed'
-    assert model.index(1, 1).data(Qt.DisplayRole) == 'test_foo.test_ok'
-    assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.test_ok'
-    assert model.index(1, 2).data(Qt.DisplayRole) == ''
+    if alltests:
+        assert model.index(1, 0).data(
+            Qt.DisplayRole) == 'ok' if framework == 'nose2' else 'passed'
+        assert model.index(1, 1).data(Qt.DisplayRole) == 'test_foo.test_ok'
+        assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.test_ok'
+        assert model.index(1, 2).data(Qt.DisplayRole) == ''
 
 
+@pytest.mark.parametrize('alltests', [True, False])
 def test_run_tests_using_unittest_and_display_results(
-        qtbot, widget, tmpdir, monkeypatch):
+        qtbot, widget, tmpdir, monkeypatch, alltests):
     """Basic check."""
     os.chdir(tmpdir.strpath)
     testfilename = tmpdir.join('test_foo.py').strpath
@@ -201,18 +213,22 @@ def test_run_tests_using_unittest_and_display_results(
 
     config = Config(wdir=tmpdir.strpath, framework='unittest', coverage=False)
     with qtbot.waitSignal(widget.sig_finished, timeout=10000, raising=True):
-        widget.run_tests(config)
+        if alltests:
+            widget.run_tests(config)
+        else:
+            widget.run_tests(config, single_test='test_foo.MyTest.test_fail')
 
     MockQMessageBox.assert_not_called()
     model = widget.testdatamodel
-    assert model.rowCount() == 2
+    assert model.rowCount() == (2 if alltests else 1)
     assert model.index(0, 0).data(Qt.DisplayRole) == 'failure'
     assert model.index(0, 1).data(Qt.DisplayRole) == 'test_foo.MyTest.test_fail'
     assert model.index(0, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_fail'
-    assert model.index(1, 0).data(Qt.DisplayRole) == 'success'
-    assert model.index(1, 1).data(Qt.DisplayRole) == 'test_foo.MyTest.test_ok'
-    assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_ok'
-    assert model.index(1, 2).data(Qt.DisplayRole) == ''
+    if alltests:
+        assert model.index(1, 0).data(Qt.DisplayRole) == 'success'
+        assert model.index(1, 1).data(Qt.DisplayRole) == 'test_foo.MyTest.test_ok'
+        assert model.index(1, 1).data(Qt.ToolTipRole) == 'test_foo.MyTest.test_ok'
+        assert model.index(1, 2).data(Qt.DisplayRole) == ''
 
 def test_run_tests_with_print_using_unittest_and_display_results(
         qtbot, widget, tmpdir, monkeypatch):

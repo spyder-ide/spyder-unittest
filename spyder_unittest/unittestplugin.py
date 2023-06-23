@@ -18,7 +18,6 @@ from spyder.api.plugins import Plugins, SpyderDockablePlugin
 from spyder.api.plugin_registration.decorators import (
     on_plugin_available, on_plugin_teardown)
 from spyder.config.base import get_translation
-from spyder.config.gui import is_dark_interface
 from spyder.plugins.mainmenu.api import ApplicationMenus
 from spyder.utils.palette import SpyderPalette
 
@@ -166,7 +165,6 @@ class UnitTestPlugin(SpyderDockablePlugin):
         """
         preferences = self.get_plugin(Plugins.Preferences)
         preferences.register_plugin_preferences(self)
-        self.get_widget().use_dark_interface(is_dark_interface())
 
     @on_plugin_teardown(plugin=Plugins.Preferences)
     def on_preferences_teardown(self):

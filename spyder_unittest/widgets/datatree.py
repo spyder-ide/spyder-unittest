@@ -55,9 +55,13 @@ class TestDataView(QTreeView):
     -------
     sig_edit_goto(str, int): Emitted if editor should go to some position.
         Arguments are file name and line number (zero-based).
+    sig_single_test_run_requested(str): Emitted to request a single test
+        to be run. Argument is the name of the test.
     """
 
     sig_edit_goto = Signal(str, int)
+    sig_single_test_run_requested = Signal(str)
+
     __test__ = False  # this is not a pytest test class
 
     def __init__(self, parent=None):
@@ -120,6 +124,13 @@ class TestDataView(QTreeView):
                 lineno = 0
             self.sig_edit_goto.emit(filename, lineno)
 
+    def run_single_test(self, index):
+        """Ask plugin to run only the test corresponding to index."""
+        index = self.make_index_canonical(index)
+        testresult = self.model().testresults[index.row()]
+        testname = testresult.name
+        self.sig_single_test_run_requested.emit(testname)
+
     def make_index_canonical(self, index):
         """
         Convert given index to canonical index for the same test.
@@ -146,12 +157,21 @@ class TestDataView(QTreeView):
                                      triggered=lambda: self.expand(index))
             menuItem.setEnabled(self.model().hasChildren(index))
         contextMenu.addAction(menuItem)
+
         menuItem = create_action(
                 self, _('Go to definition'),
                 triggered=lambda: self.go_to_test_definition(index))
         test_location = self.model().data(index, Qt.UserRole)
         menuItem.setEnabled(test_location[0] is not None)
         contextMenu.addAction(menuItem)
+
+        menuItem = create_action(
+                self, _('Run only this test'),
+                triggered=lambda: self.run_single_test(index))
+        result_category = self.model().testresults[index.row()].category
+        menuItem.setEnabled(result_category != Category.COVERAGE)
+        contextMenu.addAction(menuItem)
+
         return contextMenu
 
     def resizeColumns(self):
@@ -192,11 +212,6 @@ class TestDataModel(QAbstractItemModel, SpyderConfigurationAccessor):
     a tuple (row, column, id). The id is TOPLEVEL_ID for top-level items.
     For level-2 items, the id is the index of the test in `self.testresults`.
 
-    Attributes
-    ----------
-    is_dark_interface : bool
-        Whether to use colours appropriate for a dark user interface.
-
     Signals
     -------
     sig_summary(str)
@@ -212,7 +227,6 @@ class TestDataModel(QAbstractItemModel, SpyderConfigurationAccessor):
         """Constructor."""
         QAbstractItemModel.__init__(self, parent)
         self.abbreviator = Abbreviator()
-        self.is_dark_interface = False
         self.testresults = []
         try:
             self.monospace_font = parent.window().editor.get_plugin_font()

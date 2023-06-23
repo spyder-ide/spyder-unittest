@@ -8,20 +8,27 @@
 # Standard library imports
 import os.path as osp
 import sys
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 # Third party imports
 import pytest
 
 # Local imports
-from spyder_unittest.backend.pytestrunner import (PyTestRunner,
-                                                  logreport_to_testresult)
+from spyder_unittest.backend.pytestrunner import PyTestRunner
 from spyder_unittest.backend.runnerbase import (Category, TestResult,
                                                 COV_TEST_NAME)
 from spyder_unittest.widgets.configdialog import Config
 
 
-def test_pytestrunner_create_argument_list(monkeypatch):
+@pytest.fixture
+def runner():
+    res = PyTestRunner(None)
+    res.rootdir = 'ham'
+    res.config = Config(wdir='ham')
+    return res
+
+
+def test_pytestrunner_create_argument_list(monkeypatch, runner):
     config = Config(args=['--extra-arg'])
     cov_path = None
     MockZMQStreamReader = Mock()
@@ -34,7 +41,7 @@ def test_pytestrunner_create_argument_list(monkeypatch):
     runner.reader = mock_reader
     monkeypatch.setattr('spyder_unittest.backend.pytestrunner.os.path.dirname',
                         lambda _: 'dir')
-    arg_list = runner.create_argument_list(config, cov_path)
+    arg_list = runner.create_argument_list(config, cov_path, None)
     pyfile, port, *coverage, last = arg_list
     assert pyfile == osp.join('dir', 'workers', 'pytestworker.py')
     assert port == '42'
@@ -48,24 +55,23 @@ def test_pytestrunner_start(monkeypatch):
         MockZMQStreamReader)
     mock_reader = MockZMQStreamReader()
 
-    MockRunnerBase = Mock(name='RunnerBase')
-    monkeypatch.setattr('spyder_unittest.backend.pytestrunner.RunnerBase',
-                        MockRunnerBase)
+    mock_base_start = Mock()
+    monkeypatch.setattr('spyder_unittest.backend.unittestrunner.RunnerBase.start',
+                        mock_base_start)
 
     runner = PyTestRunner(None, 'results')
     config = Config()
     cov_path = None
-    runner.start(config, cov_path, sys.executable, ['pythondir'])
+    runner.start(config, cov_path, sys.executable, ['pythondir'], None)
     assert runner.config is config
     assert runner.reader is mock_reader
     runner.reader.sig_received.connect.assert_called_once_with(
         runner.process_output)
-    MockRunnerBase.start.assert_called_once_with(
-        runner, config, cov_path, sys.executable, ['pythondir'])
+    mock_base_start.assert_called_once_with(
+        config, cov_path, sys.executable, ['pythondir'], None)
 
 
-def test_pytestrunner_process_output_with_collected(qtbot):
-    runner = PyTestRunner(None)
+def test_pytestrunner_process_output_with_collected(qtbot, runner):
     output = [{'event': 'collected', 'nodeid': 'spam.py::ham'},
               {'event': 'collected', 'nodeid': 'eggs.py::bacon'}]
     with qtbot.waitSignal(runner.sig_collected) as blocker:
@@ -74,8 +80,7 @@ def test_pytestrunner_process_output_with_collected(qtbot):
     assert blocker.args == [expected]
 
 
-def test_pytestrunner_process_output_with_collecterror(qtbot):
-    runner = PyTestRunner(None)
+def test_pytestrunner_process_output_with_collecterror(qtbot, runner):
     output = [{
             'event': 'collecterror',
             'nodeid': 'ham/spam.py',
@@ -87,8 +92,7 @@ def test_pytestrunner_process_output_with_collecterror(qtbot):
     assert blocker.args == [expected]
 
 
-def test_pytestrunner_process_output_with_starttest(qtbot):
-    runner = PyTestRunner(None)
+def test_pytestrunner_process_output_with_starttest(qtbot, runner):
     output = [{'event': 'starttest', 'nodeid': 'ham/spam.py::ham'},
               {'event': 'starttest', 'nodeid': 'ham/eggs.py::bacon'}]
     with qtbot.waitSignal(runner.sig_starttest) as blocker:
@@ -97,7 +101,7 @@ def test_pytestrunner_process_output_with_starttest(qtbot):
     assert blocker.args == [expected]
 
 
-@pytest.mark.parametrize('exitcode, normal_exit', 
+@pytest.mark.parametrize('exitcode, normal_exit',
                          [(0, True), (1, True), (2, True), (3, False),
                           (4, False), (5, True)])
 def test_pytestrunner_finished(qtbot, exitcode, normal_exit):
@@ -114,6 +118,39 @@ def test_pytestrunner_finished(qtbot, exitcode, normal_exit):
     assert blocker.args == [results, output, normal_exit]
 
 
+@pytest.mark.parametrize('wdir, expected', [
+    ('ham', 'spam.eggs'),
+    (osp.join('ham', 'spam'), 'eggs'),
+    (osp.join('link-to-ham', 'spam'), 'eggs')])
+def test_normalize_module_name(runner, wdir, expected):
+    def new_realpath(name):
+        """Simulate link from `link-to-ham` to `ham`"""
+        if name.startswith('link-to-ham'):
+            return name[len('link-to-'):]
+        else:
+            return name
+
+    with patch('spyder_unittest.backend.pytestrunner.osp.realpath',
+               side_effect=new_realpath):
+        runner.config = Config(wdir=wdir)
+        result = runner.normalize_module_name(osp.join('spam', 'eggs.py'))
+        assert result == expected
+
+
+def test_convert_nodeid_to_testname(runner):
+    nodeid = osp.join('spam', 'eggs.py') + '::test_foo'
+    testname = 'spam.eggs.test_foo'
+    result = runner.convert_nodeid_to_testname(nodeid)
+    assert result == testname
+
+
+def test_convert_testname_to_nodeid(runner):
+    nodeid = osp.join('spam', 'eggs.py') + '::test_foo'
+    testname = 'spam.eggs.test_foo'
+    result = runner.convert_testname_to_nodeid(testname)
+    assert result == nodeid
+
+
 def standard_logreport_output():
     return {
         'event': 'logreport',
@@ -125,9 +162,8 @@ def standard_logreport_output():
         'duration': 42
     }
 
-def test_pytestrunner_process_output_with_logreport_passed(qtbot):
-    runner = PyTestRunner(None)
-    runner.rootdir = 'ham'
+
+def test_pytestrunner_process_output_with_logreport_passed(qtbot, runner):
     output = [standard_logreport_output()]
     with qtbot.waitSignal(runner.sig_testresult) as blocker:
         runner.process_output(output)
@@ -224,40 +260,39 @@ TOTAL                                        1201    174    86%
     ('---', True, Category.FAIL)
     # ('---', False, this is not possible)
 ])
-def test_logreport_to_testresult_with_outcome_and_possible_error(outcome,
-                                                                 witherror,
-                                                                 category):
+def test_logreport_to_testresult_with_outcome_and_possible_error(
+        runner, outcome, witherror, category):
     report = standard_logreport_output()
     report['outcome'] = outcome
     report['witherror'] = witherror
     expected = TestResult(category, outcome, 'foo.bar', time=42,
                           filename=osp.join('ham', 'foo.py'), lineno=24)
-    assert logreport_to_testresult(report, 'ham') == expected
+    assert runner.logreport_to_testresult(report) == expected
 
 
-def test_logreport_to_testresult_with_message():
+def test_logreport_to_testresult_with_message(runner):
     report = standard_logreport_output()
     report['message'] = 'msg'
     expected = TestResult(Category.OK, 'passed', 'foo.bar', message='msg',
                           time=42, filename=osp.join('ham', 'foo.py'),
                           lineno=24)
-    assert logreport_to_testresult(report, 'ham') == expected
+    assert runner.logreport_to_testresult(report) == expected
 
 
-def test_logreport_to_testresult_with_extratext():
+def test_logreport_to_testresult_with_extratext(runner):
     report = standard_logreport_output()
     report['longrepr'] = 'long msg'
     expected = TestResult(Category.OK, 'passed', 'foo.bar', time=42,
                           extra_text='long msg',
                           filename=osp.join('ham', 'foo.py'), lineno=24)
-    assert logreport_to_testresult(report, 'ham') == expected
+    assert runner.logreport_to_testresult(report) == expected
 
 
 @pytest.mark.parametrize('longrepr,prefix', [
     ('', ''),
     ('msg', '\n')
 ])
-def test_logreport_to_testresult_with_output(longrepr, prefix):
+def test_logreport_to_testresult_with_output(runner, longrepr, prefix):
     report = standard_logreport_output()
     report['longrepr'] = longrepr
     report['sections'] = [['Captured stdout call', 'ham\n'],
@@ -268,5 +303,4 @@ def test_logreport_to_testresult_with_output(longrepr, prefix):
     expected = TestResult(Category.OK, 'passed', 'foo.bar', time=42,
                           extra_text=txt, filename=osp.join('ham', 'foo.py'),
                           lineno=24)
-    assert logreport_to_testresult(report, 'ham') == expected
-
+    assert runner.logreport_to_testresult(report) == expected
