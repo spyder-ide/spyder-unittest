@@ -1,5 +1,29 @@
 # History of changes
 
+## Version 0.6.0 (2023-07-02)
+
+### New Features
+
+* Support nose2 and drop support for nose ([Issue 178](https://github.com/spyder-ide/spyder-unittest/issues/178), [PR 200](https://github.com/spyder-ide/spyder-unittest/pull/200))
+* New menu item for running only a single test ([Issue 88](https://github.com/spyder-ide/spyder-unittest/issues/88), [PR 211](https://github.com/spyder-ide/spyder-unittest/pull/211))
+* New configuration option for adding extra command-line arguments when running tests ([Issue 199](https://github.com/spyder-ide/spyder-unittest/issues/199), [PR 204](https://github.com/spyder-ide/spyder-unittest/pull/204))
+* New configuration option to disable or enable abbreviating the test name ([Issue 122](https://github.com/spyder-ide/spyder-unittest/issues/122), [PR 208](https://github.com/spyder-ide/spyder-unittest/pull/208))
+
+### Bug Fixes
+
+* Execute `unittest` tests programmatically for robustness ([Issue 73](https://github.com/spyder-ide/spyder-unittest/issues/73), [Issue 76](https://github.com/spyder-ide/spyder-unittest/issues/76), [Issue 160](https://github.com/spyder-ide/spyder-unittest/issues/160), [PR 202](https://github.com/spyder-ide/spyder-unittest/pull/202))
+* Support changed format of `unittest` output in Python 3.11 ([Issue 193](https://github.com/spyder-ide/spyder-unittest/issues/193), [PR 190](https://github.com/spyder-ide/spyder-unittest/pull/190), [PR 194](https://github.com/spyder-ide/spyder-unittest/pull/194), by [@juliangilbey](https://github.com/juliangilbey))
+* Fix keyboard shortcut for running tests ([Issue 172](https://github.com/spyder-ide/spyder-unittest/issues/172), [PR 203](https://github.com/spyder-ide/spyder-unittest/pull/203))
+* Use colours from Spyder's standard palette to get a uniform UI ([Issue 186](https://github.com/spyder-ide/spyder-unittest/issues/186), [PR 187](https://github.com/spyder-ide/spyder-unittest/pull/187))
+
+### Maintenance
+
+* Keep plugin up-to-date with latest changes in Spyder 5 ([Issue 195](https://github.com/spyder-ide/spyder-unittest/issues/195), [Issue 206](https://github.com/spyder-ide/spyder-unittest/issues/206), [Issue 209](https://github.com/spyder-ide/spyder-unittest/issues/209), [PR 197](https://github.com/spyder-ide/spyder-unittest/pull/197), [PR 207](https://github.com/spyder-ide/spyder-unittest/pull/207), [PR 214](https://github.com/spyder-ide/spyder-unittest/pull/214))
+* Update translations ([PR 212](https://github.com/spyder-ide/spyder-unittest/pull/212))
+* Fix integration tests for the plugin ([Issue 167](https://github.com/spyder-ide/spyder-unittest/issues/167), [PR 197](https://github.com/spyder-ide/spyder-unittest/pull/197))
+* Update GitHub workflow for running tests ([PR 192](https://github.com/spyder-ide/spyder-unittest/pull/192), [PR 196](https://github.com/spyder-ide/spyder-unittest/pull/196), [PR 201](https://github.com/spyder-ide/spyder-unittest/pull/201))
+
+
 ## Version 0.5.1 (2022/09/03)
 
 ### New Features
