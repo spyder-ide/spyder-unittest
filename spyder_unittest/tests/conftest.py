@@ -20,22 +20,18 @@ from qtpy import QtWebEngineWidgets  # noqa
 
 # Spyder imports
 from spyder import dependencies
-from spyder import version_info as spyder_version_info
 from spyder.api.plugin_registration.registry import PLUGIN_REGISTRY
 from spyder.app import start
 from spyder.config.manager import CONF
-
-SPYDER6 = spyder_version_info[0] == 6
 
 
 @pytest.fixture
 def main_window(monkeypatch):
     """Main Window fixture"""
 
-    if not SPYDER6:
-        # Disable loading of old third-party plugins in Spyder 5
-        monkeypatch.setattr(
-            'spyder.app.mainwindow.get_spyderplugins_mods', lambda: [])
+    # Disable loading of old third-party plugins in Spyder 5
+    monkeypatch.setattr(
+        'spyder.app.mainwindow.get_spyderplugins_mods', lambda: [])
 
     # Don't show tours message
     CONF.set('tours', 'show_tour_message', False)
