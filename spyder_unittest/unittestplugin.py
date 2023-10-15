@@ -49,11 +49,13 @@ class UnitTestPlugin(SpyderDockablePlugin):
                       {'framework': '',
                        'wdir': '',
                        'coverage': False,
+                       'args': [],
                        'abbrev_test_names': False}),
                      ('shortcuts',
                       {'unittest/Run tests': 'Alt+Shift+F11'})]
-    CONF_NAMEMAP = {CONF_SECTION: [(CONF_SECTION,
-                                    ['framework', 'wdir', 'coverage'])]}
+    CONF_NAMEMAP = {CONF_SECTION:
+                    [(CONF_SECTION,
+                      ['framework', 'wdir', 'coverage', 'args'])]}
     CONF_FILE = True
     CONF_VERSION = '0.2.0'
     CONF_WIDGET_CLASS = UnitTestConfigPage
@@ -316,7 +318,8 @@ class UnitTestPlugin(SpyderDockablePlugin):
         new_config = Config(
             framework=project.get_option('framework', self.CONF_SECTION),
             wdir=project.get_option('wdir', self.CONF_SECTION),
-            coverage=project.get_option('coverage', self.CONF_SECTION))
+            coverage=project.get_option('coverage', self.CONF_SECTION),
+            args=project.get_option('args', self.CONF_SECTION))
         if not widget.config_is_valid(new_config):
             new_config = None
         widget.set_config_without_emit(new_config)
@@ -337,6 +340,7 @@ class UnitTestPlugin(SpyderDockablePlugin):
                            self.CONF_SECTION)
         project.set_option('wdir', test_config.wdir, self.CONF_SECTION)
         project.set_option('coverage', test_config.coverage, self.CONF_SECTION)
+        project.set_option('args', test_config.args, self.CONF_SECTION)
 
     def goto_in_editor(self, filename, lineno):
         """
