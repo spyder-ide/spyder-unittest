@@ -72,7 +72,8 @@ class UnitTestPlugin(SpyderDockablePlugin):
         """
         return _('Unit testing')
 
-    def get_description(self):
+    @staticmethod
+    def get_description():
         """
         Return the plugin localized description.
 
@@ -83,7 +84,8 @@ class UnitTestPlugin(SpyderDockablePlugin):
         """
         return _('Run test suites and view their results')
 
-    def get_icon(self):
+    @classmethod
+    def get_icon(cls):
         """
         Return the plugin associated icon.
 
