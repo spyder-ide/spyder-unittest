@@ -14,21 +14,11 @@ jobs:
       fail-fast: false 
       matrix:
         OS: ['ubuntu', 'macos', 'windows']
-        PYTHON_VERSION: ['3.8', '3.9', '3.10']
-        SPYDER_SOURCE: ['conda', 'git']
-        exclude:
-          - OS: 'macos'
-            PYTHON_VERSION: '3.8'
-            SPYDER_SOURCE: 'git'
-          - OS: 'macos'
-            PYTHON_VERSION: '3.9'
-            SPYDER_SOURCE: 'git'
-          - OS: 'windows'
-            PYTHON_VERSION: '3.8'
-            SPYDER_SOURCE: 'git'
-          - OS: 'windows'
-            PYTHON_VERSION: '3.9'
-            SPYDER_SOURCE: 'git'
+        PYTHON_VERSION: ['3.9', '3.10', '3.11']
+        # Do not test against conda for the moment because latest Spyder
+        # version on conda-forge is 6.0.0alpha2 which is not compatible
+        # with Spyder's master branch
+        SPYDER_SOURCE: ['git']
     name: ${{ matrix.OS }} py${{ matrix.PYTHON_VERSION }} spyder-from-${{ matrix.SPYDER_SOURCE }}
     runs-on: ${{ matrix.OS }}-latest
     env:
