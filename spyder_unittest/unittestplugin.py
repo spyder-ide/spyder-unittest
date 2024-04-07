@@ -126,9 +126,9 @@ class UnitTestPlugin(SpyderDockablePlugin):
         """
         editor = self.get_plugin(Plugins.Editor)
         run_action = self.get_action(UnitTestPluginActions.Run)
-        editor.pythonfile_dependent_actions += [run_action]
+        editor.get_widget().pythonfile_dependent_actions += [run_action]
         # FIXME: Previous line does not do anything
-        self.get_widget().pre_test_hook = editor.save_all
+        self.get_widget().pre_test_hook = editor.get_widget().save_all
         self.get_widget().sig_edit_goto.connect(self.goto_in_editor)
 
     @on_plugin_teardown(plugin=Plugins.Editor)
