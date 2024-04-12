@@ -19,7 +19,6 @@ import pytest
 from qtpy import QtWebEngineWidgets  # noqa
 
 # Spyder imports
-from spyder import dependencies
 from spyder import version_info as spyder_version_info
 from spyder.api.plugin_registration.registry import PLUGIN_REGISTRY
 from spyder.app import start
@@ -41,10 +40,6 @@ def main_window(monkeypatch):
     CONF.set('tours', 'show_tour_message', False)
     QApplication.processEvents()
 
-    # Reset global state
-    dependencies.DEPENDENCIES = []
-    PLUGIN_REGISTRY.reset()
-
     # Start the window
     window = start.main()
     QApplication.processEvents()
@@ -52,5 +47,8 @@ def main_window(monkeypatch):
     yield window
 
     # Close main window
+    window.closing(close_immediately=True)
     window.close()
     CONF.reset_to_defaults(notification=False)
+    CONF.reset_manager()
+    PLUGIN_REGISTRY.reset()
