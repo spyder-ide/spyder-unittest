@@ -26,21 +26,21 @@ jobs:
       PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
     steps:
       - name: Checkout branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install System Packages
         if: matrix.OS == 'ubuntu'
         run: | 
           sudo apt-get update --fix-missing
           sudo apt-get install -qq pyqt5-dev-tools libxcb-xinerama0 xterm --fix-missing
       - name: Install Conda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
-           miniforge-variant: Mambaforge
+           miniforge-version: latest
            auto-update-conda: true
            python-version: ${{ matrix.PYTHON_VERSION }} 
       - name: Checkout Spyder from git
         if: matrix.SPYDER_SOURCE == 'git'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: 'spyder-ide/spyder'
           path: 'spyder'
@@ -85,7 +85,7 @@ jobs:
           mamba list
       - name: Run tests (Linux)
         if: matrix.OS == 'ubuntu'
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         with:
           timeout_minutes: 10
           max_attempts: 3
@@ -95,7 +95,7 @@ jobs:
             xvfb-run --auto-servernum pytest spyder_unittest -vv
       - name: Run tests (MacOS)
         if: matrix.OS == 'macos'
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         with:
           timeout_minutes: 10
           max_attempts: 3
@@ -105,7 +105,7 @@ jobs:
             pytest spyder_unittest -vv
       - name: Run tests (Windows)
         if: matrix.OS == 'windows'
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         with:
           timeout_minutes: 10
           max_attempts: 3
