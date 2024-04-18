@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
+        with:
+           path: 'spyder-unittest'
       - name: Install System Packages
         if: matrix.OS == 'ubuntu'
         run: | 
@@ -64,20 +66,20 @@ jobs:
         if: matrix.SPYDER_SOURCE == 'git'
         shell: bash -l {0}
         run: |
-          python .github/scripts/generate-without-spyder.py
-          mamba install --file requirements/without-spyder.txt -y
+          python spyder-unittest/.github/scripts/generate-without-spyder.py
+          mamba install --file spyder-unittest/requirements/without-spyder.txt -y
       - name: Install plugin dependencies
         if: matrix.SPYDER_SOURCE == 'conda'
         shell: bash -l {0}
-        run: mamba install --file requirements/conda.txt -y
+        run: mamba install --file spyder-unittest/requirements/conda.txt -y
       - name: Install test dependencies
         shell: bash -l {0}
         run: |
           mamba install nomkl -y -q
-          mamba install --file requirements/tests.txt -y
+          mamba install --file spyder-unittest/requirements/tests.txt -y
       - name: Install plugin
         shell: bash -l {0}
-        run: pip install --no-deps -e .
+        run: pip install --no-deps -e spyder-unittest
       - name: Show environment information
         shell: bash -l {0}
         run: |
@@ -92,7 +94,7 @@ jobs:
           shell: bash
           command: |
             . ~/.profile
-            xvfb-run --auto-servernum pytest spyder_unittest -vv
+            xvfb-run --auto-servernum pytest spyder-unittest/spyder_unittest -vv
       - name: Run tests (MacOS)
         if: matrix.OS == 'macos'
         uses: nick-fields/retry@v3
@@ -102,11 +104,11 @@ jobs:
           shell: bash
           command: |
             . ~/.profile
-            pytest spyder_unittest -vv
+            pytest spyder-unittest/spyder_unittest -vv
       - name: Run tests (Windows)
         if: matrix.OS == 'windows'
         uses: nick-fields/retry@v3
         with:
           timeout_minutes: 10
           max_attempts: 3
-          command: pytest spyder_unittest -vv
+          command: pytest spyder-unittest/spyder_unittest -vv
