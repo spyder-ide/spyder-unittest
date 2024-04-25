@@ -20,7 +20,6 @@ from spyder.api.plugins import Plugins
 from spyder.api.plugin_registration.registry import PLUGIN_REGISTRY
 from spyder.app.cli_options import get_options
 from spyder.config.manager import CONF
-from spyder.plugins.preferences.plugin import Preferences
 
 # Local imports
 from spyder_unittest.unittestplugin import UnitTestPlugin
@@ -34,6 +33,10 @@ class MainWindowMock(QMainWindow):
     register_shortcut = Mock()
 
     def __init__(self, parent):
+        # This import assumes that an QApplication is already running,
+        # so we can not put it at the top of the file
+        from spyder.plugins.preferences.plugin import Preferences
+
         super().__init__(parent)
         self.default_style = None
         self.widgetlist = []
@@ -75,6 +78,10 @@ class MainWindowMock(QMainWindow):
 class ConfigDialogTester(QWidget):
     def __init__(self, parent, main_class,
                  general_config_plugins, plugins):
+        # This import assumes that an QApplication is already running,
+        # so we can not put it at the top of the file
+        from spyder.plugins.preferences.plugin import Preferences
+
         super().__init__(parent)
         self._main = main_class(self) if main_class else None
         if self._main is None:

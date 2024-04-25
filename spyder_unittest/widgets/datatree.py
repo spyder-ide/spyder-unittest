@@ -16,7 +16,7 @@ from qtpy.QtGui import QBrush, QColor, QFont
 from qtpy.QtWidgets import QMenu, QTreeView
 from spyder.api.config.mixins import SpyderConfigurationAccessor
 from spyder.config.base import get_translation
-from spyder.utils.palette import QStylePalette, SpyderPalette
+from spyder.utils.palette import SpyderPalette
 from spyder.utils.qthelpers import create_action
 
 # Local imports
@@ -33,8 +33,8 @@ COLORS = {
     Category.OK:       SpyderPalette.COLOR_SUCCESS_1,
     Category.FAIL:     SpyderPalette.COLOR_ERROR_1,
     Category.SKIP:     SpyderPalette.COLOR_WARN_1,
-    Category.PENDING:  QStylePalette.COLOR_BACKGROUND_1,
-    Category.COVERAGE: QStylePalette.COLOR_ACCENT_1
+    Category.PENDING:  SpyderPalette.COLOR_BACKGROUND_1,
+    Category.COVERAGE: SpyderPalette.COLOR_ACCENT_1
 }
 
 STATUS_COLUMN = 0
