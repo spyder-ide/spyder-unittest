@@ -1,2 +1,2 @@
 lxml
-spyder>=5.4.1,<7
+spyder>=6,<7
