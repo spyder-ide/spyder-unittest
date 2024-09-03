@@ -23,19 +23,14 @@ from spyder.plugins.mainmenu.api import ApplicationMenus
 from spyder_unittest.unittestplugin import UnitTestPlugin
 from spyder_unittest.widgets.configdialog import Config
 
-SPYDER6 = spyder_version_info[0] == 6
-
 
 def test_menu_item(main_window):
     """
     Test that plugin adds item 'Run unit tests' to Run menu.
     """
-    if SPYDER6:
-        main_menu = main_window.get_plugin(Plugins.MainMenu)
-        run_menu = main_menu.get_application_menu(ApplicationMenus.Run)
-        actions = run_menu.get_actions()
-    else:
-        actions = main_window.run_menu_actions
+    main_menu = main_window.get_plugin(Plugins.MainMenu)
+    run_menu = main_menu.get_application_menu(ApplicationMenus.Run)
+    actions = run_menu.get_actions()
 
     # Filter out seperators (indicated by action is None) and convert to text
     menu_items = [action.text() for action in actions if action]
@@ -71,10 +66,7 @@ def test_default_working_dir(main_window, tmpdir):
 
     assert unittest_plugin.get_widget().default_wdir == os.getcwd()
 
-    if SPYDER6:
-        projects.create_project(project_dir)
-    else:
-        projects._create_project(project_dir)
+    projects.create_project(project_dir)
     assert unittest_plugin.get_widget().default_wdir == project_dir
 
     projects.close_project()
@@ -96,10 +88,7 @@ def test_plugin_config(main_window, tmpdir, qtbot):
     assert unittest_widget.config is None
 
     # Create new project
-    if SPYDER6:
-        projects.create_project(project_dir)
-    else:
-        projects._create_project(project_dir)
+    projects.create_project(project_dir)
 
     # Test config file does exist but config is empty
     assert config_file_path.check()

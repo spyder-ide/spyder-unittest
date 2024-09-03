@@ -37,7 +37,7 @@ def get_package_data(name, extlist):
 
 
 # Requirements
-REQUIREMENTS = ['lxml', 'spyder>=6.0.0.dev0,<7', 'pyzmq']
+REQUIREMENTS = ['lxml', 'spyder>=6,<7', 'pyzmq']
 EXTLIST = ['.jpg', '.png', '.json', '.mo', '.ini']
 LIBNAME = 'spyder_unittest'
 
@@ -56,7 +56,7 @@ setup(
     packages=find_packages(),
     package_data={LIBNAME: get_package_data(LIBNAME, EXTLIST)},
     keywords=["Qt PyQt4 PyQt5 spyder plugins testing"],
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     install_requires=REQUIREMENTS,
     url='https://github.com/spyder-ide/spyder-unittest',
     license='MIT',
