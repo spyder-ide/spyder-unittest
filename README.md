@@ -31,14 +31,21 @@ Support for `pytest` is most complete at the moment.
 
 ## Installation
 
-The unittest plugin is available in the `spyder-ide` channel in Anaconda and in PyPI,
-so it can be installed with the following commands:
+To install this plugin, you can use either ``pip`` or ``conda`` package managers, as follows:
 
-* Using Anaconda: `conda install -c spyder-ide spyder-unittest`
-* Using pip: `pip install spyder-unittest`
+Using conda (the recommended way!):
 
-All dependencies will be automatically installed.
-You have to restart Spyder before you can use the plugin.
+```
+conda install spyder-unittest -c conda-forge
+```
+
+Using pip:
+
+```
+pip install spyder-unittest
+```
+
+**Note**: At the moment it is not possible to use this plugin with the [Spyder installers](http://docs.spyder-ide.org/current/installation.html#standalone-installers) for Windows and macOS. We're working to make that a reality in the future.
 
 
 ## Usage
