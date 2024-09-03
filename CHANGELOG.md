@@ -1,5 +1,20 @@
 # History of changes
 
+## Version 0.7.0 (2024/09/03)
+
+This release updates the plugin to be used with Spyder 6 and fixes two bugs.
+
+### Bug fixes
+
+* Save command-line arguments ([Issue 216](https://github.com/spyder-ide/spyder-unittest/issues/216), [PR 217](https://github.com/spyder-ide/spyder-unittest/pull/217) by [@abdullahkhalids](https://github.com/abdullahkhalids))
+  * Thanks to [Abdullah Khalid](https://github.com/abdullahkhalids) for this contribution!
+* Update installation instructions to point to conda-forge ([Issue 220](https://github.com/spyder-ide/spyder-unittest/issues/220), [PR 223](https://github.com/spyder-ide/spyder-unittest/pull/223))
+
+### Maintenance
+
+* Make plugin compatible with Spyder 6 ([Issue 198](https://github.com/spyder-ide/spyder-unittest/issues/198), [Issue 210](https://github.com/spyder-ide/spyder-unittest/issues/210), [Issue 215](https://github.com/spyder-ide/spyder-unittest/issues/215), [Issue 221](https://github.com/spyder-ide/spyder-unittest/issues/221), [PR 223](https://github.com/spyder-ide/spyder-unittest/pull/223), [PR 222](https://github.com/spyder-ide/spyder-unittest/pull/222), [PR 218](https://github.com/spyder-ide/spyder-unittest/pull/218))
+
+
 ## Version 0.6.0 (2023-07-02)
 
 ### New Features
