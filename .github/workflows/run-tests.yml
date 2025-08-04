@@ -58,7 +58,7 @@ jobs:
       - name: Install Spyder from source
         if: matrix.SPYDER_SOURCE == 'git'
         shell: bash -l {0}
-        run: pip install --no-deps -e spyder
+        run: python -m pip install --no-deps spyder/
       - name: Install plugin dependencies (without Spyder)
         if: matrix.SPYDER_SOURCE == 'git'
         shell: bash -l {0}
@@ -76,7 +76,7 @@ jobs:
           conda install --file spyder-unittest/requirements/tests.txt -y
       - name: Install plugin
         shell: bash -l {0}
-        run: pip install --no-deps -e spyder-unittest
+        run: python -m pip install --no-deps spyder-unittest/
       - name: Show environment information
         shell: bash -l {0}
         run: |
