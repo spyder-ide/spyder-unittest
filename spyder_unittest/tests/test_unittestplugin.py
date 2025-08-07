@@ -47,7 +47,7 @@ def test_pythonpath_change(main_window):
 
     new_path = '/some/path'
     new_path_dict = OrderedDict([(new_path, True)])
-    ppm.get_container()._update_python_path(new_path_dict)
+    ppm.get_container()._save_paths(user_paths=new_path_dict)
 
     assert unittest_plugin.get_widget().pythonpath == [new_path]
 

@@ -10,9 +10,6 @@ This contains the necessary definitions to make the main_window fixture
 available for integration tests.
 """
 
-# Standard library imports
-import os
-
 # Third-party imports
 from qtpy.QtWidgets import QApplication
 import pytest
@@ -34,12 +31,6 @@ def main_window(monkeypatch):
 
     # Don't show tours message
     CONF.set('tours', 'show_tour_message', False)
-
-    # Turn introspection on, even though it's slower and more memory
-    # intensive, because otherwise tests are aborted at end with
-    # "QThread: Destroyed while thread is still running".
-    os.environ['SPY_TEST_USE_INTROSPECTION'] = 'True'
-
     QApplication.processEvents()
 
     # Start the window
@@ -54,5 +45,3 @@ def main_window(monkeypatch):
     CONF.reset_to_defaults(notification=False)
     CONF.reset_manager()
     PLUGIN_REGISTRY.reset()
-
-    os.environ.pop('SPY_TEST_USE_INTROSPECTION')
