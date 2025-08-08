@@ -88,5 +88,7 @@ def test_runnerbase_start(monkeypatch):
     with pytest.raises(RuntimeError):
         runner.start(config, cov_path, 'python_exec', ['pythondir'], None)
 
-    mock_process.start.assert_called_once_with('python_exec', ['arg1', 'arg2'])
+    mock_process.start.assert_called_once_with(
+        'python_exec', ['-X', 'utf8', 'arg1', 'arg2']
+    )
     mock_remove.assert_called_once_with('results')
