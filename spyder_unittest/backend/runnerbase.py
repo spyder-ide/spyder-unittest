@@ -208,6 +208,7 @@ class RunnerBase(QObject):
         """
         self.process = self._prepare_process(config, pythonpath)
         p_args = self.create_argument_list(config, cov_path, single_test)
+        p_args = ['-X', 'utf8'] + p_args  # Ensure output is UTF-8
         try:
             os.remove(self.resultfilename)
         except OSError:
@@ -231,8 +232,7 @@ class RunnerBase(QObject):
         """Read and return all output from `self.process` as unicode."""
         assert self.process is not None
         qbytearray = self.process.readAllStandardOutput()
-        locale_codec = QTextCodec.codecForLocale()
-        return locale_codec.toUnicode(qbytearray.data())
+        return str(qbytearray.data(), encoding='utf-8')
 
     def stop_if_running(self) -> None:
         """Stop testing process if it is running."""
