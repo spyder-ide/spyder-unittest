@@ -10,6 +10,8 @@ This contains the necessary definitions to make the main_window fixture
 available for integration tests.
 """
 
+import time
+
 # Third-party imports
 from qtpy.QtWidgets import QApplication
 import pytest
@@ -22,6 +24,7 @@ from qtpy import QtWebEngineWidgets  # noqa
 from spyder import version_info as spyder_version_info
 from spyder.api.plugin_registration.registry import PLUGIN_REGISTRY
 from spyder.app import start
+from spyder.config.base import running_in_ci
 from spyder.config.manager import CONF
 
 
@@ -38,6 +41,11 @@ def main_window(monkeypatch):
     QApplication.processEvents()
 
     yield window
+
+    # This is to prevent "QThread: Thread still running" error
+    if running_in_ci():
+        time.sleep(5)
+        QApplication.processEvents()
 
     # Close main window
     window.closing(close_immediately=True)

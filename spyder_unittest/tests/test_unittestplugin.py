@@ -10,18 +10,33 @@ Tests for the integration of the plugin with Spyder.
 # Standard library imports
 from collections import OrderedDict
 import os
+import time
 
 # Third party imports
 from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QApplication
 
 # Spyder imports
 from spyder import version_info as spyder_version_info
 from spyder.api.plugins import Plugins
+from spyder.config.base import running_in_ci
 from spyder.plugins.mainmenu.api import ApplicationMenus
 
 # Local imports
 from spyder_unittest.unittestplugin import UnitTestPlugin
 from spyder_unittest.widgets.configdialog import Config
+
+
+def sleep_if_running_in_ci():
+    """
+    Sleep if the tests are running in GitHub CI.
+
+    This prevents the error "QThread: Destroyed while thread is still running"
+    for some reason.
+    """
+    if running_in_ci():
+        time.sleep(5)
+        QApplication.processEvents()
 
 
 def test_menu_item(main_window):
@@ -66,9 +81,11 @@ def test_default_working_dir(main_window, tmpdir):
 
     assert unittest_plugin.get_widget().default_wdir == os.getcwd()
 
+    sleep_if_running_in_ci()
     projects.create_project(project_dir)
     assert unittest_plugin.get_widget().default_wdir == project_dir
 
+    sleep_if_running_in_ci()
     projects.close_project()
     assert unittest_plugin.get_widget().default_wdir == os.getcwd()
 
@@ -88,6 +105,7 @@ def test_plugin_config(main_window, tmpdir, qtbot):
     assert unittest_widget.config is None
 
     # Create new project
+    sleep_if_running_in_ci()
     projects.create_project(project_dir)
 
     # Test config file does exist but config is empty
@@ -102,14 +120,17 @@ def test_plugin_config(main_window, tmpdir, qtbot):
     assert 'framework = unittest' in config_file_path.read().splitlines()
 
     # Close project and test that config is empty
+    sleep_if_running_in_ci()
     projects.close_project()
     assert unittest_widget.config is None
 
     # Re-open project and test that config is correctly read
+    sleep_if_running_in_ci()
     projects.open_project(project_dir)
     assert unittest_widget.config == config
 
     # Close project before ending test, which removes the project dir
+    sleep_if_running_in_ci()
     projects.close_project()
 
 
