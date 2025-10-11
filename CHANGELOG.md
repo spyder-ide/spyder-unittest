@@ -1,5 +1,17 @@
 # History of changes
 
+## Version 0.7.1 (2025/10/11)
+
+This is a maintenance release, bringing the plugin up-to-date with Spyder 6.1.
+
+### Maintenance
+
+* Remove QTextCodec for Qt 6 compatibility ([Issue 224](https://github.com/spyder-ide/spyder-unittest/issues/224), [PR 230](https://github.com/spyder-ide/spyder-unittest/pull/230))
+* Convert to pyproject.toml ([Issue 226](https://github.com/spyder-ide/spyder-unittest/issues/226), [PR 231](https://github.com/spyder-ide/spyder-unittest/pull/231))
+* Update plugin tests for Spyder 6.1 ([Issue 227](https://github.com/spyder-ide/spyder-unittest/issues/227), [PR 228](https://github.com/spyder-ide/spyder-unittest/pull/228))
+* Update GitHub CI tests after release of Spyder 6.1 ([Issue 229](https://github.com/spyder-ide/spyder-unittest/issues/229), [PR 232](https://github.com/spyder-ide/spyder-unittest/pull/232))
+
+
 ## Version 0.7.0 (2024/09/03)
 
 This release updates the plugin to be used with Spyder 6 and fixes two bugs.
